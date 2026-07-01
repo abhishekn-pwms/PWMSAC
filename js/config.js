@@ -9,7 +9,7 @@ const APP_BASE = (() => {
         window.location.hostname ===
         "abhishekn-pwms.github.io"
     ) {
-        return "/PWMSGG";
+        return "/PWMSAC";
     }
 
     else if (
