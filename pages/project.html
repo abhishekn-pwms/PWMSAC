@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Master</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Project</div>
+                    <button class="btn btn-primary" onclick="newProject()">+ New Project</button>
+                </div>
+
+                <div class="toolbar">
+                    <input type="search" id="searchText" class="search-box" placeholder="Search Project..." onkeyup="renderProjectGrid()">
+                </div>
+
+                <div class="toolbar-secondary">
+                    <select id="statusFilter" onchange="renderProjectGrid()">
+                        <option value="Enabled" selected>Enabled</option>
+                        <option value="Disabled">Disabled</option>
+                        <option value="All">All</option>
+                    </select>
+                    <select id="projectStatusFilter" onchange="renderProjectGrid()"></select>
+                </div>
+
+                <div class="stat-strip">
+                    <div id="projectCount" class="stat-chip"></div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Project Name</th>
+                                <th>Portfolio</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>Target Date</th>
+                                <th>Enabled</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectGrid"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <h2>Project</h2>
+            <input type="hidden" id="projectId">
+
+            <div class="form-row">
+                <label>Portfolio</label>
+                <select id="portfolioId"></select>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Project Code</label>
+                    <input id="projectCode">
+                </div>
+                <div>
+                    <label>Project Name</label>
+                    <input id="projectName">
+                </div>
+            </div>
+
+            <div class="desc-date-row">
+                <div>
+                    <label>Description</label>
+                    <textarea id="description" style="min-height: 30px; min-width: stretch; height: 50px;" rows="2" maxlength="200"></textarea>
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select id="projectStatus"></select>
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div>
+                    <label>Target Date</label>
+                    <input type="date" id="targetDate">
+                </div>
+            </div>
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="enabled" checked>
+                <label>Enabled?</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveProject()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/project.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div class="fab-container" id="universalFab" onclick="this.classList.toggle('active')">
+        <button class="fab-trigger">＋</button>
+        <div class="fab-options">
+            <a href="todo.html?action=new" class="fab-sub-btn">📝 New ToDo</a>
+            <a href="task-log.html?action=new" class="fab-sub-btn">⏱️ Log Task</a>
+        </div>
+    </div>
+
+</body>
+</html>

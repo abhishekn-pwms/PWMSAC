@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo AC</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">ToDo AC</div>
+                    <button class="btn btn-primary hide-on-mobile" onclick="newTodo()">+ New ToDo</button>
+                </div>
+
+                <div class="toolbar">
+                    <input type="search" id="searchText" class="search-box" placeholder="Search ToDo..." onkeyup="refreshTodoView()">
+                    <select id="statusFilter" onchange="refreshTodoView()">
+                        <option value="Open" selected>Open</option>
+                        <option value="Completed">Completed</option>
+                        <option value="All">All</option>
+                    </select>
+                    <select id="activityFilter" onchange="refreshTodoView()">
+                        <option value="All">All Activities</option>
+                    </select>
+                </div>
+
+                <div class="stat-strip">
+                    <div id="totalOpen" class="stat-chip">Open: 0</div>
+                    <div id="totalCompleted" class="stat-chip">Completed: 0</div>
+                    <div id="totalOverdue" class="stat-chip">Overdue: 0</div>
+                </div>
+
+                <div id="todoFeed"></div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="todoModal" class="modal">
+        <div class="modal-content">
+            <h2>ToDo AC</h2>
+            <input type="hidden" id="todoId">
+
+            <div class="form-row">
+<!--
+                <label>ToDo</label>
+-->
+                <input id="todoText" maxlength="200">
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Due Date</label>
+                    <input type="date" id="dueDate">
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select id="todoStatus">
+                        <option value="Open">Open</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Activity</label>
+                <div class="activity-picker-row">
+                    <select id="activityId" onchange="activityChanged()"></select>
+                    <input type="search" id="activitySearch" placeholder="Filter activities..." onkeyup="filterActivities()">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Context</label>
+                <div class="activity-context-box" id="activityContext">Select Activity</div>
+            </div>
+
+            <div id="newActivitySection" class="inline-create-box" style="display:none;">
+                <div class="inline-create-title">New Activity</div>
+                <div class="time-row">
+                    <div>
+                        <label>Activity Name</label>
+                        <input id="newActivityName">
+                    </div>
+                    <div>
+                        <label>Milestone</label>
+                        <select id="newActivityMilestone"></select>
+                    </div>
+                </div>
+                <div class="time-row" style="margin-bottom:0;">
+                    <div>
+                        <label>Target Date</label>
+                        <input type="date" id="newActivityTargetDate">
+                    </div>
+                    <div>
+                        <label>Priority</label>
+                        <select id="newActivityPriority"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="notes" rows="2"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveTodo()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('todoModal')">Cancel</button>
+                <button id="deleteTodoButton" class="btn btn-danger" onclick="deleteCurrentTodo()" style="display:none; margin-left:auto;" title="Delete">
+                    &#128465;&#65039;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/todo.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <button class="fab-btn" title="Add New ToDo" onclick="newTodo()">+</button>
+
+</body>
+</html>

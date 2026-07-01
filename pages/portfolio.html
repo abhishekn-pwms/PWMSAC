@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Master</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Portfolio</div>
+                    <button class="btn btn-primary" onclick="newPortfolio()">+ New Portfolio</button>
+                </div>
+
+                <div class="toolbar">
+                    <input type="search" id="searchText" class="search-box" placeholder="Search Portfolio..." onkeyup="renderPortfolioGrid()">
+                    <select id="statusFilter" onchange="renderPortfolioGrid()">
+                        <option value="Enabled" selected>Enabled</option>
+                        <option value="Disabled">Disabled</option>
+                        <option value="All">All</option>
+                    </select>
+                </div>
+
+                <div class="stat-strip">
+                    <div id="portfolioCount" class="stat-chip"></div>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Portfolio Name</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Enabled</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolioGrid"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="portfolioModal" class="modal">
+        <div class="modal-content">
+            <h2>Portfolio</h2>
+            <input type="hidden" id="portfolioId">
+
+            <div class="form-row">
+                <label>Portfolio Name</label>
+                <input id="portfolioName">
+            </div>
+
+            <div class="form-row">
+                <label>Portfolio Type</label>
+                <select id="portfolioType"></select>
+            </div>
+
+            <div class="form-row">
+                <label>Description</label>
+                <textarea id="description" style="min-height: 30px; min-width: stretch; height: 50px;" rows="2" maxlength="200"></textarea>
+            </div>
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="enabled" checked>
+                <label>Enabled?</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="savePortfolio()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('portfolioModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/portfolio.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div class="fab-container" id="universalFab" onclick="this.classList.toggle('active')">
+        <button class="fab-trigger">＋</button>
+        <div class="fab-options">
+            <a href="todo.html?action=new" class="fab-sub-btn">📝 New ToDo</a>
+            <a href="task-log.html?action=new" class="fab-sub-btn">⏱️ Log Task</a>
+        </div>
+    </div>
+
+</body>
+</html>
