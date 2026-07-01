@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PWMS GG — SHARED STYLESHEET (v2.0 Redesign Pass)
+   PWMS AC - SHARED STYLESHEET (v1.0 Redesign Pass)
    Compact, data-dense UI. Mobile-first quick logging is priority #1.
    NOTE: This pass touches DASHBOARD styles + global fixes only.
    Other pages keep their existing inline <style> blocks untouched for now
@@ -608,10 +608,6 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     }
 
     .dashboard-grid { display: flex; flex-direction: column; gap: 12px; }
-    /* Priority: Action Desk (todos) shown before Milestone Runway on mobile */
-    .dashboard-grid .focus-section:first-child { order: 2; }
-    .dashboard-grid .focus-section:nth-child(2) { order: 1; }
-    .dashboard-grid .dashboard-full-row { order: 3; }
 
     .dashboard-summary-row { gap: 6px; }
     .dashboard-summary-card { padding: 10px 6px; }
