@@ -13,7 +13,7 @@ This release focuses entirely on Re-designing the PWMS GG version.
 ## FOR PWMS GG - REFER PWMSGG REPOSITORY
 
 # PWMSGG URL 'https://github.com/abhishekn-pwms/PWMSGG'
-# GitHub Pages URL 'https://abhishekn-pwms.github.io/PWMSAC'
+# GitHub Pages URL 'https://abhishekn-pwms.github.io/PWMSGG'
 
 
 
@@ -41,4 +41,4 @@ Development (Local)
 Production
 ------------------
 * GitHub Pages
-* Site URL = GitHub Pages URL 'https://abhishekn-pwms.github.io/PWMSAC'
+* Site URL = GitHub Pages URL 'https://abhishekn-pwms.github.io/PWMSAC/'
