@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Master</title>
+    <title>Portfolio Master 1.1</title>
     <link rel="stylesheet" href="../css/pwms.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
             <div id="content">
 
                 <div class="page-header">
-                    <div class="page-title">Portfolio</div>
+                    <div class="page-title">Portfolio v1</div>
                     <button class="btn btn-primary" onclick="newPortfolio()">+ New Portfolio</button>
                 </div>
 
@@ -102,11 +102,41 @@
 
     <script>initializeAppIcon();</script>
 
-    <div class="fab-container" id="universalFab" onclick="this.classList.toggle('active')">
-        <button class="fab-trigger">＋</button>
+    <!--
+    v1.1 NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+    -->
+    <div class="fab-container" id="universalFab">
+        <button class="fab-trigger" onclick="toggleUniversalFab(event)">＋</button>
         <div class="fab-options">
-            <a href="todo.html?action=new" class="fab-sub-btn">📝 New ToDo</a>
-            <a href="task-log.html?action=new" class="fab-sub-btn">⏱️ Log Task</a>
+            
+            <div class="fab-section-header">📋 Master Tables</div>
+            <div class="fab-row-grid">
+                <a href="portfolio.html" class="fab-sub-btn" style="background-color: var(--surface-alt); border-color: var(--primary);">💼 Portfolios</a>
+                <a href="project.html" class="fab-sub-btn">🚀 Projects</a>
+                <a href="milestone.html" class="fab-sub-btn">🎯 Milestones</a>
+                <a href="activity.html" class="fab-sub-btn">⚡ Activities</a>
+            </div>
+            <div class="fab-row-grid" style="margin-top: 4px;">
+                <a href="review.html" class="fab-sub-btn fab-full-width">📊 Analytical Reviews</a>
+            </div>
+
+            <div class="fab-section-header" style="margin-top: 4px;">📋 Core Data</div>
+            <div class="fab-row-grid">
+                <a href="task-log.html" class="fab-sub-btn">🕒 Task Logs</a>
+                <a href="todo.html" class="fab-sub-btn">✔️ ToDos</a>
+            </div>
+
+            <div class="fab-section-header" style="margin-top: 4px;">🏠 Quick Nav</div>
+            <div class="fab-row-grid">
+                <a href="dashboard.html" class="fab-sub-btn fab-full-width">🏠 Cockpit Dashboard</a>
+            </div>
+
+            <div class="fab-section-header" style="margin-top: 4px;">🔥 Accelerators</div>
+            <div class="fab-row-grid">
+                <button class="fab-sub-btn fab-accent-action" onclick="handleFabQuickAction('todo.html', 'newTodo')">📝 + ToDo</button>
+                <button class="fab-sub-btn fab-accent-action" onclick="handleFabQuickAction('task-log.html', 'newTaskLog')">⏱️ + Task</button>
+            </div>
+
         </div>
     </div>
 
