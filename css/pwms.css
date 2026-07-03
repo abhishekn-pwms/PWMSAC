@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PWMS AC - SHARED STYLESHEET (v1.0 Redesign Pass)
+   PWMS AC - SHARED STYLESHEET (v1.1 FAB Redesign Pass)
    Compact, data-dense UI. Mobile-first quick logging is priority #1.
    NOTE: This pass touches DASHBOARD styles + global fixes only.
    Other pages keep their existing inline <style> blocks untouched for now
@@ -390,23 +390,128 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 .fab-btn:hover { background-color: var(--primary); transform: scale(1.06); }
 .fab-btn:active { transform: scale(0.95); }
 
-.fab-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; z-index: 9999; }
+
+/* ==========================================================================
+   v1.1 NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+   (Updated click-toggle and horizontal screen-adaptive rules)
+   ========================================================================== */
+.fab-container { 
+    position: fixed; 
+    bottom: 24px; 
+    right: 24px; 
+    display: flex; 
+    flex-direction: column-reverse; 
+    align-items: flex-end; 
+    gap: 12px; 
+    z-index: 9999; 
+}
+
 .fab-trigger {
-    width: 52px; height: 52px; background-color: var(--primary); color: #ffffff; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 1.4rem; border: none;
-    cursor: pointer; box-shadow: var(--shadow-md); transition: transform 0.25s ease, background-color 0.15s ease;
+    width: 52px; 
+    height: 52px; 
+    background-color: var(--primary); 
+    color: #ffffff; 
+    border-radius: 50%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 1.5rem; 
+    border: none;
+    cursor: pointer; 
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
+    transition: transform 0.2s ease, background-color 0.15s ease;
 }
-.fab-options { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; opacity: 0; pointer-events: none; transform: translateY(15px); transition: all 0.2s ease; }
-.fab-container:hover .fab-options, .fab-container.active .fab-options { opacity: 1; pointer-events: auto; transform: translateY(0); }
-.fab-container:hover .fab-trigger, .fab-container.active .fab-trigger { transform: rotate(135deg); background-color: var(--header-bg); }
+
+/* 📲 The Universal Panel Overlay Container Card */
+.fab-options { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius); 
+    padding: 14px; 
+    box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.25); 
+    opacity: 0; 
+    pointer-events: none; 
+    transform: translateY(20px); 
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); 
+    width: 280px; 
+}
+
+/* 🎯 Click-Trigger Active State Rules (Hover rules deleted to prevent mobile touch jumping) */
+.fab-container.open .fab-options { 
+    opacity: 1; 
+    pointer-events: auto; 
+    transform: translateY(0); 
+}
+
+.fab-container.open .fab-trigger { 
+    transform: rotate(135deg); 
+    background-color: var(--header-bg); 
+}
+
+/* Internal Touch Grid Layout Systems */
+.fab-row-grid { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); /* 2 Column distribution in standard Portrait */
+    gap: 8px; 
+}
+
+.fab-full-width { 
+    grid-column: span 2; 
+}
+
 .fab-sub-btn {
-    display: flex; align-items: center; gap: 8px; padding: 8px 14px; background-color: var(--surface);
-    border: 1px solid var(--border); border-radius: var(--radius-pill); color: var(--text-main);
-    font-size: 0.8rem; font-weight: 600; text-decoration: none; box-shadow: var(--shadow-sm);
-    white-space: nowrap; cursor: pointer; transition: background-color 0.15s ease;
-    min-height: var(--touch-target);
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: flex-start; 
+    gap: 8px; 
+    padding: 10px 12px; 
+    background-color: var(--background);
+    border: 1px solid var(--border); 
+    border-radius: var(--radius); 
+    color: var(--text-main);
+    font-size: 0.8rem; 
+    font-weight: 600; 
+    text-decoration: none; 
+    cursor: pointer; 
+    transition: background-color 0.1s ease;
+    min-height: auto;
 }
-.fab-sub-btn:hover { background-color: var(--background); }
+
+.fab-sub-btn:hover { background-color: var(--surface-alt); }
+.fab-accent-action { background-color: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.fab-accent-action:hover { background-color: #dbeafe; }
+
+.fab-section-header {
+    font-size: 0.65rem; 
+    font-weight: 800; 
+    color: var(--text-muted); 
+    text-transform: uppercase;
+    letter-spacing: 0.06em; 
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 2px; 
+    margin-bottom: 2px;
+}
+
+/* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
+@media (max-height: 480px) or (orientation: landscape) and (max-width: 920px) {
+    .fab-options { 
+        width: 460px; 
+        max-height: 82vh; 
+        overflow-y: auto; 
+    }
+    .fab-row-grid { 
+        grid-template-columns: repeat(3, 1fr) !important; 
+    }
+    .fab-full-width { 
+        grid-column: span 1 !important; 
+    }
+    .fab-row-grid:last-child { 
+        grid-template-columns: 2fr 1fr !important; /* Scales accelerators symmetrically across width */
+    }
+}
 
 /* ==========================================================================
    13. DASHBOARD / OPERATIONAL COCKPIT
