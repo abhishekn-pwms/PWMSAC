@@ -1,4 +1,20 @@
 === === === === === ===
+Date : Wed, 03-Jul-2026
+=== === === === === ===
+
+Release PWMS AC v1.1g4 NEW FAB
+------------------
+
+What's New
+New FAB with Click-toggle and Horizontal screen-adaptive rules
+
+** RE-DESIGNED FAB ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+## Comment Blocks
+# "v1.1 NEW FAB"
+# "v1.1g4 NEW FAB"
+
+
+=== === === === === ===
 Date : Wed, 01-Jul-2026
 === === === === === ===
 
