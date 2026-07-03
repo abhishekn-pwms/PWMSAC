@@ -1,7 +1,7 @@
-/* v1.1e */
+/* AC v1.1f */
 
 /* ==========================================================================
-   PWMS AC - SHARED STYLESHEET (v1.1 FAB Redesign Pass)
+   PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
    Compact, data-dense UI. Mobile-first quick logging is priority #1.
    NOTE: This pass touches DASHBOARD styles + global fixes only.
    Other pages keep their existing inline <style> blocks untouched for now
@@ -394,14 +394,14 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 
 
 /* ==========================================================================
-   v1.1e NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+   v1.1f NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
    (Updated click-toggle and horizontal screen-adaptive rules)
    ========================================================================== */
 
 /* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
 
 /* ==========================================================================
-   11. UNIFIED PORTRAIT & LANDSCAPE DUAL-ROW NAVIGATION HUB
+   UNIFIED PORTRAIT & LANDSCAPE DUAL-ROW NAVIGATION HUB
    ========================================================================== */
 .fab-container {
     position: fixed;
@@ -487,14 +487,14 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 .active-page-indicator { background-color: #f1f5f9; border-color: var(--primary); }
 
 .fab-section-header {
-    font-size: 0.65rem;
-    font-weight: 800;
+    font-size: 0.05rem; /* original font-size: 0.65rem */
+    font-weight: 10; /* original font-size: font-weight: 800 */
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 2px;
-    margin-bottom: 2px;
+    letter-spacing: 0.06em; /* original letter-spacing: 0.06em */
+    border-bottom: 1px solid var(--border); /* original border-bottom: 1px solid var(--border) */
+    padding-bottom: 1px; /* original padding-bottom: 2px */
+    margin-bottom: 1px; /* original margin-bottom: 2px */
 }
 
 /* ==========================================================================
