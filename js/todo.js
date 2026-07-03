@@ -33,15 +33,29 @@ document.addEventListener(
 
         await loadTodos();
 
+        
+        // PASS v1.1g4 NEW FAB
+        // 🚀 UPDATED: Multi-Route Interceptor for both Universal accelerators and Dashboard Log transitions
+        const urlParams = new URLSearchParams(window.location.search);
+        const actionType = urlParams.get('action');
+        
+        if (actionType === 'new' || actionType === 'log') {
+            // Instantly fire your form modal open loop
+            newTodo(); 
+            
+            // If it came from the dashboard link, automatically select the right record context
+            const targetId = urlParams.get('id');
+            if (actionType === 'log' && targetId) {
+                // Ensure your local edit function loads the specific task data mapping
+                editTodo(targetId);
+            }
+        }
+
+        // Clean up the URL string line parameters in the address bar cleanly to safeguard manual page reloads
+            window.history.replaceState({}, document.title, window.location.pathname);
+
         // 🚀 NEW: Instantly ready to search without clicking
         document.getElementById("searchText")?.focus();
-
-
-        // 🚀 NEW: Auto-open form if launched from the universal accelerator button
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('action') === 'new') {
-            newTodo(); // Instantly fire your form modal open loop
-        }
 
     }
 );

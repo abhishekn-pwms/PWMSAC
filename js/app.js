@@ -1,4 +1,4 @@
-// v1.1 NEW FAB
+// AC v1.1g4 PASS 2 - NEW FAB
 
 
 // ======================================
@@ -363,6 +363,32 @@ function toggleUniversalFab(event) {
     }
 }
 
+
+
+// ======================================
+// v1.1g4 PASS NEW FAB
+// REPLACING BELOW BLOCK WITH NEW FUNCTION ABOVE
+// ======================================
+// 🚀 Smart Context Router: Safely targets local handlers or passes parameter state trees
+function handleFabQuickAction(targetPage, localInitFunctionName) {
+    const currentPath = window.location.pathname;
+    
+    // Check if the file names match explicitly rather than a loose substring match
+    if (currentPath.substring(currentPath.lastIndexOf('/') + 1) === targetPage) {
+        if (typeof window[localInitFunctionName] === "function") {
+            window[localInitFunctionName](); 
+            document.getElementById("universalFab")?.classList.remove("open");
+            return;
+        }
+    }
+    
+    // Otherwise, redirect forward smoothly using URL redirection parameters
+    window.location.href = `${targetPage}?action=new`;
+}
+
+// REPLACING BELOW BLOCK WITH NEW FUNCTION ABOVE
+
+/*
 // 🚀 Smart Context Router: Triggers modal forms locally or redirects cross-page seamlessly
 function handleFabQuickAction(targetPage, localInitFunctionName) {
     const currentPath = window.location.pathname;
@@ -379,6 +405,9 @@ function handleFabQuickAction(targetPage, localInitFunctionName) {
     // Otherwise, redirect forward smoothly using URL redirection parameters
     window.location.href = `${targetPage}?action=new`;
 }
+*/
+
+
 
 // Global listener: Automatically collapses the open overlay menu if you tap on empty whitespace
 window.addEventListener("click", () => {

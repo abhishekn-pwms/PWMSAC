@@ -1,4 +1,4 @@
-// PWMS AC
+// AC v1.1g4 NEW FAB
 
 let taskLogData = [];
 
@@ -8,6 +8,12 @@ let milestoneData = [];
 
 let filteredActivityData = [];
 
+
+// ======================================
+// v1.1g4 PASS NEW FAB
+// REPLACING DOMCONTENTLOADED BLOCK 
+// ======================================
+
 document.addEventListener(
     "DOMContentLoaded",
     async () => {
@@ -16,13 +22,11 @@ document.addEventListener(
 
         await initializeLayout();
 
-
         loadStatusDropdown(
             "activityStatusFilter",
             true,
             "All Activity Statuses"
         );
-
 
         initializeDateFilters();
 
@@ -43,11 +47,14 @@ document.addEventListener(
                 updateCharacterCount
             );
 
-        // 🚀 AUTO-FILL ACTION: Pre-populate when coming straight from the dashboard desk shortcuts
+        // 🎯 UNIFIED DETECTOR: Safely processes both Dashboard Quick-Logs and Universal FAB launches
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('action') === 'new') {
+            
+            // 1. Instantly trigger the local log modal window layout template open loop
             newTaskLog(); 
             
+            // 2. Safely capture data parameters if arriving via Dashboard "⏱️ Log" action link
             const quickDesc = sessionStorage.getItem("QUICK_LOG_DESC");
             const quickActivity = sessionStorage.getItem("QUICK_LOG_ACTIVITY");
             
@@ -56,12 +63,16 @@ document.addEventListener(
                 document.getElementById("activityId").value = quickActivity;
                 activityChanged(); 
                 
+                // Clear out cache buffers immediately to prevent dirty data mapping duplication
                 sessionStorage.removeItem("QUICK_LOG_DESC");
                 sessionStorage.removeItem("QUICK_LOG_ACTIVITY");
             }
+
+            // 3. Clean up the URL string line parameters in the address bar cleanly to safeguard manual page reloads
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // 🚀 DESKTOP SHORTCUT: Puts your input field cursor active right away
+        // 🚀 DESKTOP SHORTCUT: Puts your search box input field cursor active right away
         document.getElementById("searchText")?.focus();
     }
 );
