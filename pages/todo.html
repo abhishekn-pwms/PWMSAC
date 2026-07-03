@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToDo AC</title>
+    <title>ToDos AC v1.1g4</title>
     <link rel="stylesheet" href="../css/pwms.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
             <div id="content">
 
                 <div class="page-header">
-                    <div class="page-title">ToDo AC</div>
+                    <div class="page-title">ToDos AC v1.1g4</div>
                     <button class="btn btn-primary hide-on-mobile" onclick="newTodo()">+ New ToDo</button>
                 </div>
 
@@ -139,7 +139,41 @@
 
     <script>initializeAppIcon();</script>
 
-    <button class="fab-btn" title="Add New ToDo" onclick="newTodo()">+</button>
+    <!--
+    v1.1g4 NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+    -->
+    <div class="fab-container" id="universalFab">
+        <button class="fab-trigger" onclick="toggleUniversalFab(event)">＋</button>
+        <div class="fab-options">
+            
+            <div class="fab-section-header">📋 Master Tables</div>
+            <div class="fab-row-grid section-one">
+                <a href="portfolio.html" class="fab-sub-btn">💼 Portfolios</a>
+                <a href="project.html" class="fab-sub-btn">🚀 Projects</a>
+                <a href="milestone.html" class="fab-sub-btn">🎯 Milestones</a>
+                <a href="activity.html" class="fab-sub-btn">⚡ Activities</a>
+            </div>
+
+            <div class="fab-section-header">📋 Core Data</div>
+            <div class="fab-row-grid section-two-three-four">
+                <a href="todo.html" class="fab-sub-btn active-page-indicator">✔️ ToDos</a>
+                <a href="task-log.html" class="fab-sub-btn">🕒 Task Logs</a>
+            </div>
+
+            <div class="fab-section-header">🏠 Quick Nav</div>
+            <div class="fab-row-grid section-two-three-four">
+                <a href="review.html" class="fab-sub-btn">📊 Reviews</a>
+                <a href="dashboard.html" class="fab-sub-btn">🏠 Dashboard</a>
+            </div>
+
+            <div class="fab-section-header">🔥 Accelerators</div>
+            <div class="fab-row-grid section-two-three-four">
+                <button class="fab-sub-btn fab-accent-action" onclick="handleFabQuickAction('todo.html', 'newTodo')">📝 + ToDo</button>
+                <button class="fab-sub-btn fab-accent-action" onclick="handleFabQuickAction('task-log.html', 'newTaskLog')">⏱️ + Task</button>
+            </div>
+
+        </div>
+    </div>
 
 </body>
 </html>
