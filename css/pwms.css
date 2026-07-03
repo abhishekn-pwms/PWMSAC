@@ -460,7 +460,7 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 /* Portrait Grid Distribution Engine (2 Column Balanced Stack) */
 .fab-row-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
 }
 
@@ -516,7 +516,7 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 
     /* Section 1 forces 3 columns natively */
     .fab-container.open .section-one {
-        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-columns: repeat(4, 1fr) !important;
         gap: 6px !important;
     }
 
