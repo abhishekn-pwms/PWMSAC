@@ -495,21 +495,47 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     margin-bottom: 2px;
 }
 
-/* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
-@media (max-height: 480px) or (orientation: landscape) and (max-width: 920px) {
-    .fab-options { 
-        width: 460px; 
-        max-height: 82vh; 
-        overflow-y: auto; 
+/* ==========================================================================
+   🚨 UPDATED: RE-ENGINEERED LANDSCAPE & SHORT INTERFACE LAYER
+   ========================================================================== */
+@media (max-width: 768px) {
+    .fab-container { bottom: 16px; right: 16px; }
+}
+
+/* Hardened Landscape Rules: Unlocks touch scrolling and keeps components visible */
+@media (max-height: 540px) or (orientation: landscape) and (max-width: 960px) {
+    .fab-container {
+        /* Safely pulls the menu up so it doesn't get buried behind virtual keyboard shelves */
+        bottom: 12px !important;
+        right: 12px !important;
     }
-    .fab-row-grid { 
-        grid-template-columns: repeat(3, 1fr) !important; 
+
+    .fab-options {
+        width: 440px !important; 
+        max-height: 72vh !important; /* Constrains the box size safely inside short windows */
+        overflow-y: auto !important;  /* 🔥 UNLOCKS INTERNAL SCROLLING: Let's you swipe up/down inside the card */
+        -webkit-overflow-scrolling: touch; /* Ensures silky-smooth momentum swiping on iOS/Android */
+        padding: 10px !important;
+        gap: 8px !important;
     }
-    .fab-full-width { 
+    
+    .fab-row-grid {
+        grid-template-columns: repeat(3, 1fr) !important; /* Locks into your 3-column vision */
+    }
+    
+    .fab-full-width {
         grid-column: span 1 !important; 
     }
-    .fab-row-grid:last-child { 
-        grid-template-columns: 2fr 1fr !important; /* Scales accelerators symmetrically across width */
+    
+    /* Structures the action buttons symmetrically at the base of the wide grid */
+    .fab-row-grid:last-child {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    
+    /* Keeps section labels short and tidy */
+    .fab-section-header {
+        margin-top: 2px !important;
+        margin-bottom: 1px !important;
     }
 }
 
