@@ -498,52 +498,63 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 /* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
 
 /* ==========================================================================
-   🚨 Pass D - FIXED SPECIFICITY: RESPONSIVE LANDSCAPE MODE OVERRIDES (3-Column Fix)
+   🚨 PASS E - ULTIMATE LANDSCAPE RESOLUTION: FLAT HORIZONTAL NAVIGATION MATRIX
    ========================================================================== */
 @media (max-width: 768px) {
     .fab-container { bottom: 16px; right: 16px; }
 }
 
-/* Detects horizontal landscape viewports or shorter display screens */
+/* Enforces layout adjustments when vertical height drops */
 @media (max-height: 540px), (orientation: landscape) and (max-width: 1024px) {
     
-    /* Matched high specificity selector to defeat the portrait override */
-    .fab-container.open .fab-options {
-        width: 440px !important; 
-        max-height: 68vh !important; /* 🎯 Limits height to prevent screen overflow */
-        overflow-y: auto !important;  /* 🎯 Unlocks internal scrolling inside the box */
-        -webkit-overflow-scrolling: touch !important; /* Silky smooth momentum swipe */
-        padding: 10px !important;
-        gap: 6px !important;
-    }
-    
-    /* Forces the inner grid to re-render as 3 columns */
-    .fab-container.open .fab-row-grid {
-        grid-template-columns: repeat(3, 1fr) !important; 
-        gap: 6px !important;
-    }
-    
-    /* Matches specificity for section headers to span all 3 columns */
-    .fab-container.open .fab-section-header {
-        grid-column: span 3 !important; 
-        margin-top: 2px !important;
-        margin-bottom: 0px !important;
+    /* 1. Reset container parameters to allow independent browser positioning calculations */
+    .fab-container.open {
+        top: 10px !important;
+        bottom: 10px !important;
+        right: 12px !important;
+        flex-direction: column !important; /* Disables reversed behavior layout jams */
+        justify-content: flex-end !important;
     }
 
-    .fab-container.open .fab-full-width {
-        grid-column: span 1 !important; /* Wraps wide bars into a single grid slot */
+    /* 2. Format the card container to act as a single fluid horizontal box wrapper */
+    .fab-container.open .fab-options {
+        width: calc(100vw - 80px) !important; /* Auto-scales horizontally across screen width */
+        max-width: 580px !important;
+        max-height: 78vh !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important; /* Uniform 3-column layout grid */
+        gap: 6px !important;
+        padding: 8px !important;
+        overflow-y: auto !important; /* Guarantees fallback scrolling permissions */
+        -webkit-overflow-scrolling: touch !important;
     }
-    
-    /* Spreads your bottom accelerators evenly across the 3-column row space */
-    .fab-container.open .fab-row-grid:last-child {
-        grid-template-columns: 1fr 1fr !important;
-        grid-column: span 3 !important;
+
+    /* 3. Re-align individual button layout elements inside the flat horizontal grid mapping */
+    .fab-container.open .fab-row-grid {
+        display: contents !important; /* Dissolves separate inner groups so all buttons mix into a single grid array */
     }
-    
-    /* Compact padding adjustments to maximize landscape view space */
+
+    /* 4. Hide secondary section title rows to compress vertical space */
+    .fab-container.open .fab-section-header {
+        display: none !important; 
+    }
+
+    /* 5. Maximize button dimensions for comfortable tap targeting */
     .fab-container.open .fab-sub-btn {
+        width: 100% !important;
         padding: 8px 10px !important;
-        font-size: 0.75rem !important;
+        font-size: 0.74rem !important;
+        justify-content: center !important;
+    }
+
+    /* 6. Format the lower execution accelerators to span symmetrically across the grid layout paths */
+    .fab-container.open .fab-full-width {
+        grid-column: span 1 !important;
+    }
+    
+    .fab-container.open .fab-accent-action {
+        grid-column: span 1 !important;
+        background-color: #eff6ff !important;
     }
 }
 
