@@ -504,20 +504,21 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     .fab-container { bottom: 16px; right: 16px; }
 }
 
-@media (max-height: 540px), (orientation: landscape) and (max-width: 1024px) {
+@media (max-height: 540px), (orientation: landscape) and (max-width: 1024px)
+{
     .fab-container.open .fab-options {
         width: 440px !important;
         max-height: 72vh !important;
         overflow-y: auto !important; /* Locks scrolling seamlessly to inside the menu card box */
         -webkit-overflow-scrolling: touch !important;
         padding: 10px !important;
-        gap: 5px !important;
+        gap: 6px !important;
     }
 
-    /* Section 1 forces 4 columns natively */
+    /* Section 1 forces 4 columns natively */ /* original Section 1 forces 3 columns natively */
     .fab-container.open .section-one {
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 5px !important;
+        grid-template-columns: repeat(4, 0.75fr) !important; /* original grid-template-columns: repeat(3, 1fr) */
+        gap: 5px !important; /* original gap: 6px !important */
     }
 
     /* Sections 2, 3, and 4 stretch cleanly across the wider landscape rows */
@@ -527,12 +528,12 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     }
 
     .fab-container.open .fab-sub-btn {
-        padding: 8px 8px !important;
-        font-size: 0.76rem !important;
+        padding: 8px 8px !important; /* original padding: 8px 10px !important */
+        font-size: 0.67rem !important; /* original font-size: 0.76rem !important */
     }
 
     .fab-container.open .fab-section-header {
-        margin-top: 2px !important;
+        margin-top: 0px !important; /* original margin-top: 2px !important */
         margin-bottom: 0px !important;
     }
 }
