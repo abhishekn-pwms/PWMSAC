@@ -496,47 +496,54 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 }
 
 /* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
+
 /* ==========================================================================
-   🚨 Pass C - UPDATED: RE-ENGINEERED LANDSCAPE & SHORT INTERFACE LAYER
+   🚨 Pass D - FIXED SPECIFICITY: RESPONSIVE LANDSCAPE MODE OVERRIDES (3-Column Fix)
    ========================================================================== */
 @media (max-width: 768px) {
     .fab-container { bottom: 16px; right: 16px; }
 }
 
-/* Hardened Landscape Rules: Unlocks touch scrolling and keeps components visible */
-@media (max-height: 540px) or (orientation: landscape) and (max-width: 960px) {
-    .fab-container {
-        /* Safely pulls the menu up so it doesn't get buried behind virtual keyboard shelves */
-        bottom: 12px !important;
-        right: 12px !important;
+/* Detects horizontal landscape viewports or shorter display screens */
+@media (max-height: 540px), (orientation: landscape) and (max-width: 1024px) {
+    
+    /* Matched high specificity selector to defeat the portrait override */
+    .fab-container.open .fab-options {
+        width: 440px !important; 
+        max-height: 68vh !important; /* 🎯 Limits height to prevent screen overflow */
+        overflow-y: auto !important;  /* 🎯 Unlocks internal scrolling inside the box */
+        -webkit-overflow-scrolling: touch !important; /* Silky smooth momentum swipe */
+        padding: 10px !important;
+        gap: 6px !important;
+    }
+    
+    /* Forces the inner grid to re-render as 3 columns */
+    .fab-container.open .fab-row-grid {
+        grid-template-columns: repeat(3, 1fr) !important; 
+        gap: 6px !important;
+    }
+    
+    /* Matches specificity for section headers to span all 3 columns */
+    .fab-container.open .fab-section-header {
+        grid-column: span 3 !important; 
+        margin-top: 2px !important;
+        margin-bottom: 0px !important;
     }
 
-    .fab-options {
-        width: 440px !important; 
-        max-height: 72vh !important; /* Constrains the box size safely inside short windows */
-        overflow-y: auto !important;  /* 🔥 UNLOCKS INTERNAL SCROLLING: Let's you swipe up/down inside the card */
-        -webkit-overflow-scrolling: touch; /* Ensures silky-smooth momentum swiping on iOS/Android */
-        padding: 10px !important;
-        gap: 8px !important;
+    .fab-container.open .fab-full-width {
+        grid-column: span 1 !important; /* Wraps wide bars into a single grid slot */
     }
     
-    .fab-row-grid {
-        grid-template-columns: repeat(3, 1fr) !important; /* Locks into your 3-column vision */
-    }
-    
-    .fab-full-width {
-        grid-column: span 1 !important; 
-    }
-    
-    /* Structures the action buttons symmetrically at the base of the wide grid */
-    .fab-row-grid:last-child {
+    /* Spreads your bottom accelerators evenly across the 3-column row space */
+    .fab-container.open .fab-row-grid:last-child {
         grid-template-columns: 1fr 1fr !important;
+        grid-column: span 3 !important;
     }
     
-    /* Keeps section labels short and tidy */
-    .fab-section-header {
-        margin-top: 2px !important;
-        margin-bottom: 1px !important;
+    /* Compact padding adjustments to maximize landscape view space */
+    .fab-container.open .fab-sub-btn {
+        padding: 8px 10px !important;
+        font-size: 0.75rem !important;
     }
 }
 
