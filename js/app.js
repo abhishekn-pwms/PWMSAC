@@ -1,3 +1,6 @@
+// v1.1 NEW FAB
+
+
 // ======================================
 // DATE HELPERS
 // ======================================
@@ -342,3 +345,45 @@ function enabledBadgeHtml(enabled) {
         ? `<span class="badge-pill badge-status-completed">Yes</span>`
         : `<span class="badge-pill badge-status-cancelled">No</span>`;
 }
+
+
+// ======================================
+// v1.1 NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+// ⚙️ UNIFIED QUICK-ACTION HUB CONTROLLERS
+// ======================================
+
+// 🚀 Toggle rule for the multi-action menu hub container overlay
+function toggleUniversalFab(event) {
+    if (event) {
+        event.stopPropagation(); // Stops the body click listener from firing instantly
+    }
+    const fabContainer = document.getElementById("universalFab");
+    if (fabContainer) {
+        fabContainer.classList.toggle("open");
+    }
+}
+
+// 🚀 Smart Context Router: Triggers modal forms locally or redirects cross-page seamlessly
+function handleFabQuickAction(targetPage, localInitFunctionName) {
+    const currentPath = window.location.pathname;
+    
+    // Checks if the user is already sitting on the target page where the modal resides
+    if (currentPath.includes(targetPage)) {
+        if (typeof window[localInitFunctionName] === "function") {
+            window[localInitFunctionName](); // Safely triggers modal open loop locally
+            document.getElementById("universalFab")?.classList.remove("open");
+            return;
+        }
+    }
+    
+    // Otherwise, redirect forward smoothly using URL redirection parameters
+    window.location.href = `${targetPage}?action=new`;
+}
+
+// Global listener: Automatically collapses the open overlay menu if you tap on empty whitespace
+window.addEventListener("click", () => {
+    const fabContainer = document.getElementById("universalFab");
+    if (fabContainer && fabContainer.classList.contains("open")) {
+        fabContainer.classList.remove("open");
+    }
+});
