@@ -498,6 +498,8 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 /* ==========================================================================
    🚨 UPDATED: RE-ENGINEERED LANDSCAPE & SHORT INTERFACE LAYER
    ========================================================================== */
+
+/* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
 @media (max-width: 768px) {
     .fab-container { bottom: 16px; right: 16px; }
 }
