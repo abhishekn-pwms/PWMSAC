@@ -1,3 +1,5 @@
+/* v1.1e */
+
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1.1 FAB Redesign Pass)
    Compact, data-dense UI. Mobile-first quick logging is priority #1.
@@ -392,169 +394,146 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 
 
 /* ==========================================================================
-   v1.1 NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
+   v1.1e NEW FAB - ADAPTIVE QUICK-ACTION & NAVIGATION HUB
    (Updated click-toggle and horizontal screen-adaptive rules)
    ========================================================================== */
-.fab-container { 
-    position: fixed; 
-    bottom: 24px; 
-    right: 24px; 
-    display: flex; 
-    flex-direction: column-reverse; 
-    align-items: flex-end; 
-    gap: 12px; 
-    z-index: 9999; 
+
+/* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
+
+/* ==========================================================================
+   11. UNIFIED PORTRAIT & LANDSCAPE DUAL-ROW NAVIGATION HUB
+   ========================================================================== */
+.fab-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 12px;
+    z-index: 9999;
 }
 
 .fab-trigger {
-    width: 52px; 
-    height: 52px; 
-    background-color: var(--primary); 
-    color: #ffffff; 
+    width: 52px;
+    height: 52px;
+    background-color: var(--primary);
+    color: #ffffff;
     border-radius: 50%;
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 1.5rem; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
     border: none;
-    cursor: pointer; 
+    cursor: pointer;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
     transition: transform 0.2s ease, background-color 0.15s ease;
 }
 
-/* 📲 The Universal Panel Overlay Container Card */
-.fab-options { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px; 
-    background: var(--surface); 
-    border: 1px solid var(--border); 
-    border-radius: var(--radius); 
-    padding: 14px; 
-    box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.25); 
-    opacity: 0; 
-    pointer-events: none; 
-    transform: translateY(20px); 
-    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1); 
-    width: 280px; 
+.fab-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    box-shadow: 0 12px 30px -5px rgba(15, 23, 42, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+    transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+    width: 290px;
 }
 
-/* 🎯 Click-Trigger Active State Rules (Hover rules deleted to prevent mobile touch jumping) */
-.fab-container.open .fab-options { 
-    opacity: 1; 
-    pointer-events: auto; 
-    transform: translateY(0); 
+.fab-container.open .fab-options {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
-.fab-container.open .fab-trigger { 
-    transform: rotate(135deg); 
-    background-color: var(--header-bg); 
+.fab-container.open .fab-trigger {
+    transform: rotate(135deg);
+    background-color: var(--header-bg);
 }
 
-/* Internal Touch Grid Layout Systems */
-.fab-row-grid { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); /* 2 Column distribution in standard Portrait */
-    gap: 8px; 
-}
-
-.fab-full-width { 
-    grid-column: span 2; 
+/* Portrait Grid Distribution Engine (2 Column Balanced Stack) */
+.fab-row-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
 
 .fab-sub-btn {
-    display: inline-flex; 
-    align-items: center; 
-    justify-content: flex-start; 
-    gap: 8px; 
-    padding: 10px 12px; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
     background-color: var(--background);
-    border: 1px solid var(--border); 
-    border-radius: var(--radius); 
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     color: var(--text-main);
-    font-size: 0.8rem; 
-    font-weight: 600; 
-    text-decoration: none; 
-    cursor: pointer; 
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
     transition: background-color 0.1s ease;
-    min-height: auto;
 }
 
 .fab-sub-btn:hover { background-color: var(--surface-alt); }
 .fab-accent-action { background-color: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
 .fab-accent-action:hover { background-color: #dbeafe; }
+.active-page-indicator { background-color: #f1f5f9; border-color: var(--primary); }
 
 .fab-section-header {
-    font-size: 0.65rem; 
-    font-weight: 800; 
-    color: var(--text-muted); 
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.06em; 
-    border-bottom: 1px solid var(--border); 
-    padding-bottom: 2px; 
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
     margin-bottom: 2px;
 }
 
-/* 🚨 HORIZONTAL SCREEN HEIGHT & LANDSCAPE ADJUSTMENTS (Enforces 3 Columns Layout) */
-
 /* ==========================================================================
-   🚨 PASS E - ULTIMATE LANDSCAPE RESOLUTION: FLAT HORIZONTAL NAVIGATION MATRIX
+   📲 HARDENED LANDSCAPE MEDIA QUERY OVERRIDES (Enforces 3-Column Width Limits)
    ========================================================================== */
 @media (max-width: 768px) {
     .fab-container { bottom: 16px; right: 16px; }
 }
 
-/* Enforces layout adjustments when vertical height drops */
 @media (max-height: 540px), (orientation: landscape) and (max-width: 1024px) {
-    
-    /* 1. Reset container parameters to allow independent browser positioning calculations */
-    .fab-container.open {
-        top: 10px !important;
-        bottom: 10px !important;
-        right: 12px !important;
-        flex-direction: column !important; /* Disables reversed behavior layout jams */
-        justify-content: flex-end !important;
-    }
-
-    /* 2. Format the card container to act as a single fluid horizontal box wrapper */
     .fab-container.open .fab-options {
-        width: calc(100vw - 80px) !important; /* Auto-scales horizontally across screen width */
-        max-width: 580px !important;
-        max-height: 78vh !important;
-        display: grid !important;
-        grid-template-columns: repeat(3, 1fr) !important; /* Uniform 3-column layout grid */
-        gap: 6px !important;
-        padding: 8px !important;
-        overflow-y: auto !important; /* Guarantees fallback scrolling permissions */
+        width: 440px !important;
+        max-height: 72vh !important;
+        overflow-y: auto !important; /* Locks scrolling seamlessly to inside the menu card box */
         -webkit-overflow-scrolling: touch !important;
+        padding: 10px !important;
+        gap: 6px !important;
     }
 
-    /* 3. Re-align individual button layout elements inside the flat horizontal grid mapping */
-    .fab-container.open .fab-row-grid {
-        display: contents !important; /* Dissolves separate inner groups so all buttons mix into a single grid array */
+    /* Section 1 forces 3 columns natively */
+    .fab-container.open .section-one {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
     }
 
-    /* 4. Hide secondary section title rows to compress vertical space */
-    .fab-container.open .fab-section-header {
-        display: none !important; 
+    /* Sections 2, 3, and 4 stretch cleanly across the wider landscape rows */
+    .fab-container.open .section-two-three-four {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
     }
 
-    /* 5. Maximize button dimensions for comfortable tap targeting */
     .fab-container.open .fab-sub-btn {
-        width: 100% !important;
         padding: 8px 10px !important;
-        font-size: 0.74rem !important;
-        justify-content: center !important;
+        font-size: 0.76rem !important;
     }
 
-    /* 6. Format the lower execution accelerators to span symmetrically across the grid layout paths */
-    .fab-container.open .fab-full-width {
-        grid-column: span 1 !important;
-    }
-    
-    .fab-container.open .fab-accent-action {
-        grid-column: span 1 !important;
-        background-color: #eff6ff !important;
+    .fab-container.open .fab-section-header {
+        margin-top: 2px !important;
+        margin-bottom: 0px !important;
     }
 }
 
