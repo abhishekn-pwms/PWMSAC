@@ -1,4 +1,4 @@
-// PWMS AC
+// PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS
 
 /* ==================================
    DATA
@@ -6,7 +6,7 @@
 
 let todoData = [];
 
-let activityData = [];
+let projectData = []; // To support inline parent project mappings
 
 let milestoneData = [];
 
@@ -22,15 +22,9 @@ document.addEventListener(
     async () => {
 
         await requireAuthentication();
-
         await initializeLayout();
-
+        await loadProjects(); // New method to feed the inline child selector
         await loadMilestones();
-
-        populatePriorityDropdown();
-
-        await loadActivities();
-
         await loadTodos();
 
         
@@ -61,87 +55,40 @@ document.addEventListener(
 );
 
 
+
 /* ==================================
-   LOAD ACTIVITIES
+   LOAD PROJECTS (For Inline Form Mapping)
 ================================== */
+async function loadProjects() {
+    projectData = await getData("project?enabled=eq.true&order=project_name.asc");
+    if (!Array.isArray(projectData)) { projectData = []; return; }
+    
+    const dropdown = document.getElementById("newMilestoneProject");
+    if (!dropdown) return;
+    dropdown.innerHTML = '<option value="">Select Project</option>';
+    projectData.forEach(p => {
+        dropdown.innerHTML += `<option value="${p.project_id}">${p.project_name}</option>`;
+    });
+}
 
-async function loadActivities() {
-
-    activityData =
-        await getData(
-            "vw_activity_details?enabled=eq.true&order=activity_name.asc"
-        );
-
-    if (!Array.isArray(activityData)) {
-
-        console.error(
-            activityData
-        );
-
-        activityData = [];
-
-        showError(
-            "Unable to load activities"
-        );
-
+/* ==================================
+   LOAD MILESTONES (Replaces Load Activities Controls)
+================================== */
+    async function loadMilestones() {
+        // 🎯 FIX: Remove the manual order query suffix to prevent masters.js parser from tripping over it
+        milestoneData = await getData("vw_milestone_details?enabled=eq.true");
+        if (!Array.isArray(milestoneData)) {
+        console.error(milestoneData);
+        milestoneData = [];
+        showError("Unable to load milestones");
         return;
     }
-
-    filteredActivityData =
-        [...activityData];
-
-    populateActivityDropdown();
-
-    populateActivityFilter();
-
+    filteredMilestoneData = [...milestoneData];
     populateMilestoneDropdown();
+    populateMilestoneFilter();
 }
 
 
-/* ==================================
-   LOAD MILESTONES
-================================== */
-
-async function loadMilestones() {
-
-    milestoneData =
-        await getData(
-            "vw_milestone_details?enabled=eq.true&order=milestone_name.asc"
-        );
-
-    populateMilestoneDropdown();
-}
-
-
-/* ==================================
-   PRIORITY
-================================== */
-
-function populatePriorityDropdown() {
-
-    const dropdown =
-        document.getElementById(
-            "newActivityPriority"
-        );
-
-    if (!dropdown) {
-        return;
-    }
-
-    dropdown.innerHTML = "";
-
-    MASTERS.ACTIVITY_PRIORITY
-        .forEach(
-            item => {
-
-                dropdown.innerHTML += `
-                    <option value="${item}">
-                        ${item}
-                    </option>
-                `;
-            }
-        );
-}
 
 
 /* ==================================
@@ -174,38 +121,7 @@ async function loadTodos() {
 }
 
 
-/* ==================================
-   FILTER ACTIVITY
-================================== */
 
-function populateActivityFilter() {
-
-    const dropdown =
-        document.getElementById(
-            "activityFilter"
-        );
-
-    if (!dropdown) {
-        return;
-    }
-
-    dropdown.innerHTML = `
-        <option value="All">
-            All Activities
-        </option>
-    `;
-
-    activityData.forEach(
-        item => {
-
-            dropdown.innerHTML += `
-                <option value="${item.activity_id}">
-                    ${item.activity_name}
-                </option>
-            `;
-        }
-    );
-}
 
 
 /* ==================================
@@ -213,88 +129,40 @@ function populateActivityFilter() {
 ================================== */
 
 function getFilteredTodos() {
+    const search = document.getElementById("searchText").value.toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+    const milestoneFilterValue = document.getElementById("milestoneFilter").value;
 
-    const search =
-        document
-            .getElementById(
-                "searchText"
-            )
-            .value
-            .toLowerCase();
+    return todoData.filter(item => {
+    const matchesSearch =
 
-    const status =
-        document
-            .getElementById(
-                "statusFilter"
-            )
-            .value;
+                    (item.todo_text || "")
+                        .toLowerCase()
+                        .includes(search)
 
-    const activity =
-        document
-            .getElementById(
-                "activityFilter"
-            )
-            .value;
+                    ||
 
-    return todoData.filter(
-        item => {
+                    (item.notes || "")
+                        .toLowerCase()
+                        .includes(search)
 
-            const matchesSearch =
+                    ||
 
-                (item.todo_text || "")
-                    .toLowerCase()
-                    .includes(search)
+                    (item.milestone_name || "")
+                        .toLowerCase()
+                        .includes(search)
 
-                ||
+                    ||
 
-                (item.notes || "")
-                    .toLowerCase()
-                    .includes(search)
+                    (item.project_name || "")
+                        .toLowerCase()
+                        .includes(search);
 
-                ||
+        const matchesStatus = (status === "All") ? true : item.status === status;
+        const matchesMilestone = (milestoneFilterValue === "All") ? true : item.milestone_id === milestoneFilterValue;
 
-                (item.activity_name || "")
-                    .toLowerCase()
-                    .includes(search);
-
-            let matchesStatus =
-                true;
-
-            if (
-                status !== "All"
-            ) {
-
-                matchesStatus =
-                    item.status ===
-                    status;
-            }
-
-            let matchesActivity =
-                true;
-
-            if (
-                activity !== "All"
-            ) {
-
-                matchesActivity =
-                    item.activity_id ===
-                    activity;
-            }
-
-            return (
-
-                matchesSearch
-
-                &&
-
-                matchesStatus
-
-                &&
-
-                matchesActivity
-            );
-        }
-    );
+        return matchesSearch && matchesStatus && matchesMilestone;
+    });
 }
 
 
@@ -520,51 +388,22 @@ function renderTodoFeed() {
 
 
 
-            const activities =
-                {};
-
-            items.forEach(
-                item => {
-
-                    if (
-                        !activities[
-                            item.activity_name
-                        ]
-                    ) {
-
-                        activities[
-                            item.activity_name
-                        ] = [];
-                    }
-
-                    activities[
-                        item.activity_name
-                    ].push(
-                        item
-                    );
+            const milestones = {};
+            items.forEach(item => {
+                const groupKey = item.milestone_name || "Standalone Actions";
+                if (!milestones[groupKey]) {
+                    milestones[groupKey] = [];
                 }
-            );
+                milestones[groupKey].push(item);
+            });
 
-            Object.keys(
-                activities
-            ).forEach(
-                activity => {
-
-                    feed.innerHTML += `
-                        <div
-                            class="todo-activity-header">
-
-                            ${activity}
-
-                        </div>
-                    `;
-
-                    activities[
-                        activity
-                    ].forEach(
-                        item => {
-
-
+            Object.keys(milestones).forEach(milestoneName => {
+                feed.innerHTML += `
+                    <div class="todo-activity-header">
+                        ${milestoneName}
+                    </div>
+                `;
+                milestones[milestoneName].forEach(item => {
                             feed.innerHTML += `
 
                                 <div
@@ -661,308 +500,117 @@ function refreshTodoView() {
 }
 
 
+
+
+
+
 /* ==================================
-   ACTIVITY DROPDOWN
+   FILTER MILESTONE DROPDOWN
 ================================== */
-
-function populateActivityDropdown() {
-
-    const dropdown =
-        document.getElementById(
-            "activityId"
-        );
-
-    if (!dropdown) {
-        return;
-    }
-
-    dropdown.innerHTML = `
-        <option value="">
-            Select Activity
-        </option>
-    `;
-
-    filteredActivityData
-        .forEach(
-            item => {
-
-                dropdown.innerHTML += `
-                    <option
-                        value="${item.activity_id}">
-
-                        ${item.activity_name}
-
-                    </option>
-                `;
-            }
-        );
-
-    dropdown.innerHTML += `
-        <option
-            value="NEW_ACTIVITY">
-
-            + Create New Activity
-
-        </option>
-    `;
+function populateMilestoneFilter() {
+    const dropdown = document.getElementById("milestoneFilter");
+    if (!dropdown) return;
+    dropdown.innerHTML = '<option value="All">All Milestones</option>';
+    milestoneData.forEach(item => {
+        dropdown.innerHTML += `<option value="${item.milestone_id}">${item.milestone_name}</option>`;
+    });
 }
 
-
 /* ==================================
-   MILESTONE DROPDOWN
+   FORM MILESTONE PICKER DIRECT SELECTOR
 ================================== */
 
 function populateMilestoneDropdown() {
+    const dropdown = document.getElementById("milestoneId");
+    if (!dropdown) return;
+    dropdown.innerHTML = '<option value="">⭐ Standalone / Unassigned Action</option>';
+    filteredMilestoneData.forEach(item => {
+        // 🎯 FIX: Bind the actual milestone primary key as the option value
+        dropdown.innerHTML += `<option value="${item.milestone_id}">${item.project_name} ➔ ${item.milestone_name}</option>`;
+    });
 
-    const dropdown =
-        document.getElementById(
-            "newActivityMilestone"
-        );
+    dropdown.innerHTML += `<option value="NEW_MILESTONE">+ Create New Milestone</option>`;
+}
 
-    if (!dropdown) {
+
+
+
+/* ==================================
+   FILTER MILESTONES
+================================== */
+function filterMilestones() {
+    const search = document.getElementById("milestoneSearch").value.toLowerCase();
+    filteredMilestoneData = milestoneData.filter(item =>
+        (item.milestone_name || "").toLowerCase().includes(search) ||
+        (item.project_name || "").toLowerCase().includes(search) ||
+        (item.portfolio_name || "").toLowerCase().includes(search)
+    );
+    populateMilestoneDropdown();
+}
+
+/* ==================================
+   MILESTONE CHANGED VIEW REACTION
+================================== */
+function milestoneChanged() {
+    const milestoneId = document.getElementById("milestoneId").value;
+    const section = document.getElementById("newMilestoneSection");
+    if (milestoneId === "NEW_MILESTONE") {
+        section.style.display = "block";
+        document.getElementById("milestoneContext").innerHTML = "New Milestone Setup";
         return;
     }
-
-    dropdown.innerHTML = `
-        <option value="">
-            Standalone Activity
-        </option>
-    `;
-
-    milestoneData
-        .forEach(
-            item => {
-
-                dropdown.innerHTML += `
-                    <option
-                        value="${item.milestone_id}">
-
-                        ${item.portfolio_name}
-                        |
-                        ${item.project_name}
-                        |
-                        ${item.milestone_name}
-
-                    </option>
-                `;
-            }
-        );
-}
-
-
-/* ==================================
-   FILTER ACTIVITIES
-================================== */
-
-function filterActivities() {
-
-    const search =
-        document
-            .getElementById(
-                "activitySearch"
-            )
-            .value
-            .toLowerCase();
-
-    filteredActivityData =
-        activityData.filter(
-            item =>
-
-                (item.activity_name || "")
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                (item.milestone_name || "")
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                (item.project_name || "")
-                    .toLowerCase()
-                    .includes(search)
-
-                ||
-
-                (item.portfolio_name || "")
-                    .toLowerCase()
-                    .includes(search)
-        );
-
-    populateActivityDropdown();
-}
-
-
-/* ==================================
-   ACTIVITY CHANGED
-================================== */
-
-function activityChanged() {
-
-    const activityId =
-        document
-            .getElementById(
-                "activityId"
-            )
-            .value;
-
-    const section =
-        document
-            .getElementById(
-                "newActivitySection"
-            );
-
-    if (
-        activityId ===
-        "NEW_ACTIVITY"
-    ) {
-
-        section.style.display =
-            "block";
-
-        document
-            .getElementById(
-                "activityContext"
-            )
-            .innerHTML =
-                "New Activity";
-
+    section.style.display = "none";
+    if (milestoneId === "") {
+        document.getElementById("milestoneContext").innerHTML = "Standalone Action";
         return;
     }
-
-    section.style.display =
-        "none";
-
-    const activity =
-        activityData.find(
-            x =>
-                x.activity_id ===
-                activityId
-        );
-
-    if (!activity) {
-
-        document
-            .getElementById(
-                "activityContext"
-            )
-            .innerHTML =
-                "Select Activity";
-
+    // 🎯 FIX: Locate the matching milestone by its correct primary identifier column key
+    const milestone = milestoneData.find(x => x.milestone_id === milestoneId);
+    if (!milestone) {
+        document.getElementById("milestoneContext").innerHTML = "Standalone Action";
         return;
     }
-
-    document
-        .getElementById(
-            "activityContext"
-        )
-        .innerHTML =
-
-        activity.milestone_id
-
-            ?
-
-            `${activity.portfolio_name}
-             |
-             ${activity.project_name}
-             |
-             ${activity.milestone_name}`
-
-            :
-
-            "Standalone Activity";
+    document.getElementById("milestoneContext").innerHTML = 
+        `${milestone.portfolio_name} | ${milestone.project_name} | ${milestone.milestone_name}`;
 }
 
 
-/* ==================================
-   RESET SEARCH
-================================== */
-
-function resetActivitySearch() {
-
-    document
-        .getElementById(
-            "activitySearch"
-        )
-        .value = "";
-
-    filteredActivityData =
-        [...activityData];
-
-    populateActivityDropdown();
+function resetMilestoneSearch() {
+    const searchInput = document.getElementById("milestoneSearch");
+    if (searchInput) searchInput.value = "";
+    filteredMilestoneData = [...milestoneData];
+    populateMilestoneDropdown();
 }
 
 
+
+
 /* ==================================
-   CREATE INLINE ACTIVITY
+   CREATE INLINE MILESTONE
 ================================== */
-
-async function createInlineActivity() {
-
-    const activityName =
-        getInputValue(
-            "newActivityName"
-        )
-        .trim();
-
-    if (!activityName) {
-
-        showError(
-            "Activity Name is required"
-        );
-
+async function createInlineMilestone() {
+    const name = document.getElementById("newMilestoneName").value.trim();
+    const projectId = document.getElementById("newMilestoneProject").value;
+    if (!name || !projectId) {
+        showError("Milestone Name and Project are required");
         return null;
     }
-
     const payload = {
-
-        activity_name:
-            activityName,
-
-        milestone_id:
-            getInputValue(
-                "newActivityMilestone"
-            ) || null,
-
-        target_date:
-            getInputValue(
-                "newActivityTargetDate"
-            ) || null,
-
-        priority:
-            getInputValue(
-                "newActivityPriority"
-            ) || "Medium",
-
-        status:
-            "Not Started",
-
-        display_order:
-            100,
-
-        enabled:
-            true,
-
-        created_by:
-            getCurrentUser(),
-
-        updated_by:
-            getCurrentUser()
+        milestone_name: name,
+        project_id: projectId,
+        target_date: document.getElementById("newMilestoneTargetDate").value || null,
+        status: document.getElementById("newMilestoneStatus").value || "Open",
+        enabled: true,
+        display_order: 100,
+        created_by: getCurrentUser(),
+        updated_by: getCurrentUser()
     };
-
-    const result =
-        await insertData(
-            "activity",
-            payload
-        );
-
-    await loadActivities();
-
-    return result?.[0]
-        ?.activity_id;
+    const result = await insertData("milestone", payload);
+    await loadMilestones();
+    return result?.[0]?.milestone_id;
 }
+
+
 
 
 /* ==================================
@@ -970,63 +618,21 @@ async function createInlineActivity() {
 ================================== */
 
 function newTodo() {
-
-    document
-        .getElementById(
-            "todoId"
-        )
-        .value = "";
-
-    document
-        .getElementById(
-            "todoText"
-        )
-        .value = "";
-
-    document
-        .getElementById(
-            "dueDate"
-        )
-        .value = "";
-
-    document
-        .getElementById(
-            "notes"
-        )
-        .value = "";
-
-    document
-        .getElementById(
-            "todoStatus"
-        )
-        .value = "Open";
-
-    resetActivitySearch();
-
-    document
-        .getElementById(
-            "activityId"
-        )
-        .selectedIndex = 0;
-
-    activityChanged();
-
-
-    document.getElementById(
-        "deleteTodoButton"
-    ).style.display =
-        "none";
-
-
-    openModal(
-        "todoModal"
-    );
-
-    document
-        .getElementById(
-            "todoText"
-        )
-        .focus();
+    document.getElementById("todoId").value = "";
+    document.getElementById("todoText").value = "";
+    document.getElementById("dueDate").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("todoStatus").value = "Open";
+    
+    resetMilestoneSearch();
+    
+    // 🎯 FIX: Forces the form to default to the standalone action option at index 0
+    document.getElementById("milestoneId").selectedIndex = 0;
+    milestoneChanged();
+    
+    document.getElementById("deleteTodoButton").style.display = "none";
+    openModal("todoModal");
+    document.getElementById("todoText").focus();
 }
 
 
@@ -1035,69 +641,28 @@ function newTodo() {
 ================================== */
 
 function editTodo(id) {
+    const item = todoData.find(x => x.todo_id === id);
+    if (!item) return;
 
-    const item =
-        todoData.find(
-            x =>
-                x.todo_id === id
-        );
+    // 🎯 FIX: Force-populate dropdown items immediately to handle instant URL deep-links safely
+    populateMilestoneDropdown();
 
-    if (!item) {
-        return;
-    }
+    document.getElementById("todoId").value = item.todo_id;
+    document.getElementById("todoText").value = item.todo_text || "";
+    document.getElementById("dueDate").value = formatDateForInput(item.due_date);
+    document.getElementById("notes").value = item.notes || "";
+    document.getElementById("todoStatus").value = item.status || "Open";
+    
+    // Clear searches and bind the direct milestone relationship
+    resetMilestoneSearch();
+    
+    // Ensure this exact assignment line is active inside your editTodo function:
+    document.getElementById("milestoneId").value = item.milestone_id || "";
+    milestoneChanged();
 
-    document.getElementById(
-        "todoId"
-    ).value =
-        item.todo_id;
-
-    document.getElementById(
-        "todoText"
-    ).value =
-        item.todo_text || "";
-
-    document.getElementById(
-        "dueDate"
-    ).value =
-        formatDateForInput(
-            item.due_date
-        );
-
-    document.getElementById(
-        "notes"
-    ).value =
-        item.notes || "";
-
-    document.getElementById(
-        "todoStatus"
-    ).value =
-        item.status || "Open";
-
-    resetActivitySearch();
-
-    document.getElementById(
-        "activityId"
-    ).value =
-        item.activity_id;
-
-    activityChanged();
-
-
-
-    document.getElementById(
-        "deleteTodoButton"
-    ).style.display =
-        "inline-block";
-
-
-
-    openModal(
-        "todoModal"
-    );
-
-    document.getElementById(
-        "todoText"
-    ).focus();
+    document.getElementById("deleteTodoButton").style.display = "inline-block";
+    openModal("todoModal");
+    document.getElementById("todoText").focus();
 }
 
 
@@ -1106,127 +671,42 @@ function editTodo(id) {
 ================================== */
 
 async function saveTodo() {
+    let milestoneId = getInputValue("milestoneId");
+    const todoId = getInputValue("todoId");
+    const todoText = getInputValue("todoText").trim();
 
-    let activityId =
-        getInputValue(
-            "activityId"
-        );
+    if (!todoText) { showError("ToDo is required"); return; }
 
-    const todoId =
-        getInputValue(
-            "todoId"
-        );
-
-    const todoText =
-        getInputValue(
-            "todoText"
-        ).trim();
-
-    if (!todoText) {
-
-        showError(
-            "ToDo is required"
-        );
-
-        return;
+    if (milestoneId === "NEW_MILESTONE") {
+        milestoneId = await createInlineMilestone();
+        if (!milestoneId) return;
     }
 
-    if (
-        activityId ===
-        "NEW_ACTIVITY"
-    ) {
-
-        activityId =
-            await createInlineActivity();
-
-        if (!activityId) {
-            return;
-        }
-    }
-
-    if (!activityId) {
-
-        showError(
-            "Activity is required"
-        );
-
-        return;
-    }
-
+    // 🎯 FIX: Optional mapping. If value is "", it passes down as null to Supabase
     const payload = {
-
-        activity_id:
-            activityId,
-
-        todo_text:
-            todoText,
-
-        notes:
-            getInputValue(
-                "notes"
-            ),
-
-        status:
-            getInputValue(
-                "todoStatus"
-            ),
-
-        due_date:
-            getInputValue(
-                "dueDate"
-            ) || null,
-
-        display_order:
-            100,
-
-        enabled:
-            true,
-
-        updated_by:
-            getCurrentUser()
+        milestone_id: milestoneId || null, 
+        todo_text: todoText,
+        notes: getInputValue("notes"),
+        status: getInputValue("todoStatus"),
+        due_date: getInputValue("dueDate") || null,
+        display_order: 100,
+        enabled: true,
+        updated_by: getCurrentUser()
     };
 
     try {
-
         if (!todoId) {
-
-            payload.created_by =
-                getCurrentUser();
-
-            await insertData(
-                "todo",
-                payload
-            );
+            payload.created_by = getCurrentUser();
+            await insertData("todo", payload);
+        } else {
+            await updateData("todo", "todo_id", todoId, payload);
         }
-        else {
-
-            await updateData(
-                "todo",
-                "todo_id",
-                todoId,
-                payload
-            );
-        }
-
-        closeModal(
-            "todoModal"
-        );
-
+        closeModal("todoModal");
         await loadTodos();
-
-        showSuccess(
-            "ToDo saved successfully"
-        );
-    }
-    catch (error) {
-
-        console.error(
-            error
-        );
-
-        showError(
-            "Unable to save ToDo"
-        );
+        showSuccess("ToDo saved successfully");
+    } catch (error) {
+        console.error(error);
+        showError("Unable to save ToDo");
     }
 }
 

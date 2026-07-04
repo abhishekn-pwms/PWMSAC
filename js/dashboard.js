@@ -1,4 +1,4 @@
-// FocusDash v1.0
+// PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS
 
 let dashboardMilestones = [];
 let dashboardTodos = [];
@@ -188,7 +188,8 @@ function quickLogToDo(todoId, todoText, activityId) {
     if (window.event) {
         window.event.stopPropagation(); // Prevents clicking the row from opening todo.html
     }
-    sessionStorage.setItem("QUICK_LOG_DESC", `Action Complete: ${todoText}`);
+    sessionStorage.setItem("QUICK_LOG_DESC", `Action Taken: ${todoText}`);
+    sessionStorage.setItem("QUICK_LOG_TODO_ID", todoId);
     sessionStorage.setItem("QUICK_LOG_ACTIVITY", activityId);
     window.location.href = "task-log.html?action=new";
 }

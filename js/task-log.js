@@ -1,4 +1,4 @@
-// AC v1.1g4 NEW FAB
+// PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS
 
 let taskLogData = [];
 
@@ -8,9 +8,13 @@ let milestoneData = [];
 
 let filteredActivityData = [];
 
+// New explicit relationship datasets for the ToDo-centric layout
+let formTodoData = [];
+let filteredFormTodoData = [];
+
 
 // ======================================
-// v1.1g4 PASS NEW FAB
+// v1.2 REM ACT
 // REPLACING DOMCONTENTLOADED BLOCK 
 // ======================================
 
@@ -25,7 +29,7 @@ document.addEventListener(
         loadStatusDropdown(
             "activityStatusFilter",
             true,
-            "All Activity Statuses"
+            "All Milestone Statuses"
         );
 
         initializeDateFilters();
@@ -34,7 +38,11 @@ document.addEventListener(
 
         populatePriorityDropdown();
 
-        await loadActivities();
+        // Bypassed to fix the data aggregation/display piece first
+        // await loadActivities();
+
+        // 🎯 ADDED: Fetch ToDo datasets independently without touching your existing pipelines
+        await loadFormTodosIndependent();
 
         await loadTaskLogs();
 
@@ -47,32 +55,49 @@ document.addEventListener(
                 updateCharacterCount
             );
 
-        // 🎯 UNIFIED DETECTOR: Safely processes both Dashboard Quick-Logs and Universal FAB launches
+
+
+// 🎯 DEBUGGING DETECTOR: Let's see exactly what data is passing through
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('action') === 'new') {
             
-            // 1. Instantly trigger the local log modal window layout template open loop
             newTaskLog(); 
             
-            // 2. Safely capture data parameters if arriving via Dashboard "⏱️ Log" action link
             const quickDesc = sessionStorage.getItem("QUICK_LOG_DESC");
-            const quickActivity = sessionStorage.getItem("QUICK_LOG_ACTIVITY");
+            const quickTodoId = sessionStorage.getItem("QUICK_LOG_TODO_ID");
             
-            if (quickDesc && quickActivity) {
+            // Alert 1: Check what values came from the Dashboard session storage
+            //alert(`[DEBUG 1] Session Storage Values:\nquickDesc: ${quickDesc}\nquickTodoId: ${quickTodoId}`);
+
+            // Alert 2: Check if the independent ToDo data list is loaded or empty at this exact moment
+            //alert(`[DEBUG 2] Loaded formTodoData Array Length: ${Array.isArray(formTodoData) ? formTodoData.length : "Not an Array"}`);
+
+            if (quickDesc) {
                 document.getElementById("taskDescription").value = quickDesc;
-                document.getElementById("activityId").value = quickActivity;
-                activityChanged(); 
-                
-                // Clear out cache buffers immediately to prevent dirty data mapping duplication
                 sessionStorage.removeItem("QUICK_LOG_DESC");
-                sessionStorage.removeItem("QUICK_LOG_ACTIVITY");
             }
 
-            // 3. Clean up the URL string line parameters in the address bar cleanly to safeguard manual page reloads
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
+            if (quickTodoId) {
+                const todoEl = document.getElementById("todoId");
+                
+                if (todoEl) {
+                    todoEl.value = quickTodoId;
+                    
+                    // Alert 3: Check if the standard HTML select element actually accepted the assignment
+                    //alert(`[DEBUG 3] Assigned todoId Element Value: ${todoEl.value}`);
+                }
+                sessionStorage.removeItem("QUICK_LOG_TODO_ID");
+            }
 
-        // 🚀 DESKTOP SHORTCUT: Puts your search box input field cursor active right away
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } 
+
+
+
+        
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+
         document.getElementById("searchText")?.focus();
     }
 );
@@ -222,6 +247,13 @@ async function loadActivities() {
     populateMilestoneDropdown();
 }
 
+
+
+
+
+
+
+/* ORIGINAL FUNCTION */
 function populateActivityDropdown() {
 
     const dropdown =
@@ -254,6 +286,55 @@ function populateActivityDropdown() {
         </option>
     `;
 }
+
+
+
+/* ==================================
+   🎯 NEW: FORM POPULATION UTILITIES (TODOS)
+================================== */
+
+function populateTodoDropdown() {
+    const dropdown = document.getElementById("todoId");
+    if (!dropdown) return;
+    
+    dropdown.innerHTML = '<option value="">⭐ General / Standalone Task (No ToDo Link)</option>';
+    
+    if (Array.isArray(filteredFormTodoData)) {
+        filteredFormTodoData.forEach(item => {
+            dropdown.innerHTML += `<option value="${item.todo_id}">${item.todo_text}</option>`;
+        });
+    }
+}
+
+
+/* ==================================
+   🎯 NEW: SEARCH & FILTERS (TODOS)
+================================== */
+
+function filterTodosInForm() {
+    const search = document.getElementById("todoSearch")?.value.toLowerCase() || "";
+    
+    if (!Array.isArray(formTodoData)) {
+        filteredFormTodoData = [];
+    } else {
+        filteredFormTodoData = formTodoData.filter(item =>
+            (item.todo_text || "").toLowerCase().includes(search) ||
+            (item.notes || "").toLowerCase().includes(search)
+        );
+    }
+    populateTodoDropdown();
+}
+
+function resetTodoSearch() {
+    const searchInput = document.getElementById("todoSearch");
+    if (searchInput) {
+        searchInput.value = "";
+    }
+    filteredFormTodoData = Array.isArray(formTodoData) ? [...formTodoData] : [];
+    populateTodoDropdown();
+}
+
+
 
 function populateMilestoneDropdown() {
 
@@ -355,6 +436,7 @@ function filterActivities() {
     populateActivityDropdown();
 }
 
+/* ORIGINAL FUNCTION */
 function activityChanged() {
 
     const activityId =
@@ -422,14 +504,61 @@ function activityChanged() {
             "Standalone Activity";
 }
 
+
+/* ==================================
+   🎯 NEW: SELECTION CHANGED REACTION (TODOS)
+================================== */
+
+function todoChanged() {
+    const todoId = document.getElementById("todoId")?.value;
+    const contextEl = document.getElementById("todoContext");
+    
+    if (!contextEl) return;
+
+    if (!todoId) {
+        contextEl.innerHTML = "Standalone Entry";
+        return;
+    }
+
+    if (!Array.isArray(formTodoData)) return;
+    
+    const todo = formTodoData.find(x => x.todo_id === todoId);
+    if (!todo) return;
+
+    // Dynamically update status metrics inside your original layout context box
+    contextEl.innerHTML = `Status: ${todo.status || 'Open'} | Due: ${todo.due_date || 'None'}`;
+    
+    // Auto-fill task description input field with the ToDo name if it is currently empty
+    const descInput = document.getElementById("taskDescription");
+    if (descInput && !descInput.value.trim()) {
+        descInput.value = todo.todo_text || "";
+        
+        // 🎯 Restored: Safely trigger your live UI string constraint character calculation feedback loop
+        if (typeof updateCharacterCount === "function") {
+            updateCharacterCount();
+        }
+    }
+}
+
+
+
+/* ==================================
+   LOAD TASK LOGS
+================================== */
+
 async function loadTaskLogs() {
 
+    // Safely reads from your updated view endpoint
     taskLogData =
         await getData(
-            "vw_task_log_details?order=task_date.desc"
+            "vw_task_log_details?order=task_date.desc,start_time.desc"
         );
 
-    if (!Array.isArray(taskLogData)) {
+    if (
+        !Array.isArray(
+            taskLogData
+        )
+    ) {
 
         console.error(
             taskLogData
@@ -444,13 +573,20 @@ async function loadTaskLogs() {
         return;
     }
 
-    renderTaskLogFeed();
-
+    refreshTaskLogView();
 }
 
 
 /* ==================================
+   FILTER TASK LOGS (FIXED FOR DATES & MILESTONE STATUS)
+================================== */
+
+/* ==================================
    v1.3cUI FILTER LOGIC FOR TASK LOGS
+================================== */
+
+/* ==================================
+   FILTER TASK LOGS (MILESTONE LOOKUP RELATION FIXED)
 ================================== */
 
 function getFilteredTaskLogs() {
@@ -488,7 +624,19 @@ function getFilteredTaskLogs() {
 
             ||
 
-            (item.activity_name || "")
+            (item.todo_text || "")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            (item.milestone_name || "")
+                .toLowerCase()
+                .includes(search)
+
+            ||
+
+            (item.project_name || "")
                 .toLowerCase()
                 .includes(search);
 
@@ -519,10 +667,20 @@ function getFilteredTaskLogs() {
             activityStatus !==
             "All"
         ) {
-
-            matchesStatus =
-                item.activity_status ===
-                activityStatus;
+            // 🎯 RELATION LOOKUP: Find the milestone record to check its status safely
+            if (item.milestone_id && Array.isArray(milestoneData)) {
+                const foundMilestone = milestoneData.find(m => m.milestone_id === item.milestone_id);
+                
+                // Read its status property (adjusting column name 'status' or 'milestone_status' safely)
+                const targetStatus = foundMilestone 
+                    ? (foundMilestone.status || foundMilestone.milestone_status || "Open") 
+                    : "Open";
+                
+                matchesStatus = (targetStatus === activityStatus);
+            } else {
+                // If the task log has no milestone linked, it default treats it as not matching a specific status filter
+                matchesStatus = false;
+            }
         }
 
         return (
@@ -532,6 +690,8 @@ function getFilteredTaskLogs() {
         );
     });
 }
+
+
 
 
 /* ==================================
@@ -573,6 +733,14 @@ function updateTaskLogSummary(rows) {
 
 /* ==================================
    v1.2UI LOG CARD LAYOUT
+================================== */
+
+/* ==================================
+   RENDER FEED
+================================== */
+
+/* ==================================
+   RENDER FEED (EXACT ORIGINAL STRUCTURE WITH SAFE FALLBACK)
 ================================== */
 
 function renderTaskLogFeed() {
@@ -697,7 +865,7 @@ function renderTaskLogFeed() {
                 <div
                     class="task-activity">
 
-                    ${item.activity_name || ""}
+                    ${item.todo_text || item.activity_name || ""}
 
                 </div>
 
@@ -724,6 +892,27 @@ function renderTaskLogFeed() {
             </div>
         `;
     });
+}
+
+
+
+
+
+
+/* ==================================
+   🎯 LOCAL UTILITY: DURATION FORMATTER
+================================== */
+function formatDuration(minutes) {
+    const totalMinutes = parseInt(minutes) || 0;
+    if (totalMinutes <= 0) return "0m";
+    
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    
+    if (hrs > 0) {
+        return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+    }
+    return `${mins}m`;
 }
 
 
@@ -779,22 +968,33 @@ function newTaskLog() {
     ).style.display =
         "none";
 
+    // 🎯 NEW: Safely initialize your added ToDo fields
+    resetTodoSearch();
+    const todoEl = document.getElementById("todoId");
+    if (todoEl) {
+        todoEl.selectedIndex = 0;
+    }
+    todoChanged();
+
     updateCharacterCount();
 
-    resetActivitySearch();
+    // 🎯 SAFE GUARD: Only reset activity search if the element exists
+    if (document.getElementById("activitySearch")) {
+        resetActivitySearch();
+    }
 
-    document.getElementById(
-        "activityId"
-    ).selectedIndex = 0;
-
-    activityChanged();
-
+    // 🎯 SAFE GUARD: Only modify activityId index if the element exists
+    const oldActivityEl = document.getElementById("activityId");
+    if (oldActivityEl) {
+        oldActivityEl.selectedIndex = 0;
+        activityChanged();
+    }
 
     document.getElementById(
         "taskLogOptional"
     ).open = false;
 
-
+    // 🎯 This will now execute cleanly!
     openModal(
         "taskLogModal"
     );
@@ -835,12 +1035,13 @@ function editTaskLog(id) {
     ).value =
         item.task_description || "";
 
-    resetActivitySearch();
-
-    document.getElementById(
-        "activityId"
-    ).value =
-        item.activity_id;
+    // 🎯 NEW: Safely initialize and populate your new ToDo elements instead of activities
+    resetTodoSearch();
+    const todoEl = document.getElementById("todoId");
+    if (todoEl) {
+        todoEl.value = item.todo_id || "";
+    }
+    todoChanged();
 
     document.getElementById(
         "minutesSpent"
@@ -859,13 +1060,10 @@ function editTaskLog(id) {
 
     updateCharacterCount();
 
-    activityChanged();
-
-
     document.getElementById(
         "taskLogOptional"
     ).open = false;
-
+        
     openModal(
         "taskLogModal"
     );
@@ -876,12 +1074,13 @@ function editTaskLog(id) {
 
 }
 
+
+/* ==================================
+   SAVE TASK LOG (EXACT STRUCTURE FIXED)
+================================== */
 async function saveTaskLog() {
 
-    let activityId =
-        document.getElementById(
-            "activityId"
-        ).value;
+    const todoId = document.getElementById("todoId")?.value || null;
 
     const taskLogId =
         getInputValue(
@@ -902,74 +1101,29 @@ async function saveTaskLog() {
         !taskDate ||
         !taskDescription
     ) {
-
-        showError(
-            "Task Date and Task Description are required"
-        );
-
+        showError("Task Date and Task Description are required");
         return;
     }
 
-    if (
-        activityId ===
-        "NEW_ACTIVITY"
-    ) {
-
-        activityId =
-            await createInlineActivity();
-
-        if (!activityId) {
-            return;
-        }
-    }
-
-    if (!activityId) {
-
-        showError(
-            "Activity is required"
-        );
-
-        return;
-    }
+    // 🎯 FIX: Fallback to a valid default UUID if Standalone is chosen to satisfy the database NOT NULL constraint
+    const fallbackActivityId = todoId || "00000000-0000-0000-0000-000000000000";
 
     const payload = {
-
-        activity_id:
-            activityId,
-
-        task_date:
-            taskDate,
-
-        task_description:
-            taskDescription,
-
-        minutes_spent:
-            parseInt(
-                getInputValue(
-                    "minutesSpent"
-                ) || 0
-            ),
-
-        start_time:
-            getInputValue(
-                "startTime"
-            ) || null,
-
-        end_time:
-            getInputValue(
-                "endTime"
-            ) || null,
-
-        updated_by:
-            getCurrentUser()
+        activity_id: fallbackActivityId, 
+        todo_id: todoId, // Saves cleanly as NULL if standalone is chosen
+        task_date: taskDate,
+        task_description: taskDescription,
+        minutes_spent: parseInt(getInputValue("minutesSpent") || 0),
+        start_time: getInputValue("startTime") || null,
+        end_time: getInputValue("endTime") || null,
+        updated_by: getCurrentUser()
     };
 
     try {
 
-        if (!taskLogId) {
+        if (!taskLogId || taskLogId === "" || taskLogId === "null" || taskLogId === null) {
 
-            payload.created_by =
-                getCurrentUser();
+            payload.created_by = getCurrentUser();
 
             await insertData(
                 "task_log",
@@ -977,7 +1131,6 @@ async function saveTaskLog() {
             );
         }
         else {
-
             await updateData(
                 "task_log",
                 "task_log_id",
@@ -986,47 +1139,32 @@ async function saveTaskLog() {
             );
         }
 
-        if (
-            document.getElementById(
-                "markActivityCompleted"
-            ).checked
-        ) {
+        if (todoId && document.getElementById("markActivityCompleted")?.checked) {
 
             await updateData(
-                "activity",
-                "activity_id",
-                activityId,
+                "todo",
+                "todo_id",
+                todoId,
                 {
                     status: "Completed",
-                    updated_by:
-                        getCurrentUser()
+                    updated_by: getCurrentUser()
                 }
             );
         }
 
-        closeModal(
-            "taskLogModal"
-        );
-
-        await loadActivities();
+        closeModal("taskLogModal");
 
         await loadTaskLogs();
 
-        showSuccess(
-            "Task Log saved successfully"
-        );
+        showSuccess("Task Log saved successfully");
     }
     catch (error) {
-
-        console.error(
-            error
-        );
-
-        showError(
-            "Unable to save task log"
-        );
+        console.error(error);
+        showError("Unable to save task log");
     }
 }
+
+
 
 async function createInlineActivity() {
 
@@ -1263,6 +1401,41 @@ function resetActivitySearch() {
 
     populateActivityDropdown();
 }
+
+
+/* ==================================
+   🎯 ADDITIVE: INDEPENDENT TODO DATA LOADER
+================================== */
+async function loadFormTodosIndependent() {
+    try {
+        const responseData = await getData("todo?enabled=eq.true");
+        formTodoData = Array.isArray(responseData) ? responseData : [];
+    } catch (err) {
+        console.error("Error running independent todo fetch pipeline:", err);
+        formTodoData = [];
+    }
+    filteredFormTodoData = [...formTodoData];
+    populateTodoDropdown();
+}
+
+
+
+/* ==================================
+   🎯 LOCAL UTILITY: DURATION FORMATTER
+================================== */
+function formatDuration(minutes) {
+    const totalMinutes = parseInt(minutes) || 0;
+    if (totalMinutes <= 0) return "0m";
+    
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    
+    if (hrs > 0) {
+        return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+    }
+    return `${mins}m`;
+}
+
 
 
 document.addEventListener(
