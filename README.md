@@ -1,5 +1,22 @@
 === === === === === ===
-Date : Wed, 03-Jul-2026
+Date : Sat, 04-Jul-2026
+=== === === === === ===
+
+Release PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS WORKFLOW
+------------------
+
+What's New
+Removed Activity from PWMS
+
+** REMOVED ACTIVITY FROM PWMS FLOW
+## <Comment Blocks>
+# "v1.2 - REMOVE ACTIVITY FROM PWMS"
+# "v1.2 - REMV ACTVTY"
+
+
+
+=== === === === === ===
+Date : Fri, 03-Jul-2026
 === === === === === ===
 
 Release PWMS AC v1.1g4 NEW FAB
