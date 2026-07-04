@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToDos AC v1.1g4</title>
+    <title>ToDos AC v1.2 - REMV ACTVTY</title>
     <link rel="stylesheet" href="../css/pwms.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
             <div id="content">
 
                 <div class="page-header">
-                    <div class="page-title">ToDos AC v1.1g4</div>
+                    <div class="page-title">ToDos AC v1.2 - REMV ACTVTY</div>
                     <button class="btn btn-primary hide-on-mobile" onclick="newTodo()">+ New ToDo</button>
                 </div>
 
@@ -30,8 +30,8 @@
                         <option value="Completed">Completed</option>
                         <option value="All">All</option>
                     </select>
-                    <select id="activityFilter" onchange="refreshTodoView()">
-                        <option value="All">All Activities</option>
+                    <select id="milestoneFilter" onchange="refreshTodoView()">
+                        <option value="All">All Milestones</option>
                     </select>
                 </div>
 
@@ -75,42 +75,50 @@
                 </div>
             </div>
 
+
             <div class="form-row">
-                <label>Activity</label>
+                <label>Milestone</label>
                 <div class="activity-picker-row">
-                    <select id="activityId" onchange="activityChanged()"></select>
-                    <input type="search" id="activitySearch" placeholder="Filter activities..." onkeyup="filterActivities()">
+                    <select id="milestoneId" onchange="milestoneChanged()"></select>
+                    <input type="search" id="milestoneSearch" placeholder="Filter milestones..." onkeyup="filterMilestones()">
                 </div>
             </div>
 
             <div class="form-row">
                 <label>Context</label>
-                <div class="activity-context-box" id="activityContext">Select Activity</div>
+                <div class="activity-context-box" id="milestoneContext">Standalone Action</div>
             </div>
 
-            <div id="newActivitySection" class="inline-create-box" style="display:none;">
-                <div class="inline-create-title">New Activity</div>
+
+
+            <div id="newMilestoneSection" class="inline-create-box" style="display:none;">
+                <div class="inline-create-title">New Milestone</div>
                 <div class="time-row">
                     <div>
-                        <label>Activity Name</label>
-                        <input id="newActivityName">
+                        <label>Milestone Name</label>
+                        <input id="newMilestoneName">
                     </div>
                     <div>
-                        <label>Milestone</label>
-                        <select id="newActivityMilestone"></select>
+                        <label>Project</label>
+                        <select id="newMilestoneProject"></select>
                     </div>
                 </div>
                 <div class="time-row" style="margin-bottom:0;">
                     <div>
                         <label>Target Date</label>
-                        <input type="date" id="newActivityTargetDate">
+                        <input type="date" id="newMilestoneTargetDate">
                     </div>
                     <div>
-                        <label>Priority</label>
-                        <select id="newActivityPriority"></select>
+                        <label>Status</label>
+                        <select id="newMilestoneStatus">
+                            <option value="Open">Open</option>
+                            <option value="Completed">Completed</option>
+                        </select>
                     </div>
                 </div>
             </div>
+
+
 
             <div class="form-row">
                 <label>Notes</label>
@@ -151,7 +159,14 @@
                 <a href="portfolio.html" class="fab-sub-btn">💼 Portfolios</a>
                 <a href="project.html" class="fab-sub-btn">🚀 Projects</a>
                 <a href="milestone.html" class="fab-sub-btn">🎯 Milestones</a>
+
+<!--
+## REMOVING ACTIVITY LINK
+-->
+<!--
                 <a href="activity.html" class="fab-sub-btn">⚡ Activities</a>
+-->
+
             </div>
 
             <div class="fab-section-header">📋 Core Data</div>

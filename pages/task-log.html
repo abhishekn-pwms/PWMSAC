@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Logs AC v1.1g4</title>
+    <title>Task Logs AC v1.2</title>
     <link rel="stylesheet" href="../css/pwms.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
             <div id="content">
 
                 <div class="page-header">
-                    <div class="page-title">Task Logs AC v1.1g4</div>
+                    <div class="page-title">Task Logs AC v1.2</div>
                     <button class="btn btn-primary hide-on-mobile" onclick="newTaskLog()">+ New Task Log</button>
                 </div>
 
@@ -40,7 +40,11 @@
                     <label style="width:25px; max-width: 30px; min-width: 15px; text-align: right; display: flow;">To:&nbsp;</label>
                     <input style="width:20px; max-width: 25px;" type="date" id="toDate" onchange="refreshTaskLogView()">
                     <label style="width:50px; max-width: 30px; min-width: 15px;">&nbsp;&nbsp;&nbsp;</label>
-                    <select style="min-width: 25%;" id="activityStatusFilter" onchange="refreshTaskLogView()"></select>
+                    <select style="min-width: 25%;" id="activityStatusFilter" onchange="refreshTaskLogView()">
+                        <option value="All">All Milestone Statuses</option>
+                        <option value="Open">Open</option>
+                        <option value="Close">Close</option>
+                    </select>
                 </div>
 
                 <div class="stat-strip">
@@ -76,16 +80,16 @@
             </div>
 
             <div class="form-row">
-                <label>Activity</label>
+                <label>Link to ToDo</label>
                 <div class="activity-picker-row">
-                    <select id="activityId" onchange="activityChanged()"></select>
-                    <input type="search" id="activitySearch" placeholder="Filter activities..." onkeyup="filterActivities()">
+                    <select id="todoId" onchange="todoChanged()"></select>
+                    <input type="search" id="todoSearch" placeholder="Filter ToDos..." onkeyup="filterTodosInForm()">
                 </div>
             </div>
 
             <div class="form-row">
                 <label>Context</label>
-                <div class="activity-context-box" id="activityContext">Select Activity</div>
+                <div class="activity-context-box" id="todoContext">Standalone Entry</div>
             </div>
 
             <div id="newActivitySection" class="inline-create-box" style="display:none;">
@@ -134,7 +138,7 @@
                 <div class="optional-content">
                     <div class="checkbox-row">
                         <input type="checkbox" id="markActivityCompleted">
-                        <label>Mark Activity Completed?</label>
+                        <label>Mark ToDo Completed?</label>
                     </div>
                 </div>
             </details>
@@ -170,7 +174,14 @@
                 <a href="portfolio.html" class="fab-sub-btn">💼 Portfolios</a>
                 <a href="project.html" class="fab-sub-btn">🚀 Projects</a>
                 <a href="milestone.html" class="fab-sub-btn">🎯 Milestones</a>
+
+<!--
+## REMOVING ACTIVITY LINK
+-->
+<!--
                 <a href="activity.html" class="fab-sub-btn">⚡ Activities</a>
+-->
+
             </div>
 
             <div class="fab-section-header">📋 Core Data</div>
