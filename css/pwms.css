@@ -1,4 +1,4 @@
-/* AC v1.1g4 PASS 2 */
+/* AC v1.2 - REMV ACTVTY */
 
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
@@ -524,9 +524,9 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
         gap: 6px !important;
     }
 
-    /* Section 1 forces 4 columns natively */ /* original Section 1 forces 3 columns natively */
+    /* Section 1 forces 3 columns natively */ /* original Section 1 forces 3 columns natively */
     .fab-container.open .section-one {
-        grid-template-columns: repeat(4, 1fr) !important; /* original grid-template-columns: repeat(3, 1fr) */
+        grid-template-columns: repeat(3, 1fr) !important; /* original grid-template-columns: repeat(3, 1fr) */
         gap: 6px !important; /* original gap: 6px !important */
     }
 
@@ -538,7 +538,7 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 
     .fab-container.open .fab-sub-btn {
         padding: 8px 10px !important; /* original padding: 8px 10px !important */
-        font-size: 0.70rem !important; /* original font-size: 0.76rem !important */
+        font-size: 0.76rem !important; /* original font-size: 0.76rem !important */
     }
 
     .fab-container.open .fab-section-header {
