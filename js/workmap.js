@@ -1,4 +1,4 @@
-// AC v1.3 Pass 3 WORKMAP
+// AC v1.3 Pass 5 WORKMAP ENHANCEMENTS
 
 // ======================================================
 // Work Map — Milestone Cards Overview
@@ -18,6 +18,8 @@ let wmEditingLogId = null;
 
 const WM_CLOSED_STATUSES = ["Completed", "Cancelled"];
 const WM_STANDALONE_ID = "__standalone__";
+const WM_UNLINKED_ID = "__unlinked__";
+const WM_FALLBACK_ACTIVITY_ID = "00000000-0000-0000-0000-000000000000";
 
 
 document.addEventListener(
@@ -73,7 +75,7 @@ async function loadWorkMapData() {
     }
 
     wmTaskLogs =
-        await getData("vw_task_log_details?todo_id=not.is.null");
+        await getData("vw_task_log_details");
 
     if (!Array.isArray(wmTaskLogs)) {
         wmTaskLogs = [];
@@ -344,9 +346,133 @@ function renderWorkMap() {
             })
             .join("");
 
+    // Unlinked Task Logs — logs with no ToDo at all (e.g. quick-logged from
+    // the Task Log page's "Standalone" option). Always rendered last,
+    // regardless of urgency/sort, since it's housekeeping, not planning.
+    const unlinkedLogs = wmTaskLogs.filter(l => !l.todo_id);
+
+    const unlinkedMatchesSearch =
+        !searchText ||
+        "unlinked".includes(searchText) ||
+        unlinkedLogs.some(l => (l.task_description || "").toLowerCase().includes(searchText));
+
+    if (unlinkedLogs.length > 0 && unlinkedMatchesSearch) {
+
+        grid.innerHTML +=
+            (wmSelectedMilestoneId === WM_UNLINKED_ID)
+                ? renderUnlinkedExpandedRow(unlinkedLogs)
+                : renderUnlinkedCard(unlinkedLogs);
+    }
+
     updateWorkMapSummary(realMilestoneCount, criticalCount);
 
     populateOpenEditPickers();
+}
+
+
+function renderUnlinkedCard(unlinkedLogs) {
+
+    const totalMinutes = unlinkedLogs.reduce((sum, l) => sum + (l.minutes_spent || 0), 0);
+
+    return `
+        <div class="wm-card wm-heat-neutral" onclick="selectMilestone('${WM_UNLINKED_ID}')">
+
+            <div class="wm-card-top">
+                <span class="badge-pill badge-status-not-started">Unlinked</span>
+            </div>
+
+            <div class="wm-card-name">📎 Unlinked Task Logs</div>
+            <div class="wm-card-context">Not tied to any ToDo</div>
+
+            <div class="wm-card-date-row">
+                <span class="wm-date-placeholder">Housekeeping — no urgency</span>
+            </div>
+
+            <div class="wm-card-stats-row" style="justify-content:center;">
+                <div class="wm-card-stat">
+                    <div class="wm-card-stat-value">${unlinkedLogs.length}</div>
+                    <div class="wm-card-stat-label">Unlinked Log(s)</div>
+                </div>
+                <div class="wm-card-stat">
+                    <div class="wm-card-stat-value">${formatMinutesAsHours(totalMinutes)}</div>
+                    <div class="wm-card-stat-label">Total</div>
+                </div>
+            </div>
+
+        </div>
+    `;
+}
+
+
+function renderUnlinkedExpandedRow(unlinkedLogs) {
+
+    const totalMinutes = unlinkedLogs.reduce((sum, l) => sum + (l.minutes_spent || 0), 0);
+
+    const sorted =
+        unlinkedLogs.slice().sort((a, b) => {
+
+                const dateCompare = (b.task_date || "").localeCompare(a.task_date || "");
+                if (dateCompare !== 0) return dateCompare;
+
+                if (!a.start_time && !b.start_time) return 0;
+                if (!a.start_time) return 1;
+                if (!b.start_time) return -1;
+
+                return b.start_time.localeCompare(a.start_time);
+            });
+
+    const logsHtml = sorted.map(log => renderLogRow(log)).join("");
+
+    const isAddingHere = (wmAddingLogForTodoId === WM_UNLINKED_ID);
+
+    const addLogSection =
+        isAddingHere
+            ? renderAddLogForm(WM_UNLINKED_ID)
+            : `<button type="button" class="wm-add-log-btn" onclick="showAddLogForm('${WM_UNLINKED_ID}')">+ Add Task Log</button>`;
+
+    return `
+        <div class="wm-expanded-row">
+
+            <div class="wm-card wm-card-selected wm-heat-neutral" onclick="selectMilestone('${WM_UNLINKED_ID}')">
+
+                <div class="wm-card-top">
+                    <span class="badge-pill badge-status-not-started">Unlinked</span>
+                </div>
+
+                <div class="wm-card-name">📎 Unlinked Task Logs</div>
+                <div class="wm-card-context">Not tied to any ToDo</div>
+
+                <div class="wm-card-stats-row" style="justify-content:center;">
+                    <div class="wm-card-stat">
+                        <div class="wm-card-stat-value">${unlinkedLogs.length}</div>
+                        <div class="wm-card-stat-label">Unlinked Log(s)</div>
+                    </div>
+                    <div class="wm-card-stat">
+                        <div class="wm-card-stat-value">${formatMinutesAsHours(totalMinutes)}</div>
+                        <div class="wm-card-stat-label">Total</div>
+                    </div>
+                </div>
+
+                <div class="wm-card-collapse-hint">Click to collapse</div>
+
+            </div>
+
+            <div class="wm-detail-panel">
+
+                <div class="wm-detail-panel-header">
+                    <div class="wm-detail-panel-title">Unlinked Task Logs</div>
+                    <a class="wm-open-detail-icon" href="workmap-detail.html?milestone_id=${WM_UNLINKED_ID}" title="Open full detail view">⤢</a>
+                </div>
+
+                <div class="wm-detail-panel-body">
+                    ${logsHtml}
+                    ${addLogSection}
+                </div>
+
+            </div>
+
+        </div>
+    `;
 }
 
 
@@ -541,7 +667,17 @@ function renderTodoBlock(todo) {
         wmTaskLogs
             .filter(l => l.todo_id === todo.todo_id)
             .slice()
-            .sort((a, b) => (b.task_date || "").localeCompare(a.task_date || ""));
+            .sort((a, b) => {
+
+                const dateCompare = (b.task_date || "").localeCompare(a.task_date || "");
+                if (dateCompare !== 0) return dateCompare;
+
+                if (!a.start_time && !b.start_time) return 0;
+                if (!a.start_time) return 1;
+                if (!b.start_time) return -1;
+
+                return b.start_time.localeCompare(a.start_time);
+            });
 
     const todoMinutes =
         logs.reduce((sum, l) => sum + (l.minutes_spent || 0), 0);
@@ -607,11 +743,16 @@ function renderLogRow(log) {
         return renderLogEditForm(log);
     }
 
+    const durationHtml =
+        (log.start_time && log.end_time)
+            ? `${formatMinutesAsHours(log.minutes_spent || 0)}<br><small style="font-weight:600; color:var(--text-muted);">[ ${formatTime(log.start_time)} - ${formatTime(log.end_time)} ]</small>`
+            : formatMinutesAsHours(log.minutes_spent || 0);
+
     return `
         <div class="wb-task-log-row">
             <div class="wb-task-log-date">${formatDate(log.task_date)}</div>
             <div class="wb-task-log-desc">${log.task_description || ""}</div>
-            <div class="wb-task-log-minutes">${formatMinutesAsHours(log.minutes_spent || 0)}</div>
+            <div class="wb-task-log-minutes">${durationHtml}</div>
             <div class="wm-row-actions">
                 <button type="button" class="wm-icon-btn" title="Edit log" onclick="editLogInline('${log.task_log_id}')">✏️</button>
                 <button type="button" class="wm-icon-btn wm-icon-btn-danger" title="Delete log" onclick="deleteLogInline('${log.task_log_id}')">🗑️</button>
@@ -682,7 +823,9 @@ function renderAddLogForm(todoId) {
         <div class="wm-add-log-form">
             <input type="date" id="wmNewLogDate_${todoId}" value="${getToday()}">
             <input type="text" id="wmNewLogDesc_${todoId}" placeholder="What did you do?">
-            <input type="number" id="wmNewLogMinutes_${todoId}" placeholder="Minutes" min="1">
+            <input type="time" id="wmNewLogStart_${todoId}" onchange="wmCalcNewLogTime('${todoId}')" title="Start time">
+            <input type="number" id="wmNewLogMinutes_${todoId}" placeholder="Minutes" min="1" onchange="wmCalcNewLogTime('${todoId}')">
+            <input type="time" id="wmNewLogEnd_${todoId}" onchange="wmCalcNewLogTime('${todoId}')" title="End time">
             <div class="wm-inline-edit-actions">
                 <button type="button" class="btn btn-primary" onclick="saveNewLog('${todoId}')">Save</button>
                 <button type="button" class="btn btn-secondary" onclick="cancelAddLog()">Cancel</button>
@@ -706,7 +849,18 @@ function renderLogEditForm(log) {
                 </div>
                 <div>
                     <label>Minutes</label>
-                    <input type="number" id="wmEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1">
+                    <input type="number" id="wmEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmCalcEditLogTime('${suffix}')">
+                </div>
+            </div>
+
+            <div class="wm-edit-field-row wm-edit-field-row-split">
+                <div>
+                    <label>Start</label>
+                    <input type="time" id="wmEditLogStart_${suffix}" value="${log.start_time || ""}" onchange="wmCalcEditLogTime('${suffix}')">
+                </div>
+                <div>
+                    <label>End</label>
+                    <input type="time" id="wmEditLogEnd_${suffix}" value="${log.end_time || ""}" onchange="wmCalcEditLogTime('${suffix}')">
                 </div>
             </div>
 
@@ -1029,6 +1183,12 @@ async function saveNewLog(todoId) {
     const date = document.getElementById(`wmNewLogDate_${todoId}`).value;
     const description = document.getElementById(`wmNewLogDesc_${todoId}`).value.trim();
     const minutes = parseInt(document.getElementById(`wmNewLogMinutes_${todoId}`).value, 10);
+    const startTime = document.getElementById(`wmNewLogStart_${todoId}`).value || null;
+    const endTime = document.getElementById(`wmNewLogEnd_${todoId}`).value || null;
+
+    // The Unlinked card reuses this same form with a sentinel "todoId" —
+    // that's a DOM-id suffix only, not a real ToDo, so it saves as null.
+    const realTodoId = (todoId === WM_UNLINKED_ID) ? null : todoId;
 
     if (!description || !minutes || minutes <= 0) {
         showError("Please add a description and minutes spent");
@@ -1038,10 +1198,13 @@ async function saveNewLog(todoId) {
     try {
 
         await insertData("task_log", {
-            todo_id: todoId,
+            todo_id: realTodoId,
+            activity_id: realTodoId || WM_FALLBACK_ACTIVITY_ID,
             task_date: date || getToday(),
             task_description: description,
             minutes_spent: minutes,
+            start_time: startTime,
+            end_time: endTime,
             created_by: getCurrentUser(),
             updated_by: getCurrentUser()
         });
@@ -1105,15 +1268,12 @@ async function saveLogEdit(taskLogId) {
     const date = document.getElementById(`wmEditLogDate_${taskLogId}`).value;
     const description = document.getElementById(`wmEditLogDesc_${taskLogId}`).value.trim();
     const minutes = parseInt(document.getElementById(`wmEditLogMinutes_${taskLogId}`).value, 10);
-    const todoId = document.getElementById(`wmEditLogTodo_${taskLogId}`).value;
+    const todoId = document.getElementById(`wmEditLogTodo_${taskLogId}`).value || null;
+    const startTime = document.getElementById(`wmEditLogStart_${taskLogId}`).value || null;
+    const endTime = document.getElementById(`wmEditLogEnd_${taskLogId}`).value || null;
 
     if (!description || !minutes || minutes <= 0) {
         showError("Please add a description and minutes spent");
-        return;
-    }
-
-    if (!todoId) {
-        showError("A task log must be mapped to a ToDo");
         return;
     }
 
@@ -1124,6 +1284,9 @@ async function saveLogEdit(taskLogId) {
             task_description: description,
             minutes_spent: minutes,
             todo_id: todoId,
+            activity_id: todoId || WM_FALLBACK_ACTIVITY_ID,
+            start_time: startTime,
+            end_time: endTime,
             updated_by: getCurrentUser()
         });
 
@@ -1167,6 +1330,7 @@ function populateWmLogTodoPicker(suffix, searchText) {
     const currentValue = select.value;
 
     select.innerHTML =
+        `<option value="">⭐ General / Standalone Task (No ToDo Link)</option>` +
         filtered
             .map(t => `<option value="${t.todo_id}">${t.milestone_name ? t.milestone_name + " → " : "(No milestone) → "}${t.todo_text}</option>`)
             .join("");
@@ -1207,13 +1371,75 @@ function updateWmLogTodoContext(suffix, todoId) {
     box.textContent =
         todo
             ? `${todo.portfolio_name || ""} | ${todo.project_name || ""} | ${todo.milestone_name || "No Milestone"} | ${todo.todo_text}`
-            : "—";
+            : "Standalone Entry";
 }
 
 
 // ======================================================
 // UTIL
 // ======================================================
+
+// ======================================================
+// TIME FIELD AUTO-CALC — mirrors Task Log page exactly:
+// Start+End -> Minutes, Start+Minutes -> End, End+Minutes -> Start.
+// ======================================================
+
+function wmApplyTimeCalc(startEl, endEl, minutesEl) {
+
+    if (!startEl || !endEl || !minutesEl) {
+        return;
+    }
+
+    const start = startEl.value;
+    const end = endEl.value;
+    const minutes = parseInt(minutesEl.value || 0);
+
+    if (start && end) {
+
+        minutesEl.value = Math.round(
+            (new Date(`2000-01-01T${end}`) - new Date(`2000-01-01T${start}`)) / 60000
+        );
+
+        return;
+    }
+
+    if (start && minutes > 0 && !end) {
+
+        const d = new Date(`2000-01-01T${start}`);
+        d.setMinutes(d.getMinutes() + minutes);
+        endEl.value = d.toTimeString().substring(0, 5);
+
+        return;
+    }
+
+    if (end && minutes > 0 && !start) {
+
+        const d = new Date(`2000-01-01T${end}`);
+        d.setMinutes(d.getMinutes() - minutes);
+        startEl.value = d.toTimeString().substring(0, 5);
+    }
+}
+
+
+function wmCalcNewLogTime(todoId) {
+
+    wmApplyTimeCalc(
+        document.getElementById(`wmNewLogStart_${todoId}`),
+        document.getElementById(`wmNewLogEnd_${todoId}`),
+        document.getElementById(`wmNewLogMinutes_${todoId}`)
+    );
+}
+
+
+function wmCalcEditLogTime(logId) {
+
+    wmApplyTimeCalc(
+        document.getElementById(`wmEditLogStart_${logId}`),
+        document.getElementById(`wmEditLogEnd_${logId}`),
+        document.getElementById(`wmEditLogMinutes_${logId}`)
+    );
+}
+
 
 function formatMinutesAsHours(minutes) {
 

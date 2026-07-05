@@ -1,4 +1,4 @@
-// AC v1.3 Pass 3 WORKMAP
+// AC v1.3 Pass 5 WORKMAP ENHANCEMENTS
 
 // ======================================================
 // Work Map — Detail Page
@@ -20,6 +20,8 @@ let wmdEditingLogId = null;
 
 const WMD_CLOSED_STATUSES = ["Completed", "Cancelled"];
 const WMD_STANDALONE_ID = "__standalone__";
+const WMD_UNLINKED_ID = "__unlinked__";
+const WMD_FALLBACK_ACTIVITY_ID = "00000000-0000-0000-0000-000000000000";
 
 
 document.addEventListener(
@@ -36,11 +38,16 @@ document.addEventListener(
 
         const urlParams = new URLSearchParams(window.location.search);
         const preselect = urlParams.get("milestone_id");
+        const preselectTodoId = urlParams.get("todo_id");
 
         renderMilestonePills();
 
         if (preselect) {
             selectDetailMilestone(preselect);
+        }
+
+        if (preselectTodoId) {
+            highlightTodoRow(preselectTodoId);
         }
     }
 );
@@ -85,7 +92,7 @@ async function loadWorkMapDetailData() {
     }
 
     wmdTaskLogs =
-        await getData("vw_task_log_details?todo_id=not.is.null");
+        await getData("vw_task_log_details");
 
     if (!Array.isArray(wmdTaskLogs)) {
         wmdTaskLogs = [];
@@ -254,7 +261,16 @@ function renderMilestonePills() {
         });
     }
 
-    if (milestoneList.length === 0) {
+    const unlinkedLogs = wmdTaskLogs.filter(l => !l.todo_id);
+
+    const unlinkedMatchesSearch =
+        !searchText ||
+        "unlinked".includes(searchText) ||
+        unlinkedLogs.some(l => (l.task_description || "").toLowerCase().includes(searchText));
+
+    const showUnlinkedPill = unlinkedLogs.length > 0 && unlinkedMatchesSearch;
+
+    if (milestoneList.length === 0 && !showUnlinkedPill) {
         container.innerHTML = `<span class="wmd-placeholder" style="height:auto;">No milestones match.</span>`;
         return;
     }
@@ -313,6 +329,20 @@ function renderMilestonePills() {
                 `;
             })
             .join("");
+
+    if (showUnlinkedPill) {
+
+        const activeClass =
+            (wmdSelectedMilestoneId === WMD_UNLINKED_ID) ? "active" : "";
+
+        container.innerHTML += `
+            <button type="button"
+                class="wmd-pill ${activeClass}"
+                onclick="selectDetailMilestone('${WMD_UNLINKED_ID}')">
+                📎 Unlinked Task Logs
+            </button>
+        `;
+    }
 }
 
 
@@ -329,6 +359,32 @@ function selectDetailMilestone(milestoneId) {
 }
 
 
+function highlightTodoRow(todoId) {
+
+    // renderDetailArea() runs synchronously above, so the row should
+    // already be in the DOM — but give the browser one paint cycle
+    // before scrolling, so scrollIntoView measures the final layout.
+    setTimeout(() => {
+
+        const row =
+            document.getElementById(`wmdTodoRow_${todoId}`);
+
+        if (!row) {
+            return;
+        }
+
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        row.classList.add("wm-todo-row-highlighted");
+
+        setTimeout(() => {
+            row.classList.remove("wm-todo-row-highlighted");
+        }, 2500);
+
+    }, 50);
+}
+
+
 // ======================================================
 // MAIN DETAIL AREA — full tree, fully expanded
 // ======================================================
@@ -336,6 +392,11 @@ function selectDetailMilestone(milestoneId) {
 function renderDetailArea() {
 
     const area = document.getElementById("wmdDetailArea");
+
+    if (wmdSelectedMilestoneId === WMD_UNLINKED_ID) {
+        renderUnlinkedDetailArea(area);
+        return;
+    }
 
     let milestone =
         wmdMilestones.find(m => m.milestone_id === wmdSelectedMilestoneId);
@@ -441,13 +502,88 @@ function renderDetailArea() {
 }
 
 
+function renderUnlinkedDetailArea(area) {
+
+    const unlinkedLogs = wmdTaskLogs.filter(l => !l.todo_id);
+
+    const totalMinutes = unlinkedLogs.reduce((sum, l) => sum + (l.minutes_spent || 0), 0);
+
+    const sorted =
+        unlinkedLogs.slice().sort((a, b) => {
+
+                const dateCompare = (b.task_date || "").localeCompare(a.task_date || "");
+                if (dateCompare !== 0) return dateCompare;
+
+                if (!a.start_time && !b.start_time) return 0;
+                if (!a.start_time) return 1;
+                if (!b.start_time) return -1;
+
+                return b.start_time.localeCompare(a.start_time);
+            });
+
+    const logsHtml =
+        sorted.length === 0
+            ? `<div class="wb-empty-state">No unlinked task logs.</div>`
+            : sorted.map(log => renderDetailLogRow(log)).join("");
+
+    const isAddingHere = (wmdAddingLogForTodoId === WMD_UNLINKED_ID);
+
+    const addLogSection =
+        isAddingHere
+            ? renderDetailAddLogForm(WMD_UNLINKED_ID)
+            : `<button type="button" class="wm-add-log-btn" onclick="showDetailAddLogForm('${WMD_UNLINKED_ID}')">+ Add Task Log</button>`;
+
+    area.innerHTML = `
+
+        <div class="wmd-detail-header">
+
+            <div>
+                <div class="wmd-detail-name">📎 Unlinked Task Logs</div>
+                <div class="wmd-detail-context">
+                    Not tied to any ToDo &nbsp;|&nbsp; <span class="badge-pill badge-status-not-started">Housekeeping</span>
+                </div>
+            </div>
+
+            <div class="wmd-detail-stats">
+                <div class="wmd-detail-stat">
+                    <div class="wmd-detail-stat-value">${unlinkedLogs.length}</div>
+                    <div class="wmd-detail-stat-label">Unlinked Logs</div>
+                </div>
+                <div class="wmd-detail-stat">
+                    <div class="wmd-detail-stat-value">${formatMinutesAsHoursDetail(totalMinutes)}</div>
+                    <div class="wmd-detail-stat-label">Total Logged</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="wb-tree-container">
+            ${logsHtml}
+            ${addLogSection}
+        </div>
+    `;
+
+    populateDetailOpenEditPickers();
+}
+
+
 function renderDetailTodoBlock(todo) {
 
     const logs =
         wmdTaskLogs
             .filter(l => l.todo_id === todo.todo_id)
             .slice()
-            .sort((a, b) => (b.task_date || "").localeCompare(a.task_date || ""));
+            .sort((a, b) => {
+
+                const dateCompare = (b.task_date || "").localeCompare(a.task_date || "");
+                if (dateCompare !== 0) return dateCompare;
+
+                if (!a.start_time && !b.start_time) return 0;
+                if (!a.start_time) return 1;
+                if (!b.start_time) return -1;
+
+                return b.start_time.localeCompare(a.start_time);
+            });
 
     const todoMinutes =
         logs.reduce((sum, l) => sum + (l.minutes_spent || 0), 0);
@@ -492,7 +628,7 @@ function renderDetailTodoBlock(todo) {
             : `<button type="button" class="wm-add-log-btn" onclick="showDetailAddLogForm('${todo.todo_id}')">+ Add Task Log</button>`;
 
     return `
-        <div class="wb-todo-row ${flagClass}" style="margin-left:0;">
+        <div class="wb-todo-row ${flagClass}" id="wmdTodoRow_${todo.todo_id}" style="margin-left:0;">
             ${headerHtml}
             ${editPanelHtml}
             <div class="wb-todo-body" style="display:block;">
@@ -510,11 +646,16 @@ function renderDetailLogRow(log) {
         return renderDetailLogEditForm(log);
     }
 
+    const durationHtml =
+        (log.start_time && log.end_time)
+            ? `${formatMinutesAsHoursDetail(log.minutes_spent || 0)}<br><small style="font-weight:600; color:var(--text-muted);">[ ${formatTime(log.start_time)} - ${formatTime(log.end_time)} ]</small>`
+            : formatMinutesAsHoursDetail(log.minutes_spent || 0);
+
     return `
         <div class="wb-task-log-row">
             <div class="wb-task-log-date">${formatDate(log.task_date)}</div>
             <div class="wb-task-log-desc">${log.task_description || ""}</div>
-            <div class="wb-task-log-minutes">${formatMinutesAsHoursDetail(log.minutes_spent || 0)}</div>
+            <div class="wb-task-log-minutes">${durationHtml}</div>
             <div class="wm-row-actions">
                 <button type="button" class="wm-icon-btn" title="Edit log" onclick="editDetailLogInline('${log.task_log_id}')">✏️</button>
                 <button type="button" class="wm-icon-btn wm-icon-btn-danger" title="Delete log" onclick="deleteDetailLogInline('${log.task_log_id}')">🗑️</button>
@@ -585,7 +726,9 @@ function renderDetailAddLogForm(todoId) {
         <div class="wm-add-log-form">
             <input type="date" id="wmdNewLogDate_${todoId}" value="${getToday()}">
             <input type="text" id="wmdNewLogDesc_${todoId}" placeholder="What did you do?">
-            <input type="number" id="wmdNewLogMinutes_${todoId}" placeholder="Minutes" min="1">
+            <input type="time" id="wmdNewLogStart_${todoId}" onchange="wmdCalcNewLogTime('${todoId}')" title="Start time">
+            <input type="number" id="wmdNewLogMinutes_${todoId}" placeholder="Minutes" min="1" onchange="wmdCalcNewLogTime('${todoId}')">
+            <input type="time" id="wmdNewLogEnd_${todoId}" onchange="wmdCalcNewLogTime('${todoId}')" title="End time">
             <div class="wm-inline-edit-actions">
                 <button type="button" class="btn btn-primary" onclick="saveDetailNewLog('${todoId}')">Save</button>
                 <button type="button" class="btn btn-secondary" onclick="cancelDetailAddLog()">Cancel</button>
@@ -609,7 +752,18 @@ function renderDetailLogEditForm(log) {
                 </div>
                 <div>
                     <label>Minutes</label>
-                    <input type="number" id="wmdEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1">
+                    <input type="number" id="wmdEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmdCalcEditLogTime('${suffix}')">
+                </div>
+            </div>
+
+            <div class="wm-edit-field-row wm-edit-field-row-split">
+                <div>
+                    <label>Start</label>
+                    <input type="time" id="wmdEditLogStart_${suffix}" value="${log.start_time || ""}" onchange="wmdCalcEditLogTime('${suffix}')">
+                </div>
+                <div>
+                    <label>End</label>
+                    <input type="time" id="wmdEditLogEnd_${suffix}" value="${log.end_time || ""}" onchange="wmdCalcEditLogTime('${suffix}')">
                 </div>
             </div>
 
@@ -913,6 +1067,12 @@ async function saveDetailNewLog(todoId) {
     const date = document.getElementById(`wmdNewLogDate_${todoId}`).value;
     const description = document.getElementById(`wmdNewLogDesc_${todoId}`).value.trim();
     const minutes = parseInt(document.getElementById(`wmdNewLogMinutes_${todoId}`).value, 10);
+    const startTime = document.getElementById(`wmdNewLogStart_${todoId}`).value || null;
+    const endTime = document.getElementById(`wmdNewLogEnd_${todoId}`).value || null;
+
+    // The Unlinked bucket reuses this same form with a sentinel "todoId" —
+    // that's a DOM-id suffix only, not a real ToDo, so it saves as null.
+    const realTodoId = (todoId === WMD_UNLINKED_ID) ? null : todoId;
 
     if (!description || !minutes || minutes <= 0) {
         showError("Please add a description and minutes spent");
@@ -922,10 +1082,13 @@ async function saveDetailNewLog(todoId) {
     try {
 
         await insertData("task_log", {
-            todo_id: todoId,
+            todo_id: realTodoId,
+            activity_id: realTodoId || WMD_FALLBACK_ACTIVITY_ID,
             task_date: date || getToday(),
             task_description: description,
             minutes_spent: minutes,
+            start_time: startTime,
+            end_time: endTime,
             created_by: getCurrentUser(),
             updated_by: getCurrentUser()
         });
@@ -989,15 +1152,12 @@ async function saveDetailLogEdit(taskLogId) {
     const date = document.getElementById(`wmdEditLogDate_${taskLogId}`).value;
     const description = document.getElementById(`wmdEditLogDesc_${taskLogId}`).value.trim();
     const minutes = parseInt(document.getElementById(`wmdEditLogMinutes_${taskLogId}`).value, 10);
-    const todoId = document.getElementById(`wmdEditLogTodo_${taskLogId}`).value;
+    const todoId = document.getElementById(`wmdEditLogTodo_${taskLogId}`).value || null;
+    const startTime = document.getElementById(`wmdEditLogStart_${taskLogId}`).value || null;
+    const endTime = document.getElementById(`wmdEditLogEnd_${taskLogId}`).value || null;
 
     if (!description || !minutes || minutes <= 0) {
         showError("Please add a description and minutes spent");
-        return;
-    }
-
-    if (!todoId) {
-        showError("A task log must be mapped to a ToDo");
         return;
     }
 
@@ -1008,6 +1168,9 @@ async function saveDetailLogEdit(taskLogId) {
             task_description: description,
             minutes_spent: minutes,
             todo_id: todoId,
+            activity_id: todoId || WMD_FALLBACK_ACTIVITY_ID,
+            start_time: startTime,
+            end_time: endTime,
             updated_by: getCurrentUser()
         });
 
@@ -1049,6 +1212,7 @@ function populateWmdLogTodoPicker(suffix, searchText) {
     const currentValue = select.value;
 
     select.innerHTML =
+        `<option value="">⭐ General / Standalone Task (No ToDo Link)</option>` +
         filtered
             .map(t => `<option value="${t.todo_id}">${t.milestone_name ? t.milestone_name + " → " : "(No milestone) → "}${t.todo_text}</option>`)
             .join("");
@@ -1089,7 +1253,68 @@ function updateWmdLogTodoContext(suffix, todoId) {
     box.textContent =
         todo
             ? `${todo.portfolio_name || ""} | ${todo.project_name || ""} | ${todo.milestone_name || "No Milestone"} | ${todo.todo_text}`
-            : "—";
+            : "Standalone Entry";
+}
+
+
+// ======================================================
+// TIME FIELD AUTO-CALC — mirrors Task Log page exactly.
+// ======================================================
+
+function wmdApplyTimeCalc(startEl, endEl, minutesEl) {
+
+    if (!startEl || !endEl || !minutesEl) {
+        return;
+    }
+
+    const start = startEl.value;
+    const end = endEl.value;
+    const minutes = parseInt(minutesEl.value || 0);
+
+    if (start && end) {
+
+        minutesEl.value = Math.round(
+            (new Date(`2000-01-01T${end}`) - new Date(`2000-01-01T${start}`)) / 60000
+        );
+
+        return;
+    }
+
+    if (start && minutes > 0 && !end) {
+
+        const d = new Date(`2000-01-01T${start}`);
+        d.setMinutes(d.getMinutes() + minutes);
+        endEl.value = d.toTimeString().substring(0, 5);
+
+        return;
+    }
+
+    if (end && minutes > 0 && !start) {
+
+        const d = new Date(`2000-01-01T${end}`);
+        d.setMinutes(d.getMinutes() - minutes);
+        startEl.value = d.toTimeString().substring(0, 5);
+    }
+}
+
+
+function wmdCalcNewLogTime(todoId) {
+
+    wmdApplyTimeCalc(
+        document.getElementById(`wmdNewLogStart_${todoId}`),
+        document.getElementById(`wmdNewLogEnd_${todoId}`),
+        document.getElementById(`wmdNewLogMinutes_${todoId}`)
+    );
+}
+
+
+function wmdCalcEditLogTime(logId) {
+
+    wmdApplyTimeCalc(
+        document.getElementById(`wmdEditLogStart_${logId}`),
+        document.getElementById(`wmdEditLogEnd_${logId}`),
+        document.getElementById(`wmdEditLogMinutes_${logId}`)
+    );
 }
 
 
