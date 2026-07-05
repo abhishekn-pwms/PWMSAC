@@ -2,6 +2,19 @@
 Date : Sun, 05-Jul-2026
 === === === === === ===
 
+Release PWMS AC v1.3 Pass 5 - WORKMAP ENHANCEMENTS
+
+------------------
+
+What's New
+Enahanced WorkMap & WorkBreakdown pages to include Standalone ToDos & Tasks. Supporting CRUD operations for Task Logs.
+
+** WORK MAP/BREAKDOWN ENHANCEMENTS (INCLUDE TODO 7 TASKS + CRUD FOR TASK LOGS)
+## <Comment Blocks>
+# "AC v1.3 Pass 5 WORKMAP ENHANCEMENTS"
+# "AC v1.3 Pass 5 WRKMPENHNCE"
+
+---------
 
 Release PWMS AC v1.3 Pass 4 - FOCUS DASHBOARD & COMMON FAB IMPLEMENTATION
 ------------------
@@ -15,9 +28,7 @@ Changed Focus Dashboard Queries & Clicks, Removed Activity Velocity & Implemente
 # "AC v1.3 Pass 4 FOCUSDASH"
 # "AC v1.3 Pass 4 CMNFAB"
 
-
 ---------
-
 
 Release PWMS AC v1.3 Pass 3 - WORK MAP/BREAKDOWN
 ------------------
