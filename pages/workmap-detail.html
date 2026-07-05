@@ -1,0 +1,87 @@
+<!-- AC v1.3 Pass 4 FOCUSDASH & CMNFAB -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Map Detail AC v1.3 Pass 4 FOCUSDASH & CMNFAB</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/workmap.css?v=8">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Work Map — Detail</div>
+                    <div class="page-header-actions">
+                        <a href="workmap.html" class="btn btn-secondary">Work Map</a>
+                        <a href="dashboard.html" class="btn btn-secondary">Dashboard</a>
+                    </div>
+                </div>
+
+                <div class="wmd-shell">
+
+                    <div class="wmd-selector-bar">
+                        <input type="search" id="wmdSearchBox" class="wmd-search-input" placeholder="Search milestones..." onkeyup="renderMilestonePills()">
+                        <div id="wmdMilestonePills" class="wmd-milestone-pills"></div>
+                    </div>
+
+                    <div id="wmdDetailArea" class="wmd-detail-area">
+                        <div class="wmd-placeholder">Select a milestone above to study it in detail.</div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="wmdMilestoneModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Milestone</h2>
+            <input type="hidden" id="wmdModalMilestoneId">
+
+            <div class="form-row">
+                <label>Status</label>
+                <select id="wmdModalStatus"></select>
+            </div>
+
+            <div class="form-row">
+                <label>Target Date</label>
+                <input type="date" id="wmdModalTargetDate">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveDetailMilestoneEdit()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('wmdMilestoneModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/workmap-detail.js"></script>
+    <script>initializeAppIcon();</script>
+
+    <!-- v1.3 PASS 4 COMMON FAB IMPLEMENTED -->
+    <div id="fab"></div>
+    
+</body>
+</html>

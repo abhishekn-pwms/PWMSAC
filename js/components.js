@@ -34,10 +34,17 @@ async function initializeLayout() {
         appUrl("/components/footer.html")
     );
 
+    await loadComponent(
+        "fab",
+        appUrl("/components/fab.html")
+    );
+
 
     loadCurrentUser();
 
     setActiveMenu();
+
+    setActiveFabItem();
 
 /* ==================================
    v1.1UI CALL MENU TOGGLE

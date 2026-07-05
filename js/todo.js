@@ -595,6 +595,7 @@ async function createInlineMilestone() {
         showError("Milestone Name and Project are required");
         return null;
     }
+    
     const payload = {
         milestone_name: name,
         project_id: projectId,
@@ -682,9 +683,12 @@ async function saveTodo() {
         if (!milestoneId) return;
     }
 
+    const fallbackActivityId = todoId || "00000000-0000-0000-0000-000000000000";
+
     // 🎯 FIX: Optional mapping. If value is "", it passes down as null to Supabase
     const payload = {
         milestone_id: milestoneId || null, 
+        activity_id: fallbackActivityId,
         todo_text: todoText,
         notes: getInputValue("notes"),
         status: getInputValue("todoStatus"),

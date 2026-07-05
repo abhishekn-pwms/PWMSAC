@@ -28,6 +28,30 @@ function setActiveMenu() {
         });
 }
 
+function setActiveFabItem() {
+
+    const currentPage =
+        window.location.pathname;
+
+    document
+        .querySelectorAll(".fab-sub-btn[data-page]")
+        .forEach(item => {
+
+            item.classList.remove("active-page-indicator");
+
+            const page =
+                item.dataset.page;
+
+            if (
+                page &&
+                currentPage.includes(page)
+            ) {
+                item.classList.add("active-page-indicator");
+            }
+
+        });
+}
+
 function toggleMenuGroup(id) {
 
     const group =

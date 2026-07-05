@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Breakdown AC v1.3 Pass 4 CMNFAB</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Work Breakdown v1.3</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="expandAllMilestones()">Expand All</button>
+                        <button class="btn btn-secondary" onclick="collapseAllMilestones()">Collapse All</button>
+                        <button class="btn btn-secondary" onclick="refreshWorkBreakdown()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <!-- ===================== FILTER BAR ===================== -->
+                <div class="wb-filter-bar">
+
+                    <div class="wb-filter-group">
+                        <label>Milestone Status</label>
+                        <select id="wbMilestoneStatusFilter" onchange="applyWorkBreakdownFilters()">
+                            <option value="Open" selected>Open (Not Started / In Progress / On Hold)</option>
+                            <option value="Completed">Completed / Cancelled</option>
+                            <option value="All">All</option>
+                        </select>
+                    </div>
+
+                    <div class="wb-filter-group">
+                        <label>Milestone</label>
+                        <select id="wbMilestonePicker" onchange="applyWorkBreakdownFilters()">
+                            <option value="All" selected>All Milestones</option>
+                        </select>
+                    </div>
+
+                    <div class="wb-filter-group wb-filter-group-wide">
+                        <label>Task Log Date Range</label>
+                        <div class="wb-date-preset-row">
+                            <button type="button" class="wb-preset-btn" data-preset="today" onclick="setWorkBreakdownDatePreset('today')">Today</button>
+                            <button type="button" class="wb-preset-btn" data-preset="week" onclick="setWorkBreakdownDatePreset('week')">This Week</button>
+                            <button type="button" class="wb-preset-btn active" data-preset="7days" onclick="setWorkBreakdownDatePreset('7days')">Last 7 Days</button>
+                            <button type="button" class="wb-preset-btn" data-preset="month" onclick="setWorkBreakdownDatePreset('month')">This Month</button>
+                            <button type="button" class="wb-preset-btn" data-preset="all" onclick="setWorkBreakdownDatePreset('all')">All Time</button>
+                            <button type="button" class="wb-preset-btn" data-preset="custom" onclick="setWorkBreakdownDatePreset('custom')">Custom</button>
+                        </div>
+                        <div id="wbCustomDateRow" class="wb-custom-date-row" style="display:none;">
+                            <input type="date" id="wbDateFrom" onchange="applyWorkBreakdownFilters()">
+                            <span>to</span>
+                            <input type="date" id="wbDateTo" onchange="applyWorkBreakdownFilters()">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ===================== SUMMARY STRIP ===================== -->
+                <div class="stat-strip">
+                    <div class="stat-chip" id="wbSummaryMilestones"></div>
+                    <div class="stat-chip" id="wbSummaryTodos"></div>
+                    <div class="stat-chip" id="wbSummaryTasks"></div>
+                    <div class="stat-chip" id="wbSummaryHours"></div>
+                </div>
+
+                <!-- ===================== TREE ===================== -->
+                <div id="wbTreeContainer" class="wb-tree-container">
+                    <div class="wb-empty-state">Loading work breakdown...</div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/workbreakdown.js"></script>
+    <script>initializeAppIcon();</script>
+
+    <!-- v1.3 PASS 4 COMMON FAB IMPLEMENTED -->
+    <div id="fab"></div>
+
+</body>
+</html>

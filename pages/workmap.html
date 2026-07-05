@@ -1,0 +1,83 @@
+<!-- AC v1.3 Pass 4 FOCUSDASH & CMNFAB -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Map AC v1.3 Pass 4 FOCUSDASH & CMNFAB</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/workmap.css?v=8">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Work Map</div>
+                    <div class="page-header-actions">
+                        <input type="search" id="wmSearchBox" class="search-box" placeholder="Search milestones..." onkeyup="renderWorkMap()" style="width:220px;">
+                        <button class="btn btn-secondary" onclick="refreshWorkMap()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div class="stat-strip">
+                    <div class="stat-chip" id="wmSummaryTotal"></div>
+                    <div class="stat-chip" id="wmSummaryCritical"></div>
+                </div>
+
+                <div id="wmCardGrid" class="wm-card-grid">
+                    <div class="wb-empty-state">Loading work map...</div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="wmMilestoneModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Milestone</h2>
+            <input type="hidden" id="wmModalMilestoneId">
+
+            <div class="form-row">
+                <label>Status</label>
+                <select id="wmModalStatus"></select>
+            </div>
+
+            <div class="form-row">
+                <label>Target Date</label>
+                <input type="date" id="wmModalTargetDate">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveMilestoneEdit()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('wmMilestoneModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/workmap.js"></script>
+    <script>initializeAppIcon();</script>
+
+    <!-- v1.3 PASS 4 COMMON FAB IMPLEMENTED -->
+    <div id="fab"></div>
+
+</body>
+</html>

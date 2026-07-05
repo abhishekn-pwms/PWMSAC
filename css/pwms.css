@@ -688,6 +688,87 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 .row-actions { display: flex; gap: 6px; }
 
 /* ==========================================================================
+   17. WORK BREAKDOWN (Deep Dive Planner)
+   Desktop-first nested tree: Milestone -> ToDo -> Task Log.
+   ========================================================================== */
+.wb-filter-bar {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+.wb-filter-group { min-width: 200px; }
+.wb-filter-group-wide { flex: 1 1 100%; }
+.wb-filter-group label { margin-bottom: 6px; }
+
+.wb-date-preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.wb-preset-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    height: auto;
+    width: auto;
+}
+.wb-preset-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.wb-preset-btn:hover:not(.active) { background: var(--surface-alt); }
+
+.wb-custom-date-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; max-width: 400px; }
+.wb-custom-date-row input { flex: 1; }
+.wb-custom-date-row span { color: var(--text-muted); font-size: 0.8rem; }
+
+.wb-tree-container { display: flex; flex-direction: column; gap: 10px; }
+
+.wb-empty-state { padding: 24px; text-align: center; color: var(--text-faint); background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius); }
+.wb-empty-state-small { padding: 10px 14px; font-size: 0.8rem; margin: 6px 0 6px 34px; text-align: left; }
+
+/* Milestone level */
+.wb-milestone-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.wb-milestone-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    background: var(--surface-alt);
+}
+.wb-milestone-header:hover { background: #e8edf3; }
+.wb-milestone-title-block { flex: 1; min-width: 0; }
+.wb-milestone-name { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+.wb-milestone-context { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+.wb-milestone-stats { display: flex; gap: 12px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+.wb-milestone-body { padding: 10px 16px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+
+/* ToDo level */
+.wb-todo-row { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-left: 22px; overflow: hidden; }
+.wb-todo-header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; background: var(--surface); }
+.wb-todo-header:hover { background: var(--surface-alt); }
+.wb-todo-text { flex: 1; font-size: 0.86rem; font-weight: 600; color: var(--text-main); }
+.wb-todo-stats { display: flex; gap: 10px; font-size: 0.74rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+.wb-todo-body { padding: 6px 12px 10px 12px; background: var(--background); display: flex; flex-direction: column; gap: 4px; }
+
+/* Task Log level */
+.wb-task-log-row { display: flex; align-items: center; gap: 12px; padding: 7px 10px 7px 34px; font-size: 0.8rem; border-bottom: 1px dashed var(--border); }
+.wb-task-log-row:last-child { border-bottom: none; }
+.wb-task-log-date { color: var(--text-muted); flex: 0 0 100px; }
+.wb-task-log-desc { flex: 1; color: var(--text-main); }
+.wb-task-log-minutes { flex: 0 0 auto; font-weight: 700; color: var(--primary); }
+
+/* Chevrons */
+.wb-chevron { display: inline-block; transition: transform 0.15s ease; color: var(--text-muted); font-size: 0.7rem; }
+.wb-chevron.open { transform: rotate(90deg); }
+.wb-chevron-small { font-size: 0.62rem; }
+
+/* ==========================================================================
    14c. STATUS / PRIORITY BADGES
    Real, working replacement for the old :contains() rules (invalid CSS,
    never fired). Applied via statusBadgeHtml()/priorityBadgeHtml() in app.js.

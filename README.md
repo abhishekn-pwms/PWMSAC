@@ -1,4 +1,38 @@
 === === === === === ===
+Date : Sun, 05-Jul-2026
+=== === === === === ===
+
+
+Release PWMS AC v1.3 Pass 4 - FOCUS DASHBOARD & COMMON FAB IMPLEMENTATION
+------------------
+
+What's New
+Changed Focus Dashboard Queries & Clicks, Removed Activity Velocity & Implemented Common FAB
+
+** FOCUS DASHBOARD REDO (Query & Links changed) || COMMON FAB IMPLEMENTATION
+## <Comment Blocks>
+# "AC v1.3 Pass 4 FOCUSDASH & CMNFAB"
+# "AC v1.3 Pass 4 FOCUSDASH"
+# "AC v1.3 Pass 4 CMNFAB"
+
+
+---------
+
+
+Release PWMS AC v1.3 Pass 3 - WORK MAP/BREAKDOWN
+------------------
+
+What's New
+Added WorkMap, with inline edits & WorkBreakdown
+
+** WORK MAP/BREAKDOWN
+## <Comment Blocks>
+# "AC v1.3 WORKMAP"
+# "AC v1.3 Pass 3 WORKMAP"
+
+
+
+=== === === === === ===
 Date : Sat, 04-Jul-2026
 === === === === === ===
 

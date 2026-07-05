@@ -2,6 +2,7 @@
 
 let dashboardMilestones = [];
 let dashboardTodos = [];
+let dashboardTaskLogs = [];
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -17,6 +18,7 @@ async function refreshFocusDashboard() {
         await Promise.all([
             loadDashboardMilestones(),
             loadDashboardTodos(),
+            loadDashboardTaskLogs(),
             loadDashboardPerformanceCounters()
         ]);
     } catch (error) {
@@ -53,7 +55,7 @@ async function loadDashboardMilestones() {
         const customBackground = isAtRisk ? "#fef2f2" : "var(--background)";
 
         container.innerHTML += `
-            <div class="stream-item" style="border-left-color: ${borderPriorityColor}; background: ${customBackground}; cursor:pointer;" onclick="window.location.href='workmap-detail.html?milestone_id=${item.milestone_id}'">
+            <div class="stream-item" style="border-left-color: ${borderPriorityColor}; background: ${customBackground};">
                 <div class="stream-item-top">
                     <span class="stream-item-title" style="${isAtRisk ? "color: var(--danger);" : ""}">${item.milestone_name}</span>
                     ${isAtRisk ? `<span class="dashboard-badge badge-alert">🚨 AT RISK</span>` : ""}
@@ -75,26 +77,11 @@ async function loadDashboardMilestones() {
 
 
 
-// 2. Fetch & Map Action Desk (Open/In Progress/Overdue ToDos)
+// 2. Fetch & Map Action Desk (Open/Overdue ToDos)
 async function loadDashboardTodos() {
-    // status=not.in.(...) — was status=eq.Open, which silently hid every
-    // "In Progress" ToDo from the Dashboard regardless of due date.
-    const data = await getData("vw_todo?status=not.in.(Completed,Cancelled)&order=due_date.asc");
+    const data = await getData("vw_todo?status=eq.Open&order=due_date.asc");
     dashboardTodos = Array.isArray(data) ? data : [];
-
-    // Needed to compute "gone cold" — started but no recent activity —
-    // distinct from Work Map's "never started at all" flag.
-    const logData = await getData("vw_task_log_details?todo_id=not.is.null");
-    const allLogs = Array.isArray(logData) ? logData : [];
-
-    const lastLoggedByTodo = {};
-    allLogs.forEach(log => {
-        const current = lastLoggedByTodo[log.todo_id];
-        if (!current || log.task_date > current) {
-            lastLoggedByTodo[log.todo_id] = log.task_date;
-        }
-    });
-
+    
     const container = document.getElementById("todoActionDesk");
     document.getElementById("countTodos").textContent = dashboardTodos.length;
     document.getElementById("summaryTodos").textContent = dashboardTodos.length;
@@ -109,20 +96,6 @@ async function loadDashboardTodos() {
     const urgentItems = dashboardTodos.filter(t => t.due_date && t.due_date <= todayStr);
     const upcomingItems = dashboardTodos.filter(t => !t.due_date || t.due_date > todayStr);
 
-    const GONE_COLD_DAYS = 7;
-
-    function goneColdBadge(todoId) {
-        const lastDate = lastLoggedByTodo[todoId];
-        if (!lastDate) {
-            return "";
-        }
-        const daysSince = Math.floor((new Date(todayStr) - new Date(lastDate)) / (1000 * 60 * 60 * 24));
-        if (daysSince >= GONE_COLD_DAYS) {
-            return `<span style="color:var(--warning); font-weight:bold;">🥶 Inactive ${daysSince}d</span>`;
-        }
-        return "";
-    }
-
     let html = "";
 
     // Render Section A: Urgent Tasks
@@ -132,17 +105,15 @@ async function loadDashboardTodos() {
     } else {
         urgentItems.forEach(item => {
             const isOverdue = item.due_date < todayStr;
-            const detailUrl = `workmap-detail.html?milestone_id=${item.milestone_id || "__standalone__"}&todo_id=${item.todo_id}`;
             html += `
-                <div class="stream-item" style="border-left-color: var(--danger); margin-bottom:6px; cursor:pointer;" onclick="window.location.href='${detailUrl}'">
+                <div class="stream-item" style="border-left-color: var(--danger); margin-bottom:6px;">
                     <div class="stream-item-top">
-                        <span class="stream-item-title">${item.todo_text}</span>
-                        <span class="stream-log-action" onclick="quickLogToDo('${item.todo_id}', '${item.todo_text.replace(/'/g, "\\'")}')">⏱️ Log</span>
+                        <span class="stream-item-title" onclick="window.location.href='todo.html'">${item.todo_text}</span>
+                        <span class="stream-log-action" onclick="quickLogToDo('${item.todo_id}', '${item.todo_text.replace(/'/g, "\\'")}', '${item.activity_id}')">⏱️ Log</span>
                     </div>
-                    <div class="item-meta">
-                        <span>🎯 ${item.milestone_name || "Standalone"}</span>
+                    <div class="item-meta" onclick="window.location.href='todo.html'">
+                        <span>⚡ ${item.activity_name}</span>
                         <span style="color:var(--danger); font-weight:bold;">${isOverdue ? "⚠️ OVERDUE" : "Due Today"}</span>
-                        ${goneColdBadge(item.todo_id)}
                     </div>
                 </div>
             `;
@@ -154,17 +125,15 @@ async function loadDashboardTodos() {
         html += `<div style="font-weight:700; font-size:0.75rem; color:var(--text-faint); margin: 12px 0 6px 0;">📅 UPCOMING & BACKLOG</div>`;
         upcomingItems.forEach(item => {
             const dateDisplayLabel = item.due_date ? formatDate(item.due_date) : "No Due Date";
-            const detailUrl = `workmap-detail.html?milestone_id=${item.milestone_id || "__standalone__"}&todo_id=${item.todo_id}`;
             html += `
-                <div class="stream-item" style="border-left-color: var(--primary); margin-bottom:6px; cursor:pointer;" onclick="window.location.href='${detailUrl}'">
+                <div class="stream-item" style="border-left-color: var(--primary); margin-bottom:6px;">
                     <div class="stream-item-top">
-                        <span class="stream-item-title">${item.todo_text}</span>
-                        <span class="stream-log-action" onclick="quickLogToDo('${item.todo_id}', '${item.todo_text.replace(/'/g, "\\'")}')">⏱️ Log</span>
+                        <span class="stream-item-title" onclick="window.location.href='todo.html'">${item.todo_text}</span>
+                        <span class="stream-log-action" onclick="quickLogToDo('${item.todo_id}', '${item.todo_text.replace(/'/g, "\\'")}', '${item.activity_id}')">⏱️ Log</span>
                     </div>
-                    <div class="item-meta">
-                        <span>🎯 ${item.milestone_name || "Standalone"}</span>
+                    <div class="item-meta" onclick="window.location.href='todo.html'">
+                        <span>⚡ ${item.activity_name}</span>
                         <span>${dateDisplayLabel}</span>
-                        ${goneColdBadge(item.todo_id)}
                     </div>
                 </div>
             `;
@@ -177,7 +146,34 @@ async function loadDashboardTodos() {
 
 
 
-// 3. Load Quick Summary performance metrics directly using the calculation structures from review.js
+// 3. Fetch & Map Velocity Track Stream (Recent Task Log Entries)
+async function loadDashboardTaskLogs() {
+    // Accesses your vw_task_log_details structural stack view directly
+    const data = await getData("vw_task_log_details?limit=5");
+    dashboardTaskLogs = Array.isArray(data) ? data : [];
+    
+    const grid = document.getElementById("taskLogStream");
+    grid.innerHTML = "";
+
+    if (dashboardTaskLogs.length === 0) {
+        grid.innerHTML = `<tr><td colspan="4" class="empty-state">No tasks logged recently.</td></tr>`;
+        return;
+    }
+
+    dashboardTaskLogs.forEach(item => {
+        const timeBounds = item.start_time ? `[ ${formatTime(item.start_time)} - ${formatTime(item.end_time || "")} ]` : "";
+        grid.innerHTML += `
+            <tr>
+                <td><strong>${formatDate(item.task_date)}</strong><br><small style="color:#64748b;">${timeBounds}</small></td>
+                <td style="white-space:normal; font-weight:500;">${item.task_description}</td>
+                <td style="color:var(--text-muted); font-size:0.78rem;">${item.activity_name}<br><small>> ${item.project_name}</small></td>
+                <td><span class="task-duration">${item.minutes_spent || 0} mins</span></td>
+            </tr>
+        `;
+    });
+}
+
+// 4. Load Quick Summary performance metrics directly using the calculation structures from review.js
 async function loadDashboardPerformanceCounters() {
     const data = await getData("vw_review_time_summary");
     if (Array.isArray(data) && data.length > 0) {
@@ -187,13 +183,14 @@ async function loadDashboardPerformanceCounters() {
 }
 
 
-// Intercepts a ToDo item and forwards it straight to your Task Log popup template
-function quickLogToDo(todoId, todoText) {
+// 🚀 NEW: Intercepts a ToDo item and forwards it straight to your Task Log popup template
+function quickLogToDo(todoId, todoText, activityId) {
     if (window.event) {
         window.event.stopPropagation(); // Prevents clicking the row from opening todo.html
     }
     sessionStorage.setItem("QUICK_LOG_DESC", `Action Taken: ${todoText}`);
     sessionStorage.setItem("QUICK_LOG_TODO_ID", todoId);
+    sessionStorage.setItem("QUICK_LOG_ACTIVITY", activityId);
     window.location.href = "task-log.html?action=new";
 }
 
