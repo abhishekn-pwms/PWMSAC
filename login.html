@@ -1,8 +1,10 @@
+<!-- AC v1.3 Pass 7 LOGINPG -->
+
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>PWMS AC Login</title>
+    <title>PWMS AC Login Pass 7</title>
 
     <link rel="stylesheet" href="css/pwms.css">
 
@@ -20,54 +22,26 @@
 
 <body class="login-page">
 
-    <div class="login-container" style="width:650px; text-align:center;">
+    <div class="login-container">
 
-        <font style="font-family:calibri;font-size:60px;color:brown;font-weight:bold;">
-            PWMS AC
-        </font>
-        <hr>
-        </hr>
-
-        </br>
-        </br>
-
-        <font style="font-family:calibri;font-size:31px;color:teal;font-weight:bold;">
-            ---------------------------------------------
-            </br>
-            Personal Work Management System AC
-            </br>
-            ---------------------------------------------
-            </br>
-        </font>
-
-        <p>
-        </p>
-
-        <font style="font-family:verdana;font-size:27px;color:grey;font-weight:bold;">
-            |   Abhi   |
-        </font>
-
-        <p>
-        </p>
+        <h1>PWMS AC</h1>
+        <p>Personal Work Management System</p>
 
         <div class="login-form">
 
-        <button
-            style="
-                height:100px;
-                border-color:blue;
-                border-width:5px;
-                font-family:calibri;
-                font-weight:bold;
-                font-size:40px;
-                display:center;"
-            onclick="login()">
-
-            Sign in with Google
-
-        </button>
+            <button class="btn-google-signin" onclick="login()">
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h11.8c-.5 2.6-2 4.9-4.3 6.4v5.3h6.9c4-3.7 6.7-9.2 6.7-16.2z"/>
+                    <path fill="#34A853" d="M24 46c5.9 0 10.8-1.9 14.4-5.3l-6.9-5.3c-1.9 1.3-4.4 2.1-7.5 2.1-5.8 0-10.7-3.9-12.4-9.1H4.5v5.5C8.1 41 15.4 46 24 46z"/>
+                    <path fill="#FBBC05" d="M11.6 28.4c-.4-1.3-.7-2.7-.7-4.4s.3-3.1.7-4.4v-5.5H4.5C3 17 2 20.3 2 24s1 7 4.5 9.9z"/>
+                    <path fill="#EA4335" d="M24 10.7c3.2 0 6 1.1 8.3 3.3l6.2-6.2C34.8 4.3 29.9 2 24 2 15.4 2 8.1 7 4.5 14.1l7.1 5.5c1.7-5.2 6.6-8.9 12.4-8.9z"/>
+                </svg>
+                Sign in with Google
+            </button>
 
             <div id="errorMessage"></div>
+
+            <text class="login-workspace-tag">Abhi's workspace</text>
 
         </div>
 
