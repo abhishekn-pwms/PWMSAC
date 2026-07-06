@@ -1,4 +1,4 @@
-// PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS
+// AC v1.3 Pass 6 DTTMPOLSH
 
 let dashboardMilestones = [];
 let dashboardTodos = [];
@@ -60,7 +60,7 @@ async function loadDashboardMilestones() {
                 </div>
                 <div class="item-meta">
                     <span>${item.portfolio_name} | ${item.project_name}</span>
-                    <span style="font-weight:600;">📅 ${formatDate(item.target_date)}</span>
+                    <span style="font-weight:600;">📅 ${formatDateWithDay(item.target_date)}</span>
                 </div>
             </div>
         `;
@@ -153,7 +153,7 @@ async function loadDashboardTodos() {
     if (upcomingItems.length > 0) {
         html += `<div style="font-weight:700; font-size:0.75rem; color:var(--text-faint); margin: 12px 0 6px 0;">📅 UPCOMING & BACKLOG</div>`;
         upcomingItems.forEach(item => {
-            const dateDisplayLabel = item.due_date ? formatDate(item.due_date) : "No Due Date";
+            const dateDisplayLabel = item.due_date ? formatDateWithDay(item.due_date) : "No Due Date";
             const detailUrl = `workmap-detail.html?milestone_id=${item.milestone_id || "__standalone__"}&todo_id=${item.todo_id}`;
             html += `
                 <div class="stream-item" style="border-left-color: var(--primary); margin-bottom:6px; cursor:pointer;" onclick="window.location.href='${detailUrl}'">

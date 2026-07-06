@@ -1,4 +1,4 @@
-// AC v1.3 Pass 5 WORKMAP ENHANCEMENTS
+// AC v1.3 Pass 6 DTTMPOLSH
 
 // ======================================================
 // Work Map — Detail Page
@@ -601,6 +601,7 @@ function renderDetailTodoBlock(todo) {
         <div class="wb-todo-header" style="cursor:default;">
             <div class="wb-todo-text">${todo.todo_text}</div>
             ${statusBadgeHtml(todo.status)}
+            ${todo.due_date ? `<span style="font-size:0.76rem; color:var(--text-muted); white-space:nowrap;">📅 ${formatDate(todo.due_date)}</span>` : ""}
             <div class="wb-todo-stats">
                 <span>${logs.length} log(s)</span>
                 <span>${formatMinutesAsHoursDetail(todoMinutes)}</span>
@@ -653,7 +654,7 @@ function renderDetailLogRow(log) {
 
     return `
         <div class="wb-task-log-row">
-            <div class="wb-task-log-date">${formatDate(log.task_date)}</div>
+            <div class="wb-task-log-date">${formatDateWithDay(log.task_date)}</div>
             <div class="wb-task-log-desc">${log.task_description || ""}</div>
             <div class="wb-task-log-minutes">${durationHtml}</div>
             <div class="wm-row-actions">
@@ -722,10 +723,17 @@ function renderDetailTodoEditForm(todo) {
 
 function renderDetailAddLogForm(todoId) {
 
+    const relatedTodo = wmdTodos.find(t => t.todo_id === todoId);
+
+    const defaultDesc =
+        relatedTodo
+            ? `Action Taken: ${relatedTodo.todo_text}`
+            : "Action Taken: ";
+
     return `
         <div class="wm-add-log-form">
             <input type="date" id="wmdNewLogDate_${todoId}" value="${getToday()}">
-            <input type="text" id="wmdNewLogDesc_${todoId}" placeholder="What did you do?">
+            <input type="text" id="wmdNewLogDesc_${todoId}" placeholder="What did you do?" value="${defaultDesc.replace(/"/g, "&quot;")}">
             <input type="time" id="wmdNewLogStart_${todoId}" onchange="wmdCalcNewLogTime('${todoId}')" title="Start time">
             <input type="number" id="wmdNewLogMinutes_${todoId}" placeholder="Minutes" min="1" onchange="wmdCalcNewLogTime('${todoId}')">
             <input type="time" id="wmdNewLogEnd_${todoId}" onchange="wmdCalcNewLogTime('${todoId}')" title="End time">
@@ -1324,5 +1332,7 @@ function formatMinutesAsHoursDetail(minutes) {
         return "0h";
     }
 
-    return `${(minutes / 60).toFixed(1)}h`;
+    const hours = Math.round((minutes / 60) * 100) / 100;
+
+    return `${hours}h`;
 }
