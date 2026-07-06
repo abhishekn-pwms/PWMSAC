@@ -1,4 +1,21 @@
 === === === === === ===
+Date : Mon, 06-Jul-2026
+=== === === === === ===
+
+Release PWMS AC v1.3 Pass 6 - POLISH FOR DASHBOARD & WORKMAP PAGES
+------------------
+
+What's New
+Polish: consistent "ddd, dd-mmm-yyyy" dates on Dashboard & WorkMap task logs, ToDo due dates now visible on WorkMap bars, precise fractional hours (0.75h/1.25h), default "Action Taken:" text on new logs, corrected task log sort order (latest start time first, blanks last).
+
+** TIME FIELDS + DATE/HOUR POLISH
+## <Comment Blocks>
+# "AC v1.3 Pass 6 DATETIMEPOLISH"
+# "AC v1.3 Pass 6 DTTMPOLSH"
+
+
+
+=== === === === === ===
 Date : Sun, 05-Jul-2026
 === === === === === ===
 
