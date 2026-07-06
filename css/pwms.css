@@ -1,4 +1,4 @@
-/* AC v1.3 Pass 6 DTTMPOLSH */
+/* AC v1.3 Pass 7 LOGINPG */
 
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
@@ -792,9 +792,48 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     .field-hint { text-align: left; }
 }
 
+
+
 /* ==========================================================================
    15. LOGIN PAGE
    ========================================================================== */
+.login-page { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 16px; }
+.login-container { width: 600px; max-width: 100%; background: rgba(184, 227, 213, 0.356); padding: 44px 36px; border-radius: var(--radius); box-shadow: var(--shadow-md); }
+.login-container h1 { text-align: center; margin-bottom: 12px; font-size: 3rem; }
+.login-container p { text-align: center; color: var(--text-muted); margin-bottom: 34px; font-size: 1.7rem; }
+.login-form { display: flex; flex-direction: column; gap: 10px; }
+.login-form button { margin-top: 10px; padding: 12px; cursor: pointer; }
+#errorMessage { color: var(--danger-strong); margin-top: 10px; }
+
+.btn-google-signin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    height: 100px;
+    background: var(--surface); /* original background: var(--surface);*/
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-google-signin:hover { background: rgba(71, 81, 185, 0.356); box-shadow: var(--shadow-sm); }
+.btn-google-signin svg { width: 22px; height: 22px; }
+
+.login-workspace-tag {
+    text-align: center;
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    margin-top: 22px;
+}
+
+
+/* PREVIOUS LOGIN PAGE CSS */
+/*
 .login-page { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 16px; }
 .login-container { width: 400px; max-width: 100%; background: var(--surface); padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow-md); }
 .login-container h1 { text-align: center; margin-bottom: 10px; }
@@ -802,6 +841,9 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 .login-form { display: flex; flex-direction: column; gap: 10px; }
 .login-form button { margin-top: 10px; padding: 12px; cursor: pointer; }
 #errorMessage { color: var(--danger-strong); margin-top: 10px; }
+*/
+
+
 
 /* ==========================================================================
    15. MOBILE RESPONSIVE OVERRIDES
