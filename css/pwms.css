@@ -1,4 +1,4 @@
-/* AC v1.2 - REMV ACTVTY */
+/* AC v1.3 Pass 6 DTTMPOLSH */
 
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
@@ -759,7 +759,7 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 /* Task Log level */
 .wb-task-log-row { display: flex; align-items: center; gap: 12px; padding: 7px 10px 7px 34px; font-size: 0.8rem; border-bottom: 1px dashed var(--border); }
 .wb-task-log-row:last-child { border-bottom: none; }
-.wb-task-log-date { color: var(--text-muted); flex: 0 0 100px; }
+.wb-task-log-date { color: var(--text-muted); flex: 0 0 150px; }
 .wb-task-log-desc { flex: 1; color: var(--text-main); }
 .wb-task-log-minutes { flex: 0 0 auto; font-weight: 700; color: var(--primary); }
 
