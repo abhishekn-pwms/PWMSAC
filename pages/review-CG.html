@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Review Reporting AC v1.3 Pass 4 CMNFAB</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <style>
+        /* Forces strict single-row execution across summary components */
+        .summary-horizontal-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+        .summary-horizontal-row .form-card {
+            flex: 1;
+            margin-bottom: 0;
+            padding: 8px;
+            text-align: center;
+            min-width: 0; /* Prevents text elements from breaking grid blocks */
+        }
+        .summary-horizontal-row .form-card div {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .summary-horizontal-row h2 {
+            font-size: 1.1rem;
+            margin-top: 2px;
+        }
+        .section-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin: 14px 0 8px 0;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-layout">
+        <div id="header"></div>
+
+        <div class="app-body-container">
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Reviews (Reporting & Analysis) AC v1.3</div>
+                    <button class="btn btn-primary" onclick="loadReviewData()">Refresh</button>
+                </div>
+
+                <div class="section-header">Activity Summary</div>
+                <div class="summary-horizontal-row">
+                    <div class="form-card">
+                        <div>Open</div>
+                        <h2 id="openActivities">0</h2>
+                    </div>
+                    <div class="form-card">
+                        <div>Progress</div>
+                        <h2 id="inProgressActivities">0</h2>
+                    </div>
+                    <div class="form-card">
+                        <div>Done</div>
+                        <h2 id="completedActivities">0</h2>
+                    </div>
+                    <div class="form-card">
+                        <div>Overdue</div>
+                        <h2 id="overdueActivities">0</h2>
+                    </div>
+                </div>
+
+                <div class="section-header">Time Summary</div>
+                <div class="summary-horizontal-row">
+                    <div class="form-card">
+                        <div>Today</div>
+                        <h2 id="todayHours">0.0h</h2>
+                    </div>
+                    <div class="form-card">
+                        <div>This Week</div>
+                        <h2 id="weekHours">0.0h</h2>
+                    </div>
+                    <div class="form-card">
+                        <div>This Month</div>
+                        <h2 id="monthHours">0.0h</h2>
+                    </div>
+                </div>
+
+                <div class="section-header">Time By Portfolio</div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Portfolio</th>
+                                <th>Hours</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolioTimeGrid"></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header">Open Activities</div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Activity</th>
+                                <th>Status</th>
+                                <th>Target Date</th>
+                                <th>Context</th>
+                            </tr>
+                        </thead>
+                        <tbody id="openActivitiesGrid"></tbody>
+                    </table>
+                </div>
+
+                <div class="section-header">Recent Work</div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Task Description</th>
+                                <th>Activity</th>
+                                <th>Minutes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentLogsGrid"></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="footer"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/review.js"></script>
+    <script>initializeAppIcon();</script>
+
+    <!-- v1.3 PASS 4 COMMON FAB IMPLEMENTED -->
+    <div id="fab"></div>
+
+</body>
+</html>
