@@ -1,0 +1,107 @@
+/* AC v1.4 Pass 4 UPDTPREP */
+
+/* ==========================================================================
+   UPDATE PREP — Prompt assembly for Manager/CSAIO updates.
+   References design tokens from pwms.css and reuses wd-range-bar /
+   wd-preset-btn from workdigest.css.
+   ========================================================================== */
+
+.up-format-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.up-format-tab {
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    height: auto;
+    width: auto;
+}
+.up-format-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.up-format-tab:hover:not(.active) { background: var(--surface-alt); }
+
+.up-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.up-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.up-panel-hint { font-size: 0.72rem; font-weight: 400; color: var(--text-faint); font-style: italic; }
+
+.up-panel textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    resize: vertical;
+    color: var(--text-main);
+}
+
+#upGeneratedPrompt, #upSpokenPrompt { background: var(--surface-alt); font-family: monospace; font-size: 0.78rem; }
+
+.up-template-controls {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+}
+
+.up-template-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 220px; }
+.up-template-field label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
+.up-template-field select { width: 100%; }
+
+.up-panel-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+.up-section-divider {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 22px 0 12px;
+    padding-top: 14px;
+    border-top: 2px solid var(--border);
+}
+
+/* Compact single-row date bar — scoped override, doesn't touch
+   workdigest.css or the Work Digest page's own date bar. */
+.up-range-bar-oneline { flex-wrap: nowrap; overflow-x: auto; }
+.up-range-bar-oneline .wd-range-field { flex-direction: row; align-items: center; gap: 6px; white-space: nowrap; }
+.up-range-bar-oneline .wd-range-field label { margin: 0; }
+.up-range-bar-oneline .wd-range-note { white-space: nowrap; }
+
+/* Side-by-side field pairs */
+.up-pair-row { display: flex; gap: 12px; align-items: stretch; }
+.up-pair-half { flex: 1; min-width: 0; margin-bottom: 12px; }
+
+.up-save-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+.up-last-saved { font-size: 0.76rem; color: var(--text-faint); }
+
+@media (max-width: 900px) {
+    .up-pair-row { flex-direction: column; }
+}

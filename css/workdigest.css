@@ -1,0 +1,137 @@
+/* ==========================================================================
+   WORK DIGEST — Milestone-grouped reporting feed for a date range.
+   Card grid (collapsed) + full-width in-place expansion, same mechanic
+   as Work Map's card grid. References design tokens from pwms.css.
+   ========================================================================== */
+
+.wd-range-bar {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.wd-range-field { display: flex; flex-direction: column; gap: 4px; }
+.wd-range-field label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+
+.wd-range-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.wd-preset-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    height: auto;
+    width: auto;
+}
+.wd-preset-btn:hover { background: var(--surface-alt); }
+
+.wd-range-note { font-size: 0.76rem; color: var(--text-faint); font-style: italic; margin-left: auto; align-self: center; }
+
+/* ---------------- Card grid (collapsed state) ---------------- */
+
+.wd-digest-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px;
+    align-items: start;
+}
+
+.wd-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-left-width: 4px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease;
+}
+.wd-card:hover { box-shadow: var(--shadow-md); }
+
+.wd-card-active { border-left-color: var(--success); }
+.wd-card-quiet { border-left-color: var(--border); }
+.wd-card-no-movement { border-left-color: var(--warning); background: var(--warning-bg); }
+
+.wd-card-name { font-size: 0.86rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; line-height: 1.25; }
+.wd-card-context { font-size: 0.72rem; color: var(--text-faint); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.wd-card-stats-row { display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding-top: 8px; }
+.wd-card-stat { text-align: center; }
+.wd-card-stat-value { font-size: 0.92rem; font-weight: 800; color: var(--text-main); }
+.wd-card-stat-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-faint); }
+
+.wd-card-no-movement-tag { text-align: center; border-top: 1px solid var(--warning); padding-top: 8px; font-size: 0.72rem; font-weight: 700; color: var(--warning); }
+
+.wd-card-collapse-hint { text-align: center; font-size: 0.66rem; color: var(--text-faint); margin-top: 8px; }
+
+/* ---------------- Expanded card (spans full grid row) ---------------- */
+
+.wd-expanded-card {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+.wd-expanded-card.wd-card-no-movement { border-left-color: var(--warning); }
+
+.wd-expanded-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    background: var(--surface-alt);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+}
+.wd-expanded-name { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+.wd-expanded-context { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.wd-expanded-tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.wd-collapse-link { font-size: 0.76rem; color: var(--text-faint); white-space: nowrap; }
+
+.wd-tag-no-movement { font-size: 0.7rem; font-weight: 700; color: var(--warning); background: var(--surface); border: 1px solid var(--warning); border-radius: var(--radius-pill); padding: 2px 9px; }
+
+.wd-expanded-body { padding: 14px 16px; }
+
+.wd-section { margin-bottom: 12px; }
+.wd-section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-faint); letter-spacing: 0.03em; margin-bottom: 6px; }
+
+.wd-log-line { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; border-bottom: 1px dashed var(--border); font-size: 0.85rem; flex-wrap: wrap; }
+.wd-log-line:last-child { border-bottom: none; }
+.wd-log-date { flex: 0 0 130px; color: var(--text-muted); font-size: 0.78rem; }
+.wd-log-desc { flex: 1; min-width: 200px; color: var(--text-main); }
+.wd-log-todo-tag { font-size: 0.7rem; color: var(--primary); background: var(--surface-alt); border-radius: var(--radius-pill); padding: 2px 8px; white-space: nowrap; }
+
+.wd-next-item { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 0.85rem; color: var(--text-main); }
+.wd-next-due { color: var(--text-muted); font-size: 0.76rem; white-space: nowrap; }
+.wd-next-empty { font-size: 0.8rem; color: var(--text-faint); font-style: italic; }
+
+.wd-historical-toggle {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 8px 0 0;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+}
+.wd-historical-toggle:hover { color: var(--primary); }
+
+.wd-historical-body { margin-top: 6px; opacity: 0.85; }
+
+@media (max-width: 700px) {
+    .wd-digest-list { grid-template-columns: 1fr; }
+}

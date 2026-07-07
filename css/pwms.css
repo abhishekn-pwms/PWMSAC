@@ -1,4 +1,4 @@
-/* AC v1.3 Pass 7 LOGINPG */
+/* AC v1.4 Pass 4 UPDTPREP */
 
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
@@ -45,7 +45,7 @@
     /* Text */
     --text-main: #0f172a;
     --text-muted: #475569;
-    --text-faint: #94a3b8;
+    --text-faint: #7a8699;
 
     /* Layout */
     --sidebar-width: 240px;
