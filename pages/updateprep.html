@@ -1,0 +1,170 @@
+<!-- AC v1.4 Pass 4 UPDTPREP -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Prep AC v1.4 Pass 4</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/workdigest.css">
+    <link rel="stylesheet" href="../css/updateprep.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Update Prep</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="refreshUpdatePrep()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div class="up-format-tabs">
+                    <button type="button" class="up-format-tab active" data-format="manager" onclick="setUpdatePrepFormat('manager')">Manager Update</button>
+                    <button type="button" class="up-format-tab" data-format="csaio" onclick="setUpdatePrepFormat('csaio')">CSAIO Update</button>
+                </div>
+
+                <div class="wd-range-bar up-range-bar-oneline">
+                    <div class="wd-range-field">
+                        <label>From</label>
+                        <input type="date" id="upFromDate" onchange="onUpdatePrepPeriodChanged()">
+                    </div>
+                    <div class="wd-range-field">
+                        <label>To</label>
+                        <input type="date" id="upToDate" onchange="onUpdatePrepPeriodChanged()">
+                    </div>
+                    <div class="wd-range-presets">
+                        <button type="button" class="wd-preset-btn" onclick="setUpdatePrepPreset('week')">This Week</button>
+                        <button type="button" class="wd-preset-btn" onclick="setUpdatePrepPreset('7days')">Last 7 Days</button>
+                    </div>
+                    <div class="wd-range-note" id="upHistoricalNote"></div>
+                </div>
+
+                <div class="up-pair-row">
+
+                    <div class="up-panel up-pair-half">
+                        <div class="up-panel-header">
+                            <span>Instructions <span id="upFormatLabel3"></span></span>
+                            <span class="up-panel-hint">Rarely changes</span>
+                        </div>
+                        <textarea id="upStyleInstructions" rows="12" onchange="saveUpdatePrepStyle()"></textarea>
+                    </div>
+
+                    <div class="up-panel up-pair-half">
+                        <div class="up-panel-header">
+                            <span>Last Period's Update <span id="upFormatLabel1"></span></span>
+                            <span class="up-panel-hint">Template, not literal text</span>
+                        </div>
+
+                        <div class="up-template-controls">
+                            <div class="up-template-field">
+                                <label>Attachments</label>
+                                <select id="upAttachmentMode" onchange="onAttachmentModeChanged()">
+                                    <option value="two">2 attachments</option>
+                                    <option value="one">1 attachment</option>
+                                </select>
+                            </div>
+                            <div class="up-template-field" id="upRecencyField">
+                                <label>Most recent?</label>
+                                <select id="upRecencyChoice" onchange="onRecencyChanged()">
+                                    <option value="2">Attachment 2</option>
+                                    <option value="1">Attachment 1</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <textarea id="upLastPeriodText" rows="8" onchange="saveUpdatePrepLastPeriod()"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="up-pair-row">
+
+                    <div class="up-panel up-pair-half">
+                        <div class="up-panel-header">
+                            <span>Generated Prompt <span id="upFormatLabel2"></span></span>
+                            <button class="btn btn-primary" onclick="copyUpdatePrepPrompt()">📋 Copy</button>
+                        </div>
+                        <textarea id="upGeneratedPrompt" rows="14" readonly></textarea>
+                    </div>
+
+                    <div class="up-panel up-pair-half">
+                        <div class="up-panel-header">
+                            <span>Paste Finished Update Back Here <span id="upFormatLabel4"></span></span>
+                        </div>
+                        <textarea id="upFinishedUpdate" rows="14" placeholder="After the AI drafts your update, paste the final version here..."></textarea>
+                    </div>
+
+                </div>
+
+                <div class="up-section-divider">🎙️ Spoken Version</div>
+
+                <div class="up-panel">
+                    <div class="up-panel-header">
+                        <span>Spoken Style Instructions</span>
+                        <span class="up-panel-hint">Shared across both formats — rarely changes</span>
+                    </div>
+                    <textarea id="upSpokenStyle" rows="8" onchange="saveUpdatePrepSpokenStyle()"></textarea>
+                </div>
+
+                <div class="up-pair-row">
+
+                    <div class="up-panel up-pair-half">
+                        <div class="up-panel-header">
+                            <span>Written Source (paste finished update)</span>
+                        </div>
+                        <textarea id="upWrittenSourceForSpoken" rows="10" placeholder="Paste the finished written update here — same text as above..." onchange="rebuildSpokenPrompt()"></textarea>
+                    </div>
+
+                    <div class="up-panel up-pair-half">
+                        <div class="up-panel-header">
+                            <span>Generated Spoken Prompt <span id="upFormatLabel5"></span></span>
+                            <button class="btn btn-primary" onclick="copySpokenPrompt()">📋 Copy</button>
+                        </div>
+                        <textarea id="upSpokenPrompt" rows="10" readonly></textarea>
+                    </div>
+
+                </div>
+
+                <div class="up-panel">
+                    <div class="up-panel-header">
+                        <span>Paste Finished Spoken Version Back Here</span>
+                    </div>
+                    <textarea id="upFinishedSpoken" rows="8" placeholder="After the AI drafts the spoken version, paste the final version here..."></textarea>
+
+                    <div class="up-save-row">
+                        <span class="up-last-saved" id="upLastSavedLabel"></span>
+                        <button class="btn btn-primary" onclick="saveUpdatePrepToHistory()">💾 Save to History</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/updateprep.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>

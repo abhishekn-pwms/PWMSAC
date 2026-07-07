@@ -1,0 +1,82 @@
+<!-- AC v1.4 WORKDIGEST -->
+ 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Digest AC v1.4</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/workdigest.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Work Digest</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="refreshWorkDigest()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div class="wd-range-bar">
+
+                    <div class="wd-range-field">
+                        <label>From</label>
+                        <input type="date" id="wdFromDate" onchange="applyWorkDigestFilters()">
+                    </div>
+
+                    <div class="wd-range-field">
+                        <label>To</label>
+                        <input type="date" id="wdToDate" onchange="applyWorkDigestFilters()">
+                    </div>
+
+                    <div class="wd-range-presets">
+                        <button type="button" class="wd-preset-btn" onclick="setWorkDigestPreset('week')">This Week</button>
+                        <button type="button" class="wd-preset-btn" onclick="setWorkDigestPreset('7days')">Last 7 Days</button>
+                        <button type="button" class="wd-preset-btn" onclick="setWorkDigestPreset('sincelast')">Since Last Digest</button>
+                    </div>
+
+                    <div class="wd-range-note" id="wdHistoricalNote"></div>
+
+                </div>
+
+                <div class="stat-strip">
+                    <div class="stat-chip" id="wdSummaryMilestones"></div>
+                    <div class="stat-chip" id="wdSummaryHours"></div>
+                    <div class="stat-chip" id="wdSummaryNoMovement"></div>
+                </div>
+
+                <div id="wdDigestList" class="wd-digest-list">
+                    <div class="wb-empty-state">Loading work digest...</div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/workdigest.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>
