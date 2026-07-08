@@ -1,0 +1,107 @@
+<!-- AC v1.5 - TASK LOG ANALYSIS -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Log Analysis AC v1.5</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/taskloganalysis.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Task Log Analysis</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="clearTlaFilters()">✕ Clear Filters</button>
+                        <button class="btn btn-primary" onclick="exportTlaToExcel()">⬇️ Export to Excel</button>
+                        <button class="btn btn-secondary" onclick="refreshTla()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div id="tlaTableWrap" class="tla-table-wrap">
+                    <table class="tla-table">
+                        <tr>
+                            <div class="tla-summary-bar">
+                                <span id="tlaRecordCount"></span>
+                                <span id="tlaTotalHours" class="tla-col-hours"></span>
+                            </div>
+                        </tr>
+                        
+                        <thead>
+                            <tr class="tla-header-row">
+                                <th onclick="setTlaSort('task_date')">Date <span id="tlaSortIcon_task_date"></span></th>
+                                <th onclick="setTlaSort('task_description')">Description <span id="tlaSortIcon_task_description"></span></th>
+                                <th onclick="setTlaSort('todo_text')">ToDo <span id="tlaSortIcon_todo_text"></span></th>
+                                <th onclick="setTlaSort('milestone_name')">Milestone <span id="tlaSortIcon_milestone_name"></span></th>
+                                <th onclick="setTlaSort('project_name')">Project <span id="tlaSortIcon_project_name"></span></th>
+                                <th onclick="setTlaSort('start_time')">Start <span id="tlaSortIcon_start_time"></span></th>
+                                <th onclick="setTlaSort('end_time')">End <span id="tlaSortIcon_end_time"></span></th>
+                                <th onclick="setTlaSort('minutes_spent')" class="tla-col-hours">Hours <span id="tlaSortIcon_minutes_spent"></span></th>
+                            </tr>
+                            <tr class="tla-filter-row">
+                                <td>
+                                    <input type="date" id="tlaFilterDate" onchange="renderTla()">
+                                    <div class="tla-range-mini">
+                                        <input type="date" id="tlaFilterFrom" onchange="renderTla()">
+                                        <input type="date" id="tlaFilterTo" onchange="renderTla()">
+                                    </div>
+                                </td>
+                                <td><input type="search" id="tlaFilterDescription" placeholder="contains..." onkeyup="renderTla()"></td>
+                                <td><input type="search" id="tlaFilterTodo" placeholder="contains..." onkeyup="renderTla()"></td>
+                                <td><select id="tlaFilterMilestone" onchange="renderTla()"><option value="">All</option></select></td>
+                                <td><select id="tlaFilterProject" onchange="renderTla()"><option value="">All</option></select></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody id="tlaTableBody">
+                            <tr><td colspan="8" class="wb-empty-state">Loading task logs...</td></tr>
+                        </tbody>
+
+<!-- MOVED TABLE ROW SUMMARY TO TOP -->
+<!--
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" id="tlaRecordCount"></td>
+                                <td colspan="4" id="tlaTotalHours" class="tla-col-hours"></td>
+                            </tr>
+                        </tfoot>
+-->
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/taskloganalysis.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>
