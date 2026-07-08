@@ -1,5 +1,6 @@
+<!-- AC v1.5 - MENU POLISH -->
 <!--
-v1.3 SHARED FAB — loaded once via loadComponent(), same pattern as header/sidebar/footer.
+SHARED FAB — loaded once via loadComponent(), same pattern as header/sidebar/footer.
 Active page highlighting is applied dynamically by setActiveFabItem() (see navigation.js),
 using data-page attributes below, the same convention as the sidebar menu.
 -->
@@ -7,27 +8,27 @@ using data-page attributes below, the same convention as the sidebar menu.
     <button class="fab-trigger" onclick="toggleUniversalFab(event)">＋</button>
     <div class="fab-options">
 
+<!--
+## REMOVING MASTER TABLE LINKS
+-->
+<!--
         <div class="fab-section-header">📋 Master Tables</div>
         <div class="fab-row-grid section-one">
             <a href="portfolio.html" class="fab-sub-btn" data-page="portfolio">💼 Portfolios</a>
             <a href="project.html" class="fab-sub-btn" data-page="project">🚀 Projects</a>
             <a href="milestone.html" class="fab-sub-btn" data-page="milestone">🎯 Milestones</a>
-
-<!--
-## REMOVING ACTIVITY LINK
--->
-<!--
             <a href="activity.html" class="fab-sub-btn" data-page="activity">⚡ Activities</a>
+        </div>
 -->
 
-        </div>
-
+<!-- REMOVING DEICATED ROW FOR CORE DATA -->
+<!--
         <div class="fab-section-header">📋 Core Data</div>
         <div class="fab-row-grid section-two-three-four">
             <a href="todo.html" class="fab-sub-btn" data-page="todo">✔️ ToDos</a>
             <a href="task-log.html" class="fab-sub-btn" data-page="task-log">🕒 Task Logs</a>
         </div>
-
+-->
 
 <!-- REMOVING DEICATED ROW FOR WORK VIEW -->
 <!--
@@ -41,10 +42,20 @@ using data-page attributes below, the same convention as the sidebar menu.
 
         <div class="fab-section-header">🏠 Quick Nav</div>
         <div class="fab-row-grid section-one">
-            <a href="review.html" class="fab-sub-btn" data-page="review">📊 Reviews</a>
+            <a href="todo.html" class="fab-sub-btn" data-page="todo">✔️ ToDos</a>
+            <a href="task-log.html" class="fab-sub-btn" data-page="task-log">🕒 Task Logs</a>
             <a href="workmap.html" class="fab-sub-btn" data-page="workmap">🗺️ Work Map</a>
+            <a href="updateprep.html" class="fab-sub-btn" data-page="updateprep">💼 Update Prep</a>
+            <a href="taskloganalysis.html" class="fab-sub-btn" data-page="taskloganalysis">📊 Task Analysis</a>
+
+<!-- REMOVING DEICATED ROW FOR WORK VIEW -->
+<!--
+            <a href="workdigest.html" class="fab-sub-btn" data-page="workdigest">🧩 WorkDigest</a>
+-->
+
             <a href="dashboard.html" class="fab-sub-btn" data-page="dashboard">🏠 Dashboard</a>
         </div>
+
 
         <div class="fab-section-header">🔥 Accelerators</div>
         <div class="fab-row-grid section-two-three-four">

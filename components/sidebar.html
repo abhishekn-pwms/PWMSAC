@@ -1,4 +1,4 @@
-<!-- AC v1.4 Pass 4 UPDTPREP + WORKDIGEST -->
+<!-- AC v1.5 - MENU POLISH -->
 
 <div class="sidebar-menu">
 
@@ -29,18 +29,20 @@
 
     </div>
 
-    <!-- NEW WORK MAPS / BREAKDONW PAGES -->
+
+
+    <!-- NEW ANALYSIS/REVIEW PAGES -->
 
     <div
         class="menu-group-header"
-        onclick="toggleMenuGroup('workMapMenu')">
+        onclick="toggleMenuGroup('analyseReviewMenu')">
 
-        Maps/Breakdown ▼
+        Analysis ▼
 
     </div>
 
     <div
-        id="workMapMenu"
+        id="analyseReviewMenu"
         class="menu-group">
 
         <div
@@ -50,9 +52,17 @@
 
             WorkMap
 
+        </div>    
+
+        <div
+            class="menu-item"
+            data-page="taskloganalysis"
+            onclick="navigateTo('taskloganalysis')">
+
+            Task-Log Analysis
+
         </div>
-
-
+        
         <div
             class="menu-item"
             data-page="workdigest"
@@ -62,44 +72,6 @@
 
         </div>
 
-
-        <div
-            class="menu-item"
-            data-page="workmap-detail"
-            onclick="navigateTo('workmap-detail')">
-
-            &nbsp;&rAarr;&nbsp;WorkMap-Details
-
-        </div>
-
-        <div
-            class="menu-item"
-            data-page="workbreakdown"
-            onclick="navigateTo('workbreakdown')">
-
-            &nbsp;&rAarr;&nbsp;Work Breakdown
-
-        </div>
-
-    </div>
-
-
-    
-    <!-- NEW REVIEW SUPPORT PAGES -->
-
-    <div
-        class="menu-group-header"
-        onclick="toggleMenuGroup('workMapMenu')">
-
-        Reviews ▼
-
-    </div>
-
-    <div
-        id="reviewMenu"
-        class="menu-group">
-
-
         <div
             class="menu-item"
             data-page="updateprep"
@@ -108,16 +80,7 @@
             Update Prep
 
         </div>
-
-        <div
-            class="menu-item"
-            data-page="review-cg"
-            onclick="navigateTo('review-cg')">
-
-            &nbsp;&rAarr;&nbsp;Prev Reporting CG
-
-        </div>
-
+        
     </div>
 
 
@@ -131,7 +94,8 @@
 
     <div
         id="mastersMenu"
-        class="menu-group">
+        class="menu-group"
+        style="display:none;">
 
         <div
             class="menu-item submenu-item"
@@ -159,6 +123,54 @@
             Milestone
 
         </div>
+
+    </div>
+
+    <!-- ALL OTHER PAGES -->
+
+    <div
+        class="menu-group-header"
+        onclick="toggleMenuGroup('OthersMenu')">
+
+        Others ▼
+
+    </div>
+
+    <div
+        id="OthersMenu"
+        class="menu-group"
+        style="display:none;">
+
+        <div
+            class="menu-item"
+            data-page="workmap-detail"
+            onclick="navigateTo('workmap-detail')">
+
+            &nbsp;&rAarr;&nbsp;WorkMap-Details
+
+        </div>
+
+        <div
+            class="menu-item"
+            data-page="workbreakdown"
+            onclick="navigateTo('workbreakdown')">
+
+            &nbsp;&rAarr;&nbsp;Work Breakdown
+
+        </div>
+
+        <div
+            class="menu-item"
+            data-page="review-cg"
+            onclick="navigateTo('review-cg')">
+
+            &nbsp;&rAarr;&nbsp;Prev Reporting CG
+
+        </div>
+
+    </div>
+
+
 
 <!--
 ## REMOVING ACTIVITY LINK
