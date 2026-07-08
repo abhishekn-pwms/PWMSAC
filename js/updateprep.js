@@ -1,4 +1,4 @@
-// AC v1.4 Pass 4 UPDTPREP
+// v1.4 Pass 7 - UPDATEPREP ENHANCE
 
 // ======================================================
 // Update Prep — assembles copy-ready prompts (written +
@@ -30,31 +30,40 @@ const UP_HISTORICAL_LOOKBACK_DAYS = 14;
 
 const UP_DEFAULT_STYLE_MANAGER =
     "### STYLE INSTRUCTIONS FOR MANAGER\n" +
-    "Write in clear, confident, executive-level language. Focus on the primary accomplishment or current state reached during the reporting period, not a list of meetings or conversations. The bold status sentence should describe the most significant accomplishment or current state, synthesizing related activities into one outcome where appropriate, but do not infer progress, maturity or completion beyond what the evidence supports.\n" +
-    "Clearly distinguish what has been completed from what remains in progress or pending.\n" +
-    "Use dependency or risk framing only when it materially affects the next step, timeline or decision, not on every project and not simply to sound more executive.\n" +
-    "The Next: sentence should state the immediate next action, naming the specific dependency only when one genuinely exists.\n" +
-    "For the bracketed history line, retain whichever date is the most meaningful reference point for continuity. This may be older than the current reporting period and is not necessarily the most recent activity. Introduce a new history date only when the current period establishes a new workstream or a significant shift in direction.\n" +
-    "If there is no material activity during the reporting period, state this explicitly (for example, \"No material change this period...\") rather than omitting the project.\n\n" +
+    "- Write in clear, confident, executive-level language. Focus on the primary accomplishment or current state reached during the reporting period, not a list of meetings or conversations.\n" +
+    "- Where multiple activities contribute to the same objective, synthesize them into a single project-level update rather than describing each activity separately.\n" +
+    "- Prefer project-level language (for example assessment, evaluation, validation, commercial discussions, migration planning or deployment readiness) over activity-level language (for example discussed, reviewed, emailed or met), unless the activity itself is the only meaningful progress during the period.\n" +
+    "- Where directly supported by the raw data or previous project continuity, briefly state the immediate purpose of the work (for example \"to finalize partner selection\", \"to evaluate migration feasibility\" or \"to support commercial closure\"). Do not infer downstream business impact or client sentiment.\n" +
+    "- The bold status sentence should describe the most significant accomplishment or current state, synthesizing related activities into one outcome where appropriate, but do not infer progress, maturity or completion beyond what the evidence supports.\n" +
+    "- Clearly distinguish what has been completed from what remains in progress or pending.\n" +
+    "- Use dependency or risk framing only when it materially affects the next step, timeline or decision, not on every project and not simply to sound more executive.\n" +
+    "- The Next: sentence should state the immediate next action, naming the specific dependency only when one genuinely exists.\n" +
+    "- For the bracketed history line, retain whichever date is the most meaningful reference point for continuity. This may be older than the current reporting period and is not necessarily the most recent activity. Introduce a new history date only when the current period establishes a new workstream or a significant shift in direction.\n" +
+    "- If there is no material activity during the reporting period, state this explicitly (for example, \"No material change this period...\") rather than omitting the project.\n\n" +
     "### DATA INTEGRITY RULES (Apply Before Style)\n" +
     "1. Synthesis must stay strictly grounded in the raw data provided. Do not infer downstream business impact, sentiment or progress (for example, strengthened the pipeline, accelerated closure or increased client confidence) unless explicitly supported by the task logs. It is acceptable to summarize related activities into the immediate outcome achieved during the reporting period.\n" +
     "2. Any dated activity within the current reporting period counts as this period's activity, even if it appears in an Open ToDos or brief-mention line. Never label a project \"No material progress this period\" if any dated activity from within the reporting period exists.\n" +
-    "3. If a project name this period is a plausible continuation of a differently named project in LAST PERIOD'S UPDATE (same client or same initiative), treat them as the same project and carry forward relevant history. If genuinely uncertain, flag the ambiguity explicitly rather than silently choosing one interpretation.";
+    "3. If a project name this period is a plausible continuation of a differently named project in LAST PERIOD'S UPDATE (same client or same initiative), treat them as the same project and carry forward relevant history. If genuinely uncertain, flag the ambiguity explicitly rather than silently choosing one interpretation.\n" +
+    "4. It is acceptable to summarize multiple related activities into a higher-level workstream when they clearly support the same objective. The summary must remain fully supported by the raw data and must not introduce additional progress, outcomes or business impact.";
 
 
 const UP_DEFAULT_STYLE_CSAIO =
     "### STYLE INSTRUCTIONS FOR CSAIO\n" +
-    "Write in clear, confident, executive-level language. Focus on the primary accomplishment or current state reached during the reporting period, not a list of meetings or conversations.\n" +
-    "Each \"Key highlights of this week\" bullet should describe the accomplishment or current state for that project, synthesizing related activities into one outcome where appropriate, but do not infer progress, maturity or completion beyond what the evidence supports.\n" +
-    "Clearly distinguish what has been completed from what remains in progress or pending.\n" +
-    "Use dependency or risk framing only when it materially affects the next step, timeline or decision, not on every project and not simply to sound more executive.\n" +
-    "Each \"Key priorities for next week\" bullet should state the immediate next action for that project, naming the specific dependency only when one genuinely exists.\n" +
-    "There is no bracketed history line in this format, but check LAST PERIOD'S UPDATE for continuity — do not drop a recurring item without reason if it remains relevant this week.\n" +
-    "If there is no material activity during the reporting period, state this explicitly (for example, \"No material change this period...\") rather than omitting the project.\n\n" +
+    "- Write in clear, confident, executive-level language. Focus on the primary accomplishment or current state reached during the reporting period, not a list of meetings or conversations.\n" +
+    "- Where multiple activities contribute to the same objective, synthesize them into a single project-level update rather than describing each activity separately.\n" +
+    "- Prefer project-level language (for example assessment, evaluation, validation, commercial discussions, migration planning or deployment readiness) over activity-level language (for example discussed, reviewed, emailed or met), unless the activity itself is the only meaningful progress during the period.\n" +
+    "- Where directly supported by the raw data or previous project continuity, briefly state the immediate purpose of the work (for example \"to finalize partner selection\", \"to evaluate migration feasibility\" or \"to support commercial closure\"). Do not infer downstream business impact or client sentiment.\n" +
+    "- Each \"Key highlights of this week\" bullet should describe the accomplishment or current state for that project, synthesizing related activities into one outcome where appropriate, but do not infer progress, maturity or completion beyond what the evidence supports.\n" +
+    "- Clearly distinguish what has been completed from what remains in progress or pending.\n" +
+    "- Use dependency or risk framing only when it materially affects the next step, timeline or decision, not on every project and not simply to sound more executive.\n" +
+    "- Each \"Key priorities for next week\" bullet should state the immediate next action for that project, naming the specific dependency only when one genuinely exists.\n" +
+    "- There is no bracketed history line in this format, but check LAST PERIOD'S UPDATE for continuity — do not drop a recurring item without reason if it remains relevant this week.\n" +
+    "- If there is no material activity during the reporting period, state this explicitly (for example, \"No material change this period...\") rather than omitting the project.\n\n" +
     "### DATA INTEGRITY RULES (Apply Before Style)\n" +
     "1. Synthesis must stay strictly grounded in the raw data provided. Do not infer downstream business impact, sentiment or progress (for example, strengthened the pipeline, accelerated closure or increased client confidence) unless explicitly supported by the task logs. It is acceptable to summarize related activities into the immediate outcome achieved during the reporting period.\n" +
     "2. Any dated activity within the current reporting period counts as this period's activity, even if it appears in an Open ToDos or brief-mention line. Never label a project \"No material progress this period\" if any dated activity from within the reporting period exists.\n" +
-    "3. If a project name this period is a plausible continuation of a differently named project in LAST PERIOD'S UPDATE (same client or same initiative), treat them as the same project and carry forward relevant history. If genuinely uncertain, flag the ambiguity explicitly rather than silently choosing one interpretation.";
+    "3. If a project name this period is a plausible continuation of a differently named project in LAST PERIOD'S UPDATE (same client or same initiative), treat them as the same project and carry forward relevant history. If genuinely uncertain, flag the ambiguity explicitly rather than silently choosing one interpretation.\n" +
+    "4. It is acceptable to summarize multiple related activities into a higher-level workstream when they clearly support the same objective. The summary must remain fully supported by the raw data and must not introduce additional progress, outcomes or business impact.";
 
 
 const UP_DEFAULT_SPOKEN_STYLE =
@@ -72,18 +81,27 @@ const UP_DEFAULT_SPOKEN_STYLE =
 
 
 const UP_TEMPLATE_TWO_ATTACHMENTS =
-`Attachment 1: Previous update of the same report type. Use this as the reference for report structure, writing style and continuity for this report type.
-Attachment 2: Previous update prepared in the other reporting format, covering many of the same projects. Use this only to cross-check project continuity where relevant.
-Most recent previous update for project continuity: Attachment [__RECENCY__].
-Use the most recent previous update to preserve the latest project continuity where it does not conflict with THIS PERIOD'S RAW DATA, which always takes precedence.
-Always follow the FORMAT section for the output. Never mix the format or presentation style of the two report types.`;
+`- Attachment 1: Previous update of the same report type. Use this as the reference for report structure, writing style and continuity for this report type.
+- Attachment 2: Previous update prepared in the other reporting format, covering many of the same projects. Use this only to cross-check project continuity where relevant.
+- Most recent previous update for project continuity: Attachment [__RECENCY__].
+- Use the most recent previous update to preserve the latest project continuity where it does not conflict with THIS PERIOD'S RAW DATA, which always takes precedence.
+- Always follow the FORMAT section for the output. Never mix the format or presentation style of the two report types.
+- In addition to project continuity, use the most recent previous update as the primary reference for the reporting style, level of abstraction and project narrative.
+- When the current period contains incremental activities on an ongoing initiative, continue the project narrative from the previous report rather than rewriting it solely from the individual task logs.
+- Prefer evolving the previous executive summary using this period's evidence instead of producing an entirely new summary from scratch. The current period's raw data always takes precedence where there is any conflict.
+- Where the previous report already established the project's objective (for example partner comparison, migration feasibility or commercial closure), retain that objective if it remains consistent with the current raw data instead of restating the underlying activities.
+- When deciding between describing individual activities and describing the overall workstream, prefer the workstream if both are equally supported by the available evidence.`;
 
 
 const UP_TEMPLATE_ONE_ATTACHMENT =
-`One previous update is attached for reference.
-Attachment 1: Previous update of the same report type. Use this as the reference for report structure, writing style and continuity for this report type.
-Use it only to preserve continuity where it does not conflict with THIS PERIOD'S RAW DATA, which always takes precedence.
-Always follow the FORMAT section for the output.`;
+`- One previous update is attached for reference.
+- Attachment 1: Previous update of the same report type. Use this as the reference for report structure, writing style and continuity for this report type.
+- Use it only to preserve continuity where it does not conflict with THIS PERIOD'S RAW DATA, which always takes precedence.
+- Always follow the FORMAT section for the output.
+- When the current period contains incremental activities on an ongoing initiative, continue the project narrative from the previous report rather than rewriting it solely from the individual task logs.
+- Prefer evolving the previous executive summary using this period's evidence instead of producing an entirely new summary from scratch. The current period's raw data always takes precedence where there is any conflict.
+- Where the previous report already established the project's objective (for example partner comparison, migration feasibility or commercial closure), retain that objective if it remains consistent with the current raw data instead of restating the underlying activities.
+- When deciding between describing individual activities and describing the overall workstream, prefer the workstream if both are equally supported by the available evidence.`;
 
 
 document.addEventListener(
@@ -107,6 +125,7 @@ document.addEventListener(
         rebuildUpdatePrepPrompt();
 
         await loadLastSavedTimestamp();
+        await loadExistingHistoryIntoBoxes();
     }
 );
 
@@ -122,6 +141,11 @@ async function getSetting(key, defaultValue) {
     if (Array.isArray(rows) && rows.length > 0 && rows[0].setting_value) {
         return rows[0].setting_value;
     }
+
+    // First time this key is ever read — persist the default so the
+    // table actually reflects what's on screen, not just showing it
+    // from memory each time.
+    await saveSetting(key, defaultValue);
 
     return defaultValue;
 }
@@ -190,6 +214,8 @@ function updateFormatLabels() {
     document.getElementById("upFormatLabel3").textContent = label;
     document.getElementById("upFormatLabel4").textContent = label;
     document.getElementById("upFormatLabel5").textContent = label;
+    document.getElementById("upFormatLabel6").textContent = label;
+    document.getElementById("upFormatLabel7").textContent = label;
 }
 
 
@@ -313,6 +339,7 @@ async function setUpdatePrepFormat(format) {
     rebuildSpokenPrompt();
 
     await loadLastSavedTimestamp();
+    await loadExistingHistoryIntoBoxes();
 }
 
 
@@ -321,6 +348,7 @@ function onUpdatePrepPeriodChanged() {
     rebuildUpdatePrepPrompt();
 
     loadLastSavedTimestamp();
+    loadExistingHistoryIntoBoxes();
 }
 
 
@@ -349,6 +377,7 @@ function setUpdatePrepPreset(preset) {
     }
 
     loadLastSavedTimestamp();
+    loadExistingHistoryIntoBoxes();
 
     rebuildUpdatePrepPrompt();
 }
@@ -541,9 +570,10 @@ If a project has "no new activity this period" but still has open items or histo
 
 const UP_CSAIO_FORMAT_INSTRUCTIONS =
 `## FORMAT — CSAIO Update (table with Focus Area | Key highlights of this week | Key priorities for next week):
-Focus Areas are: Client updates, Partner updates, Product updates, Any other updates.
-Default every project/milestone into "Client updates" unless it is clearly about partner onboarding/pilots or product feature development — in this data, that will almost always be Client updates.
-Under each Focus Area, list concise bullets for "highlights this week" and separate bullets for "priorities next week."`;
+- Focus Areas are: Client updates, Partner updates, Product updates, Any other updates.
+- Default every project/milestone into "Client updates" unless it is clearly about partner onboarding/pilots or product feature development — in this data, that will almost always be Client updates.
+- Under each Focus Area, list concise bullets for "highlights this week" and separate bullets for "priorities next week."
+- Within each Focus Area, order projects to maintain logical flow and continuity with the previous report rather than strictly following the order of the raw data.`;
 
 
 function renderGroupAsText(g) {
@@ -611,6 +641,19 @@ function copyUpdatePrepPrompt() {
 // lines, so it doesn't need this.
 // ======================================================
 
+function syncFinishedUpdateToSpokenSource() {
+
+    // Auto-sync convenience default, per your explicit confirmation — the
+    // spoken version is almost always based on the same finished update
+    // you just saved above. Still freely editable afterward if you want
+    // the spoken version based on different text for a given period.
+    document.getElementById("upWrittenSourceForSpoken").value =
+        document.getElementById("upFinishedUpdate").value;
+
+    rebuildSpokenPrompt();
+}
+
+
 async function rebuildSpokenPrompt() {
 
     const spokenStyle = document.getElementById("upSpokenStyle").value.trim();
@@ -641,8 +684,10 @@ async function rebuildSpokenPrompt() {
 
 async function getMostRecentFinishedUpdate(format) {
 
+    const primaryTo = document.getElementById("upToDate").value;
+
     const rows =
-        await getData(`update_prep_history?format=eq.${format}&finished_update=not.is.null&order=period_to.desc&limit=1`);
+        await getData(`update_prep_history?format=eq.${format}&finished_update=not.is.null&period_to=lt.${primaryTo}&order=period_to.desc&limit=1`);
 
     if (Array.isArray(rows) && rows.length > 0) {
         return rows[0].finished_update;
@@ -672,6 +717,50 @@ function copySpokenPrompt() {
 // tracked in a JS variable, so it survives page reloads,
 // tab switches, and writing/speaking on different days.
 // ======================================================
+
+async function loadExistingHistoryIntoBoxes() {
+
+    const existingId = await findExistingHistoryRow();
+
+    const finishedUpdateBox = document.getElementById("upFinishedUpdate");
+    const finishedSpokenBox = document.getElementById("upFinishedSpoken");
+    const sourceBox = document.getElementById("upWrittenSourceForSpoken");
+
+    const updateTag = document.getElementById("upRetrievedTagUpdate");
+    const spokenTag = document.getElementById("upRetrievedTagSpoken");
+    const sourceTag = document.getElementById("upRetrievedTagSource");
+
+    if (!existingId) {
+        finishedUpdateBox.value = "";
+        finishedSpokenBox.value = "";
+        sourceBox.value = "";
+        updateTag.style.display = "none";
+        spokenTag.style.display = "none";
+        sourceTag.style.display = "none";
+        rebuildSpokenPrompt();
+        return;
+    }
+
+    const rows = await getData(`update_prep_history?history_id=eq.${existingId}`);
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+        return;
+    }
+
+    const savedUpdate = rows[0].finished_update || "";
+    const savedSpoken = rows[0].finished_spoken || "";
+
+    finishedUpdateBox.value = savedUpdate;
+    finishedSpokenBox.value = savedSpoken;
+    sourceBox.value = savedUpdate;
+
+    updateTag.style.display = savedUpdate ? "inline" : "none";
+    spokenTag.style.display = savedSpoken ? "inline" : "none";
+    sourceTag.style.display = savedUpdate ? "inline" : "none";
+
+    rebuildSpokenPrompt();
+}
+
 
 async function findExistingHistoryRow() {
 
