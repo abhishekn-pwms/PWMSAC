@@ -1,11 +1,11 @@
-<!-- AC v1.4 Pass 4 UPDTPREP -->
+<!-- v1.4 Pass 7 - UPDATEPREP ENHANCE -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Prep AC v1.4 Pass 4</title>
+    <title>Update Prep AC v1.4 Pass 7</title>
     <link rel="stylesheet" href="../css/pwms.css">
     <link rel="stylesheet" href="../css/workdigest.css">
     <link rel="stylesheet" href="../css/updateprep.css">
@@ -100,9 +100,9 @@
 
                     <div class="up-panel up-pair-half">
                         <div class="up-panel-header">
-                            <span>Paste Finished Update Back Here <span id="upFormatLabel4"></span></span>
+                            <span>Paste Finished Update Back Here <span id="upFormatLabel4"></span> <span id="upRetrievedTagUpdate" class="up-retrieved-tag" style="display:none;">↺ Retrieved</span></span>
                         </div>
-                        <textarea id="upFinishedUpdate" rows="14" placeholder="After the AI drafts your update, paste the final version here..."></textarea>
+                        <textarea id="upFinishedUpdate" rows="14" placeholder="After the AI drafts your update, paste the final version here..." onchange="syncFinishedUpdateToSpokenSource()"></textarea>
                     </div>
 
                 </div>
@@ -121,9 +121,9 @@
 
                     <div class="up-panel up-pair-half">
                         <div class="up-panel-header">
-                            <span>Written Source (paste finished update)</span>
+                            <span>Source for Spoken Version (auto-filled from Finished Update) <span id="upFormatLabel6"></span> <span id="upRetrievedTagSource" class="up-retrieved-tag" style="display:none;">↺ Retrieved</span></span>
                         </div>
-                        <textarea id="upWrittenSourceForSpoken" rows="10" placeholder="Paste the finished written update here — same text as above..." onchange="rebuildSpokenPrompt()"></textarea>
+                        <textarea id="upWrittenSourceForSpoken" rows="10" placeholder="Auto-fills when you save a Finished Update above — edit here only if you want the spoken version based on different text." onchange="rebuildSpokenPrompt()"></textarea>
                     </div>
 
                     <div class="up-panel up-pair-half">
@@ -138,7 +138,7 @@
 
                 <div class="up-panel">
                     <div class="up-panel-header">
-                        <span>Paste Finished Spoken Version Back Here</span>
+                        <span>Paste Finished Spoken Version Back Here <span id="upFormatLabel7"></span> <span id="upRetrievedTagSpoken" class="up-retrieved-tag" style="display:none;">↺ Retrieved</span></span>
                     </div>
                     <textarea id="upFinishedSpoken" rows="8" placeholder="After the AI drafts the spoken version, paste the final version here..."></textarea>
 
