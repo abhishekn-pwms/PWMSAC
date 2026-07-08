@@ -1,4 +1,4 @@
-/* AC v1.4 Pass 4 UPDTPREP */
+/* v1.4 Pass 7 - UPDATEPREP ENHANCE */
 
 /* ==========================================================================
    UPDATE PREP — Prompt assembly for Manager/CSAIO updates.
@@ -101,6 +101,15 @@
     margin-top: 10px;
 }
 .up-last-saved { font-size: 0.76rem; color: var(--text-faint); }
+
+.up-retrieved-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--success);
+    background: var(--surface-alt);
+    border-radius: var(--radius-pill);
+    padding: 1px 8px;
+}
 
 @media (max-width: 900px) {
     .up-pair-row { flex-direction: column; }
