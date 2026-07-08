@@ -1,4 +1,25 @@
 === === === === === ===
+Date : Tue, 08-Jul-2026
+=== === === === === ===
+
+Release PWMS AC v1.5 - TASK LOG ANALYSIS + MENU POLISH
+------------------
+
+What's New
+Task Log Analysis Page with sortable columns, in-table filters and Excel export. Menu Changes.
+
+** TASK LOG ANALYSIS PAGE
+** MENU CHANGES = SIDEBAR + FAB
+
+## <Comment Block>
+# "AC v1.5 - TASK LOG ANALYSIS"
+# "AC v1.5 - COSMETIC POLISH"
+# "AC v1.5 - MENU POLISH"
+
+
+
+
+=== === === === === ===
 Date : Tue, 07-Jul-2026
 === === === === === ===
 
