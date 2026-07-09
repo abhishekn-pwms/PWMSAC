@@ -1,11 +1,11 @@
-<!-- AC v1.5 - TASK LOG ANALYSIS -->
+<!-- AC v1.5a - TASK LOG ANALYSIS -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Log Analysis AC v1.5</title>
+    <title>Task Log Analysis AC v1.5a</title>
     <link rel="stylesheet" href="../css/pwms.css">
     <link rel="stylesheet" href="../css/taskloganalysis.css">
 </head>
@@ -24,7 +24,6 @@
                 <div class="page-header">
                     <div class="page-title">Task Log Analysis</div>
                     <div class="page-header-actions">
-                        <button class="btn btn-secondary" onclick="clearTlaFilters()">✕ Clear Filters</button>
                         <button class="btn btn-primary" onclick="exportTlaToExcel()">⬇️ Export to Excel</button>
                         <button class="btn btn-secondary" onclick="refreshTla()" title="Refresh">🔄</button>
                     </div>
@@ -33,9 +32,10 @@
                 <div id="tlaTableWrap" class="tla-table-wrap">
                     <table class="tla-table">
                         <tr>
-                            <div class="tla-summary-bar">
+                            <div class="tla-summary-bar" style="align-items: center;">
                                 <span id="tlaRecordCount"></span>
                                 <span id="tlaTotalHours" class="tla-col-hours"></span>
+                                <button class="btn btn-secondary" onclick="clearTlaFilters()">✕ Clear Filters</button>
                             </div>
                         </tr>
                         
