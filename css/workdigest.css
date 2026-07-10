@@ -1,3 +1,5 @@
+/* AC v1.6 TODO NOTES */
+
 /* ==========================================================================
    WORK DIGEST — Milestone-grouped reporting feed for a date range.
    Card grid (collapsed) + full-width in-place expansion, same mechanic
@@ -116,6 +118,8 @@
 .wd-log-todo-tag { font-size: 0.7rem; color: var(--primary); background: var(--surface-alt); border-radius: var(--radius-pill); padding: 2px 8px; white-space: nowrap; }
 
 .wd-next-item { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 0.85rem; color: var(--text-main); }
+.wd-next-item-wrap { padding: 2px 0; }
+.wd-next-notes-preview { font-size: 0.76rem; color: var(--text-muted); font-style: italic; padding-bottom: 4px; }
 .wd-next-due { color: var(--text-muted); font-size: 0.76rem; white-space: nowrap; }
 .wd-next-empty { font-size: 0.8rem; color: var(--text-faint); font-style: italic; }
 

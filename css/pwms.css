@@ -1,4 +1,4 @@
-/* AC v1.4 Pass 4 UPDTPREP */
+/* AC v1.6 TODO NOTES */
 
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
@@ -582,16 +582,29 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 .stream-item-title { font-weight: 600; color: var(--text-main); cursor: pointer; }
 .stream-log-action { color: var(--primary); font-size: 0.75rem; font-weight: 700; cursor: pointer; white-space: nowrap; padding: 4px 2px; }
 .item-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; display: flex; justify-content: space-between; gap: 8px; }
+.item-notes-preview { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; font-style: italic; }
 .empty-state { text-align: center; padding: 22px; color: var(--text-faint); font-size: 0.85rem; }
 .empty-state.is-good { color: var(--success); font-weight: 600; }
 
 .dashboard-activity-table td { white-space: normal; }
 
-.focus-mode-active .dashboard-summary-row,
-.focus-mode-active .dashboard-grid > .focus-section:first-child {
+.milestone-summary-bar {
+    display: none;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.focus-mode-active .dashboard-summary-row {
     display: none !important;
 }
 .focus-mode-active .dashboard-grid { grid-template-columns: 1fr !important; }
+.focus-mode-active .focus-section:first-child .compact-stream { display: none !important; }
+.focus-mode-active .focus-section:first-child .milestone-summary-bar { display: flex !important; }
 
 /* ==========================================================================
    14b. SHARED FORM PATTERNS (Task Log & ToDo modals)
@@ -753,6 +766,7 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
 .wb-todo-header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; background: var(--surface); }
 .wb-todo-header:hover { background: var(--surface-alt); }
 .wb-todo-text { flex: 1; font-size: 0.86rem; font-weight: 600; color: var(--text-main); }
+.wb-todo-notes-preview { font-size: 0.76rem; color: var(--text-muted); font-style: italic; padding: 0 12px 8px 44px; }
 .wb-todo-stats { display: flex; gap: 10px; font-size: 0.74rem; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
 .wb-todo-body { padding: 6px 12px 10px 12px; background: var(--background); display: flex; flex-direction: column; gap: 4px; }
 

@@ -1,4 +1,4 @@
-/* AC v1.3 Pass 4 FOCUSDASH & CMNFAB */
+/* AC v1.6 TODO NOTES */
 
 /* ==========================================================================
    WORK MAP — Milestone Cards + Detail View
@@ -75,6 +75,13 @@
 .wm-card-stat-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-faint); }
 
 .wm-card-collapse-hint { text-align: center; font-size: 0.62rem; color: var(--text-faint); margin-top: 6px; }
+
+.wm-todo-notes-preview {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 0 10px 6px 34px;
+}
 
 /* ---------------- Expanded row (card + side panel) ---------------- */
 
@@ -155,6 +162,14 @@
 .wm-add-log-form input[type="text"] { flex: 2; min-width: 140px; }
 .wm-add-log-form input[type="date"], .wm-add-log-form input[type="number"] { flex: 1; min-width: 90px; }
 
+.wmd-todo-notes-preview {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 0 10px 8px 34px;
+    line-height: 1.4;
+}
+
 /* ---------------- Detail page (workmap-detail.html) ---------------- */
 
 .wmd-shell {
@@ -178,13 +193,26 @@
 
 .wmd-search-input { flex: 0 0 220px; }
 
+
 .wmd-milestone-pills {
     flex: 1;
     display: flex;
     gap: 8px;
     overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+/*
+.wmd-milestone-pills {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 84px;
+    overflow-y: auto;
     padding-bottom: 2px;
 }
+*/
 
 .wmd-pill {
     flex: 0 0 auto;
