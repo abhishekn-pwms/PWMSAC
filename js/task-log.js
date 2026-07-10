@@ -723,7 +723,7 @@ function updateTaskLogSummary(rows) {
     ).textContent =
         `Total Hours: ${
             (totalMinutes / 60)
-                .toFixed(1)
+                .toFixed(2)
         }`;
 }
 

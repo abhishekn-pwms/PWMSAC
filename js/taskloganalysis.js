@@ -126,6 +126,16 @@ function getTlaFilteredSortedRows() {
 
         if (valA < valB) return (tlaSortDirection === "asc") ? -1 : 1;
         if (valA > valB) return (tlaSortDirection === "asc") ? 1 : -1;
+
+        if (tlaSortColumn === "task_date") {
+
+            const timeA = a.start_time || "";
+            const timeB = b.start_time || "";
+
+            if (timeA < timeB) return (tlaSortDirection === "asc") ? -1 : 1;
+            if (timeA > timeB) return (tlaSortDirection === "asc") ? 1 : -1;
+        }
+
         return 0;
     });
 
