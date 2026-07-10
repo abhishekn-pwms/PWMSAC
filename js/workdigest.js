@@ -1,3 +1,5 @@
+// AC v1.6 TODO NOTES
+
 // ======================================================
 // Work Digest — collate work by Milestone for a date
 // range, so it can be read and turned into manager/CSAIO
@@ -387,12 +389,20 @@ function renderExpandedCard(g) {
     const openTodosHtml =
         g.openTodos.length === 0
             ? `<div class="wd-next-empty">No open ToDos.</div>`
-            : g.openTodos.map(t => `
-                <div class="wd-next-item">
-                    <span>${t.todo_text}</span>
-                    ${t.due_date ? `<span class="wd-next-due">📅 ${formatDate(t.due_date)}</span>` : ""}
-                </div>
-            `).join("");
+            : g.openTodos.map(t => {
+
+                const notesPreview = getNotesPreview(t.notes);
+
+                return `
+                    <div class="wd-next-item-wrap">
+                        <div class="wd-next-item">
+                            <span>${t.todo_text}</span>
+                            ${t.due_date ? `<span class="wd-next-due">📅 ${formatDate(t.due_date)}</span>` : ""}
+                        </div>
+                        ${notesPreview ? `<div class="wd-next-notes-preview">📝 ${notesPreview}</div>` : ""}
+                    </div>
+                `;
+            }).join("");
 
     const historicalHtml =
         g.historicalLogs.length === 0

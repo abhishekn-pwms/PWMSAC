@@ -1,4 +1,4 @@
-// v1.4 Pass 7 - UPDATEPREP ENHANCE
+// AC v1.6 TODO NOTES
 
 // ======================================================
 // Update Prep — assembles copy-ready prompts (written +
@@ -599,6 +599,11 @@ function renderGroupAsText(g) {
     } else {
         g.openTodos.forEach(t => {
             text += `- ${t.todo_text}${t.due_date ? ` (due ${formatDate(t.due_date)})` : ""}\n`;
+
+            const notePreview = getNotesPreview(t.notes);
+            if (notePreview) {
+                text += `  Notes: ${notePreview}\n`;
+            }
         });
     }
 

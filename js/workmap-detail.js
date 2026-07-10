@@ -1,4 +1,4 @@
-// AC v1.3 Pass 6 DTTMPOLSH
+// AC v1.6 TODO NOTES
 
 // ======================================================
 // Work Map — Detail Page
@@ -628,9 +628,12 @@ function renderDetailTodoBlock(todo) {
             ? renderDetailAddLogForm(todo.todo_id)
             : `<button type="button" class="wm-add-log-btn" onclick="showDetailAddLogForm('${todo.todo_id}')">+ Add Task Log</button>`;
 
+    const notesPreview = getNotesPreview(todo.notes);
+
     return `
         <div class="wb-todo-row ${flagClass}" id="wmdTodoRow_${todo.todo_id}" style="margin-left:0;">
             ${headerHtml}
+            ${notesPreview ? `<div class="wmd-todo-notes-preview">📝 ${notesPreview}</div>` : ""}
             ${editPanelHtml}
             <div class="wb-todo-body" style="display:block;">
                 ${logs.length > 0 ? logsHtml : `<div class="wb-empty-state wb-empty-state-small">Not started — no task logs yet.</div>`}

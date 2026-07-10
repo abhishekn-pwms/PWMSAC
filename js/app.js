@@ -1,4 +1,44 @@
-// AC v1.1g4 PASS 2 - NEW FAB
+// AC v1.6 TODO NOTES
+
+
+// ======================================
+// TODO NOTES PREVIEW (v1.6)
+// Notes conventionally start with a date marker like "(05-Jul)" or
+// "[05-Jul]" at position 0, with older entries appended below. This
+// extracts just the newest entry — stops at the SECOND marker — then
+// optionally caps length on top of that. Omit maxLength entirely for
+// full-text (still stops at the next marker, just never character-cut).
+// One shared function, every page just passes a different maxLength.
+// ======================================
+
+function getNotesPreview(notes, maxLength) {
+
+    if (!notes) {
+        return "";
+    }
+
+    let cutoff = notes.length;
+
+    for (let i = 1; i < notes.length; i++) {
+        if (notes[i] === "(" || notes[i] === "[") {
+            cutoff = i;
+            break;
+        }
+    }
+
+    let preview = notes.substring(0, cutoff).trim();
+    const hitSecondMarker = (cutoff < notes.length);
+
+    if (maxLength && preview.length > maxLength) {
+        preview = preview.substring(0, maxLength).trim() + "…";
+    } else if (hitSecondMarker) {
+        // Didn't hit the length cap (or none was given), but there's
+        // older history below — signal "there's more" either way.
+        preview += "…";
+    }
+
+    return preview;
+}
 
 
 // ======================================

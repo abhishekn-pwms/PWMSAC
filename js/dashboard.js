@@ -1,4 +1,4 @@
-// AC v1.5 - COSMETIC POLISH
+// AC v1.6 - TODO NOTES
 
 let dashboardMilestones = [];
 let dashboardTodos = [];
@@ -65,6 +65,15 @@ async function loadDashboardMilestones() {
             </div>
         `;
     });
+
+    // Focus Mode collapses this list down to one line — populate it here
+    // so it's ready the moment the toggle is used, not computed on click.
+    const nearest = dashboardMilestones[0];
+    const nearestDays = nearest ? Math.ceil((new Date(nearest.target_date) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+    const nearestLabel = nearest ? ` · nearest due in ${nearestDays}d (${nearest.milestone_name})` : "";
+
+    document.getElementById("milestoneSummaryBar").innerHTML =
+        `<span>🎯 <b>${dashboardMilestones.length} active</b>${nearestLabel}</span>`;
 }
 
 
@@ -133,6 +142,7 @@ async function loadDashboardTodos() {
         urgentItems.forEach(item => {
             const isOverdue = item.due_date < todayStr;
             const detailUrl = `workmap-detail.html?milestone_id=${item.milestone_id || "__standalone__"}&todo_id=${item.todo_id}`;
+            const notesPreview = getNotesPreview(item.notes, 60);
             html += `
                 <div class="stream-item" style="border-left-color: var(--danger); margin-bottom:6px; cursor:pointer;" onclick="window.location.href='${detailUrl}'">
                     <div class="stream-item-top">
@@ -144,6 +154,7 @@ async function loadDashboardTodos() {
                         <span style="color:var(--danger); font-weight:bold;">${isOverdue ? "⚠️ OVERDUE" : "Due Today"}</span>
                         ${goneColdBadge(item.todo_id)}
                     </div>
+                    ${notesPreview ? `<div class="item-notes-preview">📝 ${notesPreview}</div>` : ""}
                 </div>
             `;
         });
@@ -155,6 +166,7 @@ async function loadDashboardTodos() {
         upcomingItems.forEach(item => {
             const dateDisplayLabel = item.due_date ? formatDateWithDay(item.due_date) : "No Due Date";
             const detailUrl = `workmap-detail.html?milestone_id=${item.milestone_id || "__standalone__"}&todo_id=${item.todo_id}`;
+            const notesPreview = getNotesPreview(item.notes, 60);
             html += `
                 <div class="stream-item" style="border-left-color: var(--primary); margin-bottom:6px; cursor:pointer;" onclick="window.location.href='${detailUrl}'">
                     <div class="stream-item-top">
@@ -166,6 +178,7 @@ async function loadDashboardTodos() {
                         <span>${dateDisplayLabel}</span>
                         ${goneColdBadge(item.todo_id)}
                     </div>
+                    ${notesPreview ? `<div class="item-notes-preview">📝 ${notesPreview}</div>` : ""}
                 </div>
             `;
         });

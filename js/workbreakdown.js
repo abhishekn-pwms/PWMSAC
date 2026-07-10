@@ -1,3 +1,5 @@
+// AC v1.6 TODO NOTES
+
 // ======================================================
 // Work Breakdown (Deep Dive Planner)
 // Milestone -> ToDo -> Task Log, nested & filterable.
@@ -451,6 +453,8 @@ function renderTodoRows(todos) {
                         `)
                         .join("");
 
+                const notesPreview = getNotesPreview(todo.notes, 150);
+
                 return `
                     <div class="wb-todo-row">
 
@@ -468,6 +472,8 @@ function renderTodoRows(todos) {
                             </div>
 
                         </div>
+
+                        ${notesPreview ? `<div class="wb-todo-notes-preview">📝 ${notesPreview}</div>` : ""}
 
                         <div class="wb-todo-body" style="display:${isExpanded ? "block" : "none"};">
                             ${logsForTodo.length > 0 ? logsHtml : `<div class="wb-empty-state wb-empty-state-small">No task logs in this date range.</div>`}
