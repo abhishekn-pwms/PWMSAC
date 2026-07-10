@@ -324,13 +324,13 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     border-radius: var(--radius);
     border: 1px solid var(--border);
     box-shadow: var(--shadow-sm);
-    margin-bottom: 10px;
+    margin-bottom: 1px;
     transition: box-shadow 0.15s ease;
 }
 .task-date-header, .todo-group-header { font-size: 0.95rem; font-weight: 700; color: var(--primary); padding-bottom: 4px; margin: 16px 0 6px 0; border-bottom: 1px solid var(--border); }
 .task-date-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .task-duration { font-size: 0.75rem; font-weight: 700; color: var(--primary); }
-.task-description { font-size: 0.9rem; font-weight: 600; margin: 2px 0; }
+.task-description { font-size: 0.85rem; font-weight: 600; margin: 2px 0; }
 .task-activity { color: var(--text-muted); font-size: 0.8rem; }
 
 /* ==========================================================================
