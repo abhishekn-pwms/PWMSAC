@@ -1,0 +1,89 @@
+/* ==========================================================================
+   DATA SAFETY / BACKUP — export + push-to-pwms_prev + one-time SQL seed
+   generation. References design tokens from pwms.css.
+   ========================================================================== */
+
+.bk-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+
+.bk-panel-warning {
+    border-color: var(--danger-strong);
+    background: var(--danger-bg);
+}
+
+.bk-panel-muted {
+    background: var(--surface-alt);
+    opacity: 0.92;
+}
+
+.bk-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.bk-clear-log-btn {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    height: auto;
+    width: auto;
+}
+
+.bk-progress-log {
+    width: 100%;
+    font-family: monospace;
+    font-size: 0.76rem;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    resize: vertical;
+    color: var(--text-main);
+}
+
+.bk-panel-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+    line-height: 1.4;
+}
+
+.bk-action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-danger {
+    background: var(--danger-strong);
+    color: #fff;
+    border: none;
+}
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+.bk-push-status {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.bk-section-divider {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 24px 0 12px;
+    padding-top: 14px;
+    border-top: 2px solid var(--border);
+}

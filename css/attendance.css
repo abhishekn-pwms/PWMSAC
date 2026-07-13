@@ -1,0 +1,93 @@
+/* AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE */
+
+/* ==========================================================================
+   ATTENDANCE MODULE — shared across attendance.html, attendance-report.html,
+   payroll.html, leaveplan.html, dataquery.html. References design tokens
+   from pwms.css. Nothing in pwms.css is modified by this file.
+   ========================================================================== */
+
+.att-links-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.att-links-row a {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+}
+.att-links-row a:hover { background: var(--surface-alt); }
+
+.gap-alert {
+    background: var(--warning-bg);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: #78350f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.gap-alert a { color: #78350f; font-weight: 700; }
+.gap-alert-ok { background: var(--surface-alt); border-color: var(--border); color: var(--text-muted); }
+
+.att-layout { display: flex; gap: 16px; align-items: flex-start; }
+.att-main-col { flex: 2.4; min-width: 0; }
+.att-side-col { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 12px; }
+
+.att-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+}
+.att-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.att-panel-title { font-size: 0.92rem; font-weight: 700; color: var(--text-main); }
+
+.att-log-form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.att-field { display: flex; flex-direction: column; gap: 4px; }
+.att-field label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+.att-field input, .att-field select { padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; }
+.att-field.wide { flex: 1; min-width: 200px; }
+
+.att-widget-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow-sm); }
+.att-widget-label { font-size: 0.7rem; font-weight: 700; color: var(--text-faint); text-transform: uppercase; margin-bottom: 6px; }
+.att-widget-value { font-size: 1.2rem; font-weight: 800; color: var(--text-main); }
+.att-widget-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+.att-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.att-table th { text-align: left; padding: 8px 10px; background: var(--surface-alt); font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); cursor: pointer; }
+.att-table td { padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: middle; cursor: pointer; }
+.att-row-missed-weekday td { background: var(--danger-bg); color: var(--danger-strong); font-weight: 600; }
+.att-row-missed-weekend td { color: var(--text-faint); }
+
+.att-code-tag { display: inline-block; padding: 2px 9px; border-radius: var(--radius-pill); font-size: 0.72rem; font-weight: 700; background: var(--surface-alt); color: var(--text-main); }
+.att-code-tag.presence { background: #dcfce7; color: #166534; }
+.att-code-tag.leave { background: var(--warning-bg); color: #92400e; }
+.att-code-tag.holiday { background: #dbeafe; color: #1e40af; }
+.att-code-tag.weekoff { background: var(--surface-alt); color: var(--text-muted); }
+
+.att-toggle-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.att-toggle-btn { padding: 7px 16px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-pill); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); cursor: pointer; height: auto; width: auto; }
+.att-toggle-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.att-toggle-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.att-filter-bar { display: flex; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 14px; flex-wrap: wrap; align-items: flex-end; }
+
+.att-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+.att-cal-dow { font-size: 0.66rem; font-weight: 700; color: var(--text-faint); text-transform: uppercase; text-align: center; padding-bottom: 4px; }
+.att-cal-day { background: var(--surface-alt); border-radius: var(--radius-sm); padding: 8px 6px; min-height: 52px; font-size: 0.72rem; cursor: pointer; }
+.att-cal-day.att-cal-blank { background: transparent; cursor: default; }
+.att-cal-day .att-cal-daynum { font-weight: 700; color: var(--text-muted); font-size: 0.72rem; }
+.att-cal-day .att-cal-daycode { font-weight: 800; font-size: 0.76rem; margin-top: 4px; }
+.att-cal-day.att-cal-gap { background: var(--danger-bg); }
+.att-cal-day.att-cal-gap .att-cal-daycode { color: var(--danger-strong); }
+
+.att-note { font-size: 0.72rem; color: var(--text-faint); margin-top: 8px; font-style: italic; }
