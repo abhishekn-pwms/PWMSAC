@@ -1,0 +1,87 @@
+<!-- AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Query AC v1.7 DBBCKUPNEXPONATT</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/attendance.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Data Query</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary" onclick="exportDataQueryCsv()">⬇️ Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="att-links-row">
+                    <a href="attendance.html">← Back to Attendance</a>
+                </div>
+
+                <div class="att-note">Safe alternative to raw SQL — no direct database access from this page, only structured filters through the same API every other page already uses. Not restricted to the last 365 days.</div>
+
+                <div class="att-filter-bar">
+                    <div class="att-field">
+                        <label>Table</label>
+                        <select id="dqTable" onchange="onDataQueryTableChanged()">
+                            <option value="attendance_log">attendance_log</option>
+                        </select>
+                    </div>
+                    <div class="att-field">
+                        <label>From</label>
+                        <input type="date" id="dqFromDate">
+                    </div>
+                    <div class="att-field">
+                        <label>To</label>
+                        <input type="date" id="dqToDate">
+                    </div>
+                    <div class="att-field">
+                        <label>Code contains</label>
+                        <input type="text" id="dqCodeFilter" placeholder="optional...">
+                    </div>
+                    <button class="btn btn-primary" onclick="runDataQuery()">Run Query</button>
+                </div>
+
+                <div id="dqResultSummary" class="att-note"></div>
+
+                <table class="att-table">
+                    <thead id="dqTableHead"></thead>
+                    <tbody id="dqTableBody">
+                        <tr><td class="wb-empty-state">Set a range and click Run Query.</td></tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/dataquery.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>

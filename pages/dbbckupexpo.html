@@ -1,0 +1,93 @@
+<!-- AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Safety AC v1.7 DBBCKUPNEXPO</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/dbbckupexpo.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Data Safety</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="loadAllBackupData()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div class="stat-strip" id="bkSummaryStrip">
+                    <div class="stat-chip">Loading table counts...</div>
+                </div>
+
+                <div class="bk-panel">
+                    <div class="bk-panel-header">Export</div>
+                    <p class="bk-panel-hint">All 8 tables, every time — no partial exports. Downloads a snapshot of live data as it stands right now.</p>
+                    <div class="bk-action-row">
+                        <button class="btn btn-primary" onclick="exportCsvZip()">⬇️ Download CSV (.zip)</button>
+                        <button class="btn btn-primary" onclick="exportJson()">⬇️ Download JSON</button>
+                    </div>
+                </div>
+
+                <div class="bk-panel bk-panel-warning">
+                    <div class="bk-panel-header">Push to pwms_prev</div>
+                    <p class="bk-panel-hint">Full-replace: deletes everything currently in pwms_prev, then inserts a fresh copy of live data. This is the actual disaster-recovery mechanism — a genuine second copy of your data on a separate Supabase project.</p>
+                    <div class="bk-action-row">
+                        <button class="btn btn-danger" onclick="pushToPrev()">🔁 Push to pwms_prev</button>
+                    </div>
+                    <div id="bkPushStatus" class="bk-push-status"></div>
+                </div>
+
+                <div class="bk-panel">
+                    <div class="bk-panel-header">
+                        <span>Progress Log</span>
+                        <button class="btn btn-secondary bk-clear-log-btn" onclick="clearBackupLog()">Clear</button>
+                    </div>
+                    <textarea id="bkProgressLog" class="bk-progress-log" rows="8" readonly placeholder="Actions taken on this page will be logged here, step by step..."></textarea>
+                </div>
+
+                <div class="bk-section-divider">🛠️ One-Time Tooling</div>
+
+                <div class="bk-panel bk-panel-muted">
+                    <div class="bk-panel-header">Generate SQL Seed Files</div>
+                    <p class="bk-panel-hint">Not part of the standard backup flow. Generates real INSERT statements from live data for all 8 tables, matching the 30xx seed-file numbering convention — including replacing the current placeholder todo seed with real data. Meant to be run once, not on a regular cadence.</p>
+                    <div class="bk-action-row">
+                        <button class="btn btn-secondary" onclick="generateSqlSeeds()">📄 Generate Seed SQL (.zip)</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/pwms-prev-config.js"></script>
+    <script src="../js/dbbckupexpo-supabase.js"></script>
+    <script src="../js/dbbckupexpo.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!-- AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance AC v1.7 DBBCKUPNEXPONATT</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/attendance.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Attendance</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="loadAttendancePage()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div class="att-links-row">
+                    <a href="attendance-report.html">📊 Attendance Report</a>
+                    <a href="payroll.html">💰 Payroll View</a>
+                    <a href="leaveplan.html">🗓️ Leave Plan</a>
+                    <a href="dataquery.html">🔍 Data Query</a>
+                </div>
+
+                <div id="attGapAlert" class="gap-alert" style="display:none;"></div>
+
+                <div class="att-layout">
+
+                    <div class="att-main-col">
+
+                        <div class="att-panel">
+                            <div class="att-panel-title">Log Today</div>
+                            <div class="att-log-form-row">
+                                <div class="att-field">
+                                    <label>Date</label>
+                                    <input type="date" id="attLogDate" onchange="onAttLogDateChanged()">
+                                </div>
+                                <div class="att-field">
+                                    <label>Code</label>
+                                    <select id="attLogCode" onchange="onAttLogCodeChanged()"></select>
+                                </div>
+                                <div class="att-field wide">
+                                    <label>Reason (auto-suggested, editable)</label>
+                                    <input type="text" id="attLogReason">
+                                </div>
+                                <div class="att-field">
+                                    <label>Oracle Updated?</label>
+                                    <input type="checkbox" id="attLogOracle" style="width:20px; height:20px; margin-top:6px;">
+                                </div>
+                                <button class="btn btn-primary" onclick="saveAttendanceLog()">Save</button>
+                            </div>
+                            <div class="att-note" id="attLogModeNote"></div>
+                        </div>
+
+                        <div class="att-panel">
+                            <div class="att-panel-header">
+                                <div class="att-panel-title">Recent Entries (last 15 days)</div>
+                                <button class="btn btn-secondary" onclick="markPastWeekendsOff()">⚡ Mark all unlogged weekends up to today as Week-Off</button>
+                            </div>
+                            <table class="att-table">
+                                <thead>
+                                    <tr><th>Date</th><th>Day</th><th>Code</th><th>Reason</th></tr>
+                                </thead>
+                                <tbody id="attRecentBody">
+                                    <tr><td colspan="4" class="wb-empty-state">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <div class="att-side-col">
+                        <div class="att-widget-card">
+                            <div class="att-widget-label">Next Holiday</div>
+                            <div class="att-widget-value" id="attNextHolidayDays">—</div>
+                            <div class="att-widget-sub" id="attNextHolidaySub"></div>
+                        </div>
+                        <div class="att-widget-card">
+                            <div class="att-widget-label">Tenure</div>
+                            <div class="att-widget-value" id="attTenure">—</div>
+                            <div class="att-widget-sub" id="attTenureSub"></div>
+                        </div>
+                        <div class="att-widget-card">
+                            <div class="att-widget-label">This Month (calendar)</div>
+                            <div class="att-widget-value" id="attMonthSummary">—</div>
+                            <div class="att-widget-sub" id="attMonthSub"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="attEditModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Attendance Entry</h2>
+            <input type="hidden" id="attEditDate">
+
+            <div class="form-row">
+                <label>Date</label>
+                <input type="date" id="attEditDateDisplay" readonly>
+                <span class="field-hint">Date can't be changed — delete and re-log under a different date if needed.</span>
+            </div>
+
+            <div class="form-row">
+                <label>Code</label>
+                <select id="attEditCode" onchange="onAttEditCodeChanged()"></select>
+            </div>
+
+            <div class="form-row">
+                <label>Reason</label>
+                <input type="text" id="attEditReason">
+            </div>
+
+            <div class="form-row">
+                <label><input type="checkbox" id="attEditOracle" style="width:18px; height:18px; vertical-align:middle;"> Oracle Updated?</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" style="color:var(--danger-strong); margin-right:auto;" onclick="deleteAttendanceLog()">Delete Entry</button>
+                <button class="btn btn-secondary" onclick="closeModal('attEditModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAttendanceEdit()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/attendance.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>

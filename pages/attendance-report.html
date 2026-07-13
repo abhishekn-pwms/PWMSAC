@@ -1,0 +1,149 @@
+<!-- AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Report AC v1.7 DBBCKUPNEXPONATT</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/attendance.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Attendance Report</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary" onclick="exportAttReportCsv()">⬇️ Export CSV</button>
+                    </div>
+                </div>
+
+                <div class="att-links-row">
+                    <a href="attendance.html">← Back to Attendance</a>
+                </div>
+
+                <div class="att-toggle-row">
+                    <button class="att-toggle-btn active" id="attViewAll" onclick="setAttReportGapsOnly(false)">All Entries</button>
+                    <button class="att-toggle-btn" id="attViewGaps" onclick="setAttReportGapsOnly(true)">Gaps Only</button>
+                </div>
+
+                <div class="att-filter-bar">
+                    <div class="att-field">
+                        <label>Scope</label>
+                        <select id="attScope" onchange="onAttScopeChanged()">
+                            <option value="month" selected>Month</option>
+                            <option value="year">Year</option>
+                            <option value="range">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="att-field" id="attMonthField">
+                        <label>Month</label>
+                        <select id="attMonthSelect" onchange="renderAttReport()"></select>
+                    </div>
+                    <div class="att-field" id="attYearField">
+                        <label>Year</label>
+                        <select id="attYearSelect" onchange="renderAttReport()"></select>
+                    </div>
+                    <div class="att-field" id="attFromField" style="display:none;">
+                        <label>From</label>
+                        <input type="date" id="attFromDate" onchange="renderAttReport()">
+                    </div>
+                    <div class="att-field" id="attToField" style="display:none;">
+                        <label>To</label>
+                        <input type="date" id="attToDate" onchange="renderAttReport()">
+                    </div>
+
+                    <div class="att-toggle-row" style="margin:0 0 0 auto;">
+                        <button class="att-toggle-btn active" id="attBtnTable" onclick="showAttReportView('table')">Table</button>
+                        <button class="att-toggle-btn" id="attBtnCal" onclick="showAttReportView('calendar')">Calendar</button>
+                    </div>
+                </div>
+
+                <div class="att-note" id="attWindowNote">Report is limited to the last 12 months, regardless of how far back real data goes — use Data Query for anything older.</div>
+
+                <div class="stat-strip" id="attStatStrip"></div>
+
+                <div id="attReportTableView">
+                    <table class="att-table">
+                        <thead>
+                            <tr>
+                                <th onclick="setAttReportSort('log_date')">Date <span id="attSortIcon_log_date"></span></th>
+                                <th>Day</th>
+                                <th onclick="setAttReportSort('code')">Code <span id="attSortIcon_code"></span></th>
+                                <th>Reason</th>
+                                <th onclick="setAttReportSort('hr_type_frozen')">HR Type (frozen) <span id="attSortIcon_hr_type_frozen"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="attReportBody">
+                            <tr><td colspan="5" class="wb-empty-state">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="attReportCalendarView" style="display:none;">
+                    <div id="attCalGrid" class="att-cal-grid"></div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="attEditModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Attendance Entry</h2>
+            <input type="hidden" id="attEditDate">
+
+            <div class="form-row">
+                <label>Date</label>
+                <input type="date" id="attEditDateDisplay" readonly>
+                <span class="field-hint">Date can't be changed — delete and re-log under a different date if needed.</span>
+            </div>
+
+            <div class="form-row">
+                <label>Code</label>
+                <select id="attEditCode" onchange="onAttEditCodeChanged()"></select>
+            </div>
+
+            <div class="form-row">
+                <label>Reason</label>
+                <input type="text" id="attEditReason">
+            </div>
+
+            <div class="form-row">
+                <label><input type="checkbox" id="attEditOracle" style="width:18px; height:18px; vertical-align:middle;"> Oracle Updated?</label>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" style="color:var(--danger-strong); margin-right:auto;" onclick="deleteAttendanceLogFromReport()">Delete Entry</button>
+                <button class="btn btn-secondary" onclick="closeModal('attEditModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAttendanceEditFromReport()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/attendance-report.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>

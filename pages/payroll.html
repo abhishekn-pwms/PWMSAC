@@ -1,0 +1,75 @@
+<!-- AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll View AC v1.7 DBBCKUPNEXPONATT</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <link rel="stylesheet" href="../css/attendance.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Payroll View</div>
+                </div>
+
+                <div class="att-links-row">
+                    <a href="attendance.html">← Back to Attendance</a>
+                </div>
+
+                <div class="att-note">Uses each entry's actual employer's payroll cycle (from Employment History), not a single fixed rule. Not restricted by the Report page's rolling window — this page is meant for occasional, further-back lookups.</div>
+
+                <div class="att-filter-bar">
+                    <div class="att-field">
+                        <label>Payroll Month</label>
+                        <select id="payMonthSelect" onchange="renderPayrollView()"></select>
+                    </div>
+                    <div class="att-field">
+                        <label>Payroll Year</label>
+                        <select id="payYearSelect" onchange="renderPayrollView()"></select>
+                    </div>
+                </div>
+
+                <div class="stat-strip" id="payStatStrip"></div>
+
+                <table class="att-table">
+                    <thead>
+                        <tr><th>Date</th><th>Code</th><th>Description</th><th>Employer</th><th>Cycle</th></tr>
+                    </thead>
+                    <tbody id="payrollBody">
+                        <tr><td colspan="5" class="wb-empty-state">Loading...</td></tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/payroll.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>
