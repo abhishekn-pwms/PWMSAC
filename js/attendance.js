@@ -1,11 +1,11 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE
+// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE PASS 2
 
 // attendance.js
 // Main Attendance page — Log Today, Recent Entries (15 days), gap badge
 // (rolling 365-day window), bulk weekend fill, holiday/tenure/month
 // widgets, and the shared Edit modal.
 
-const ATT_WINDOW_MONTHS = 12;
+const ATT_WINDOW_MONTHS = 6;
 const ATT_RECENT_DAYS = 15;
 
 // Isolated on purpose — later changing ATT_WINDOW_MONTHS to 6, 3,
@@ -137,14 +137,18 @@ async function onAttLogDateChanged() {
     }
 
     const note = document.getElementById("attLogModeNote");
+    const saveBtn = document.getElementById("attLogSaveBtn");
 
     if (entry) {
 
-        document.getElementById("attLogCode").value = entry.code;
-        document.getElementById("attLogReason").value = entry.reason || "";
-        document.getElementById("attLogOracle").checked = !!entry.oracle_updated;
+        // Add-only — never load existing values into this form, and
+        // never allow Save to silently overwrite. The Edit modal
+        // (row click, in Recent Entries below) is the one and only
+        // way to change an existing entry.
+        note.textContent = `Already logged for ${formatDate(dateStr)} — click the entry below to edit it.`;
+        note.style.color = "var(--danger-strong)";
 
-        note.textContent = `Editing existing entry for ${formatDate(dateStr)} — Code/Reason/Oracle shown are the actual stored values, not a suggestion.`;
+        if (saveBtn) saveBtn.disabled = true;
 
     } else {
 
@@ -152,6 +156,9 @@ async function onAttLogDateChanged() {
         document.getElementById("attLogOracle").checked = false;
 
         note.textContent = `No entry yet for ${formatDate(dateStr)} — this will create a new one.`;
+        note.style.color = "";
+
+        if (saveBtn) saveBtn.disabled = false;
     }
 }
 
@@ -181,6 +188,13 @@ async function saveAttendanceLog() {
         return;
     }
 
+    const existing = await getData(`attendance_log?log_date=eq.${logDate}`);
+
+    if (Array.isArray(existing) && existing.length > 0) {
+        showError("Already logged for this date — click the entry below to edit it instead.");
+        return;
+    }
+
     const codeRow = attCodes.find(c => c.code === code);
     const oracleUpdated = document.getElementById("attLogOracle").checked;
 
@@ -192,15 +206,8 @@ async function saveAttendanceLog() {
         oracle_updated: oracleUpdated
     };
 
-    const existing = await getData(`attendance_log?log_date=eq.${logDate}`);
-
-    if (Array.isArray(existing) && existing.length > 0) {
-        await updateData("attendance_log", "log_date", logDate, payload);
-        showSuccess("Entry updated");
-    } else {
-        await insertData("attendance_log", { log_date: logDate, ...payload });
-        showSuccess("Entry saved");
-    }
+    await insertData("attendance_log", { log_date: logDate, ...payload });
+    showSuccess("Entry saved");
 
     await loadRecentEntries();
     await loadRollingWindowAndGaps();
@@ -302,9 +309,15 @@ async function loadRollingWindowAndGaps() {
         const dow = d.getDay();
         const isWeekend = (dow === 0 || dow === 6);
 
-        if (!isWeekend && !attLogRolling[dateStr]) {
+
+        const entry = attLogRolling[dateStr];
+        const isGap = !isWeekend && (!entry || !entry.oracle_updated);
+
+        if (isGap) {
             gapCount++;
         }
+
+
     }
 
     const alertEl = document.getElementById("attGapAlert");
@@ -389,7 +402,8 @@ async function markPastWeekendsOff() {
                 code: "OFF",
                 reason: getSuggestedReason("OFF", dateStr),
                 description: offCode.attendance_type,
-                hr_type_frozen: offCode.hr_type
+                hr_type_frozen: offCode.hr_type,
+                oracle_updated: true
             });
 
             // A 409/constraint failure often comes back as an error object

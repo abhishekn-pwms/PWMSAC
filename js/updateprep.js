@@ -1,4 +1,4 @@
-// AC v1.6 TODO NOTES
+// AC v1.7 UPDTPREP - Instructions Prompt (Manager) Changes
 
 // ======================================================
 // Update Prep — assembles copy-ready prompts (written +
@@ -36,10 +36,12 @@ const UP_DEFAULT_STYLE_MANAGER =
     "- Where directly supported by the raw data or previous project continuity, briefly state the immediate purpose of the work (for example \"to finalize partner selection\", \"to evaluate migration feasibility\" or \"to support commercial closure\"). Do not infer downstream business impact or client sentiment.\n" +
     "- The bold status sentence should describe the most significant accomplishment or current state, synthesizing related activities into one outcome where appropriate, but do not infer progress, maturity or completion beyond what the evidence supports.\n" +
     "- Clearly distinguish what has been completed from what remains in progress or pending.\n" +
-    "- Use dependency or risk framing only when it materially affects the next step, timeline or decision, not on every project and not simply to sound more executive.\n" +
-    "- The Next: sentence should state the immediate next action, naming the specific dependency only when one genuinely exists.\n" +
-    "- For the bracketed history line, retain whichever date is the most meaningful reference point for continuity. This may be older than the current reporting period and is not necessarily the most recent activity. Introduce a new history date only when the current period establishes a new workstream or a significant shift in direction.\n" +
-    "- If there is no material activity during the reporting period, state this explicitly (for example, \"No material change this period...\") rather than omitting the project.\n\n" +
+    "- Use dependency or risk framing only when it materially affects the next step, timeline or decision, not on every project and not simply to sound more executive.\n\n" +
+    "#### Weekly Progression & Continuity\n" +
+    "- Treat each weekly update as a continuation of the previous manager review, not as a standalone status report.\n" +
+    "- The bold status sentence must describe only what changed during the current reporting period, always grounded in THIS PERIOD'S RAW DATA — never in the history line or the previous update's narrative. Avoid repeating information already captured in the history line unless necessary to explain the current update.\n" +
+    "- The bracketed history line should normally be carried forward from the previous manager review, and only replaced when the current period establishes a new workstream or a significant shift in direction.\n" +
+    "- Re-evaluate the history line's anchor date every period rather than copying it by default — carrying forward the same reference without checking whether it's still the most useful one is a failure, not a safe choice. When several projects genuinely share no new activity, each one's history line must still reflect that project's own most recent meaningful anchor, not a single repeated block across projects.\n\n" +
     "### DATA INTEGRITY RULES (Apply Before Style)\n" +
     "1. Synthesis must stay strictly grounded in the raw data provided. Do not infer downstream business impact, sentiment or progress (for example, strengthened the pipeline, accelerated closure or increased client confidence) unless explicitly supported by the task logs. It is acceptable to summarize related activities into the immediate outcome achieved during the reporting period.\n" +
     "2. Any dated activity within the current reporting period counts as this period's activity, even if it appears in an Open ToDos or brief-mention line. Never label a project \"No material progress this period\" if any dated activity from within the reporting period exists.\n" +

@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE
+// AC v1.7 DB BACKUP/EXPORT PASS 2
 
 // backup.js
 // Data Safety page — exports and full-replace backup push to pwms_prev.
@@ -12,25 +12,69 @@ const BACKUP_TABLES = [
     { name: "todo", pk: "todo_id" },
     { name: "task_log", pk: "task_log_id" },
     { name: "update_prep_settings", pk: "setting_key" },
-    { name: "update_prep_history", pk: "history_id" }
+    { name: "update_prep_history", pk: "history_id" },
+    { name: "personal_profile", pk: "profile_id" },
+    { name: "employment_history", pk: "employment_id" },
+    { name: "attendance_codes", pk: "code" },
+    { name: "holiday_master", pk: "holiday_id" },
+    { name: "attendance_log", pk: "log_date" }
 ];
 
 // Parents before children, so a child's foreign key always has
-// somewhere valid to point during insert.
+// somewhere valid to point during insert. attendance_codes must
+// precede attendance_log (the only real dependency among the
+// attendance tables) — the other three attendance tables have no
+// dependencies and can sit anywhere.
 const INSERT_ORDER = [
     "portfolio", "project", "milestone", "activity",
     "todo", "task_log",
-    "update_prep_settings", "update_prep_history"
+    "update_prep_settings", "update_prep_history",
+    "personal_profile", "employment_history",
+    "attendance_codes", "holiday_master", "attendance_log"
 ];
 
 // Children before parents, so nothing is still referenced when its
-// parent gets deleted.
+// parent gets deleted. attendance_log must precede attendance_codes.
 const DELETE_ORDER = [
     "task_log", "todo", "activity", "milestone", "project", "portfolio",
-    "update_prep_settings", "update_prep_history"
+    "update_prep_settings", "update_prep_history",
+    "attendance_log", "attendance_codes",
+    "personal_profile", "employment_history", "holiday_master"
 ];
 
 let backupData = {};
+
+
+// ======================================
+// PAGINATED FETCH — PostgREST caps any single request at a default row
+// limit (commonly 1000), silently truncating anything beyond it unless
+// explicitly paginated. This fetches page by page until a page comes
+// back with fewer rows than requested, guaranteeing every row is
+// retrieved regardless of table size. Same fix as Data Query's.
+// ======================================
+
+async function fetchAllRowsPaginated(tableName) {
+
+    const PAGE_SIZE = 1000;
+    let allRows = [];
+    let offset = 0;
+
+    while (true) {
+
+        const page = await getData(`${tableName}?limit=${PAGE_SIZE}&offset=${offset}`);
+        const pageRows = Array.isArray(page) ? page : [];
+
+        allRows = allRows.concat(pageRows);
+
+        if (pageRows.length < PAGE_SIZE) {
+            break;
+        }
+
+        offset += PAGE_SIZE;
+    }
+
+    return allRows;
+}
 
 
 // ======================================
@@ -82,8 +126,7 @@ async function loadAllBackupData() {
 
     for (const t of BACKUP_TABLES) {
 
-        const rows = await getData(t.name);
-        backupData[t.name] = Array.isArray(rows) ? rows : [];
+        backupData[t.name] = await fetchAllRowsPaginated(t.name);
 
         logBackup(`  ${t.name}: ${backupData[t.name].length} row(s)`);
     }
@@ -277,12 +320,27 @@ async function generateSqlSeeds() {
         todo: "3050",
         task_log: "3060",
         update_prep_settings: "3070",
-        update_prep_history: "3080"
+        update_prep_history: "3080",
+        personal_profile: "3090",
+        employment_history: "3100",
+        attendance_codes: "3110",
+        holiday_master: "3120",
+        attendance_log: "3130"
     };
 
     BACKUP_TABLES.forEach(t => {
 
-        const rows = backupData[t.name];
+        let rows = backupData[t.name];
+
+        // attendance_log is deliberately scoped to May–Dec 2022 only
+        // here — enough real data to not start from nothing, without
+        // seeding four-plus years of history every time this runs.
+        // CSV/JSON export and Push to pwms_prev are unaffected — both
+        // still use the full live dataset, unrestricted.
+        if (t.name === "attendance_log") {
+            rows = rows.filter(r => r.log_date >= "2022-05-30" && r.log_date <= "2022-12-31");
+        }
+
         const number = seedNumbers[t.name];
         const filename = `${number}_Seed_${toPascalCase(t.name)}.sql`;
 

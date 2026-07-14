@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE
+// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE PASS 2
 
 // attendance-report.js
 // Full attendance history — but scoped to the rolling 365-day window,
@@ -368,11 +368,15 @@ function buildScopedRows() {
         const isWeekend = (dow === 0 || dow === 6);
         const entry = rowsByDate[dateStr];
 
-        if (entry) {
+
+        if (entry && entry.oracle_updated) {
             result.push({ ...entry, isGap: false });
+        } else if (entry && !entry.oracle_updated) {
+            result.push({ ...entry, isGap: true, gapType: "oracle" });
         } else if (!isWeekend) {
-            result.push({ log_date: dateStr, isGap: true });
+            result.push({ log_date: dateStr, isGap: true, gapType: "none" });
         }
+
         // unlogged weekends are simply omitted from the report entirely —
         // not gaps, not shown as rows
     }
@@ -427,14 +431,14 @@ function renderAttReport() {
 function renderAttStatStrip(rows) {
 
     const total = rows.length;
-    const gaps = rows.filter(r => r.isGap).length;
-    const logged = total - gaps;
-    const oraclePending = rows.filter(r => !r.isGap && !r.oracle_updated).length;
+    const noEntry = rows.filter(r => r.gapType === "none").length;
+    const oraclePending = rows.filter(r => r.gapType === "oracle").length;
+    const logged = total - noEntry - oraclePending;
 
     document.getElementById("attStatStrip").innerHTML = `
         <div class="stat-chip">${total} Total Day(s)</div>
-        <div class="stat-chip">${logged} Logged</div>
-        <div class="stat-chip">${gaps} Gap(s)</div>
+        <div class="stat-chip">${logged} Fully Logged</div>
+        <div class="stat-chip">${noEntry} No Entry</div>
         <div class="stat-chip">${oraclePending} Oracle Pending</div>
     `;
 }
@@ -444,15 +448,26 @@ function renderAttReportRow(r) {
 
     const dayLabel = new Date(r.log_date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short" });
 
+
     if (r.isGap) {
+        const message = (r.gapType === "oracle") ? "🔶 Logged, Oracle pending" : "⚠️ No entry logged";
+
+        // Oracle-pending gaps are a real, existing entry — clickable to
+        // edit, same as any normal row. True "nothing logged" gaps have
+        // no entry behind them, so no modal to open — not clickable.
+        const clickAttr = (r.gapType === "oracle")
+            ? `onclick="openAttEditModal('${r.log_date}')"`
+            : "";
+
         return `
-            <tr class="att-row-missed-weekday">
+            <tr class="att-row-missed-weekday" ${clickAttr}>
                 <td>${formatDate(r.log_date)}</td>
                 <td>${dayLabel}</td>
-                <td colspan="3">⚠️ No entry logged</td>
+                <td colspan="3">${message}</td>
             </tr>
         `;
     }
+
 
     const oracleTag = r.oracle_updated
         ? ""
@@ -506,7 +521,9 @@ function renderAttReportCalendar(scopedRows) {
         const dateStr = toLocalDateStr(new Date(year, month, day));
         const entry = rowsByDate[dateStr];
 
-        if (entry && entry.isGap) {
+        if (entry && entry.isGap && entry.gapType === "oracle") {
+            html += `<div class="att-cal-day att-cal-gap" onclick="openAttEditModal('${dateStr}')"><div class="att-cal-daynum">${day}</div><div class="att-cal-daycode">🔶</div></div>`;
+        } else if (entry && entry.isGap) {
             html += `<div class="att-cal-day att-cal-gap" onclick="window.location.href='attendance.html'"><div class="att-cal-daynum">${day}</div><div class="att-cal-daycode">⚠️</div></div>`;
         } else if (entry) {
             html += `<div class="att-cal-day"><div class="att-cal-daynum">${day}</div><div class="att-cal-daycode">${entry.code}</div></div>`;
@@ -536,11 +553,14 @@ function exportAttReportCsv() {
     const lines = [headers.join(",")];
 
     rows.forEach(r => {
+
+        const isTrueGap = r.isGap && r.gapType === "none";
+
         lines.push([
             r.log_date,
-            r.isGap ? "GAP" : (r.code || ""),
-            r.isGap ? "No entry logged" : (r.reason || "").replace(/,/g, ";"),
-            r.isGap ? "" : (r.hr_type_frozen || "")
+            isTrueGap ? "GAP" : (r.code || ""),
+            isTrueGap ? "No entry logged" : (r.reason || "").replace(/,/g, ";"),
+            isTrueGap ? "" : (r.hr_type_frozen || "")
         ].join(","));
     });
 
