@@ -1,0 +1,10 @@
+-- 3130_Seed_AttendanceLog.sql
+-- Deliberately empty for now.
+--
+-- 1,501 real historical entries exist in the original Excel (30 May
+-- 2022 through 10 Jul 2026), but bulk-importing all of them belongs to
+-- its own separate, later decision — once the Attendance UI actually
+-- exists to review data quality first (the ".." trailing-dot artifact
+-- on weekend reasons, the non-chronological row order, the placeholder
+-- "Update Time" values on the earliest entries, etc.) — not something
+-- to import blindly as part of this initial schema pass.

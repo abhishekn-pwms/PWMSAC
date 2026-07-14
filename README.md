@@ -1,19 +1,24 @@
 === === === === === ===
-Date : Tue, 12-Jul-2026
+Date : Tue, 13-Jul-2026
 === === === === === ===
 
-Release PWMS AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE
+Release PWMS AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE AND UPDATEPREP MANAGER PROMPT CHANGES
 ------------------
 
 What's New
-Created Data Safety (Backup & Export) page - exports and full-replace backup push to excel, JSON and pwms_prev DB in Supabase.
-Complete Attendance Module transitioned from curremt Excel Macro to PWMS WebApp.
+* Created Data Safety (Backup & Export) page - exports and full-replace backup push to excel, JSON and pwms_prev DB in Supabase.
+* Complete Attendance Module transitioned from current Excel Macro to PWMS WebApp.
+* Changed Instruction Prompt for Manager Review.
 
-** DATA BACKUP/EXPORT AND ATTENDANCE MODULE
+** DATA BACKUP/EXPORT
+** ATTENDANCE MODULE
+** Instructions Prompt (Manager) Changes
 
 ## <Comment Block>
-# "AC v1.7 DBBCKUPNEXPO"
+# "AC v1.7 UPDTPREP"
+# "AC v1.7 DBBCKUPNEXPO Pass 2"
 # "AC v1.7 DBBCKUPNEXPONATT"
+# "AC v1.7 DBBCKUPNEXPO"
 
 
 
