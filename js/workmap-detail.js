@@ -1,4 +1,4 @@
-// AC v1.6 TODO NOTES
+// AC v1.7b DSHBRDNWRKMAP
 
 // ======================================================
 // Work Map — Detail Page
@@ -49,8 +49,96 @@ document.addEventListener(
         if (preselectTodoId) {
             highlightTodoRow(preselectTodoId);
         }
+
+        checkEodNudge();
+        loadLoggingStreak();
     }
 );
+
+
+// 🌙 EOD Nudge — same pattern as Dashboard/Work Map, independently
+// implemented here since there's no shared utility file for it.
+async function checkEodNudge() {
+
+    const nudgeEl = document.getElementById("eodNudge");
+    if (!nudgeEl) {
+        return;
+    }
+
+    const todayStr = getToday();
+    const dismissKey = `EOD_NUDGE_DISMISSED_${todayStr}`;
+
+    if (sessionStorage.getItem(dismissKey)) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const currentHour = new Date().getHours();
+    if (currentHour < 17) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const todayLogs = await getData(`task_log?task_date=eq.${todayStr}`);
+    const hasLoggedToday = Array.isArray(todayLogs) && todayLogs.length > 0;
+
+    if (hasLoggedToday) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    nudgeEl.style.display = "flex";
+    nudgeEl.innerHTML = `
+        <div class="eod-nudge-text">🌙 It's after 5pm and nothing's logged today yet.</div>
+        <div class="eod-nudge-actions">
+            <button type="button" class="btn btn-primary" onclick="window.location.href='task-log.html?action=new'">Log Now</button>
+            <button type="button" class="btn btn-secondary" onclick="dismissEodNudge()">Dismiss</button>
+        </div>
+    `;
+}
+
+
+function dismissEodNudge() {
+    const todayStr = getToday();
+    sessionStorage.setItem(`EOD_NUDGE_DISMISSED_${todayStr}`, "1");
+    document.getElementById("eodNudge").style.display = "none";
+}
+
+
+// 🔥 Logging Streak — reuses wmdTaskLogs (already loaded, all-time data).
+function loadLoggingStreak() {
+
+    const chipEl = document.getElementById("wmdSummaryStreak");
+    if (!chipEl) {
+        return;
+    }
+
+    if (!Array.isArray(wmdTaskLogs) || wmdTaskLogs.length === 0) {
+        chipEl.textContent = "Streak: 0 days";
+        return;
+    }
+
+    const distinctDates = [...new Set(wmdTaskLogs.map(l => l.task_date))].sort();
+    const dateSet = new Set(distinctDates);
+
+    let current = 0;
+    let cursor = new Date(getToday() + "T00:00:00");
+
+    while (dateSet.has(toLocalDateStrWmd(cursor))) {
+        current++;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    chipEl.textContent = current === 0 ? "Streak: 0 days" : `🔥 Streak: ${current} day${current === 1 ? "" : "s"}`;
+}
+
+
+function toLocalDateStrWmd(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
 
 
 function populateDetailMilestoneStatusOptions() {
@@ -67,6 +155,31 @@ function populateDetailMilestoneStatusOptions() {
 function isDetailMilestoneClosed(status) {
 
     return WMD_CLOSED_STATUSES.includes(status);
+}
+
+
+function renderDetailStalledFlag(milestoneId, closed) {
+
+    if (closed) {
+        return "";
+    }
+
+    const STALLED_DAYS = 14;
+
+    const logsForMilestone = wmdTaskLogs.filter(l => l.milestone_id === milestoneId);
+
+    if (logsForMilestone.length === 0) {
+        return "";
+    }
+
+    const mostRecent = logsForMilestone.reduce((latest, l) => (l.task_date > latest ? l.task_date : latest), logsForMilestone[0].task_date);
+    const daysSince = Math.floor((new Date(getToday()) - new Date(mostRecent)) / (1000 * 60 * 60 * 24));
+
+    if (daysSince < STALLED_DAYS) {
+        return "";
+    }
+
+    return `&nbsp;|&nbsp; <span style="color:var(--text-muted); font-weight:700;">💤 Stalled — ${daysSince}d</span>`;
 }
 
 
@@ -469,6 +582,7 @@ function renderDetailArea() {
                     ${milestone.project_name || ""}${milestone.portfolio_name ? " · " + milestone.portfolio_name : ""}
                     &nbsp;|&nbsp; ${isStandalone ? `<span class="badge-pill badge-status-not-started">Standalone</span>` : statusBadgeHtml(milestone.status)}
                     ${isStandalone ? "" : `&nbsp;|&nbsp; 📅 ${formatDate(milestone.target_date) || "—"} (${daysLabel})`}${nearestNote}
+                    ${renderDetailStalledFlag(milestone.milestone_id, isDetailMilestoneClosed(milestone.status))}
                 </div>
             </div>
 
@@ -761,10 +875,12 @@ function renderDetailLogEditForm(log) {
                     <label>Date</label>
                     <input type="date" id="wmdEditLogDate_${suffix}" value="${log.task_date || ""}">
                 </div>
+
                 <div>
                     <label>Minutes</label>
                     <input type="number" id="wmdEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmdCalcEditLogTime('${suffix}')">
                 </div>
+
             </div>
 
             <div class="wm-edit-field-row wm-edit-field-row-split">
@@ -1307,6 +1423,7 @@ function wmdApplyTimeCalc(startEl, endEl, minutesEl) {
         startEl.value = d.toTimeString().substring(0, 5);
     }
 }
+
 
 
 function wmdCalcNewLogTime(todoId) {

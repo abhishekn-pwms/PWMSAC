@@ -1,4 +1,4 @@
-// PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS
+// AC v1.7b DSHBRDNWRKMAP
 
 let taskLogData = [];
 
@@ -33,6 +33,8 @@ document.addEventListener(
         );
 
         initializeDateFilters();
+
+        checkEodNudge();
 
         await loadMilestones();
 
@@ -574,6 +576,8 @@ async function loadTaskLogs() {
     }
 
     refreshTaskLogView();
+
+    loadLoggingStreak();
 }
 
 
@@ -692,6 +696,93 @@ function getFilteredTaskLogs() {
 }
 
 
+
+
+// 🌙 EOD Nudge — same pattern as Dashboard/Work Map, independently
+// implemented here since there's no shared utility file for it.
+async function checkEodNudge() {
+
+    const nudgeEl = document.getElementById("eodNudge");
+    if (!nudgeEl) {
+        return;
+    }
+
+    const todayStr = getToday();
+    const dismissKey = `EOD_NUDGE_DISMISSED_${todayStr}`;
+
+    if (sessionStorage.getItem(dismissKey)) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const currentHour = new Date().getHours();
+    if (currentHour < 17) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const todayLogs = await getData(`task_log?task_date=eq.${todayStr}`);
+    const hasLoggedToday = Array.isArray(todayLogs) && todayLogs.length > 0;
+
+    if (hasLoggedToday) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    nudgeEl.style.display = "flex";
+    nudgeEl.innerHTML = `
+        <div class="eod-nudge-text">🌙 It's after 5pm and nothing's logged today yet.</div>
+        <div class="eod-nudge-actions">
+            <button type="button" class="btn btn-primary" onclick="newTaskLog()">Log Now</button>
+            <button type="button" class="btn btn-secondary" onclick="dismissEodNudge()">Dismiss</button>
+        </div>
+    `;
+}
+
+
+function dismissEodNudge() {
+    const todayStr = getToday();
+    sessionStorage.setItem(`EOD_NUDGE_DISMISSED_${todayStr}`, "1");
+    document.getElementById("eodNudge").style.display = "none";
+}
+
+
+// 🔥 Logging Streak — reuses taskLogData (already loaded, all-time
+// data, no date filter in the query itself — the period dropdown only
+// filters client-side afterward).
+function loadLoggingStreak() {
+
+    const chipEl = document.getElementById("summaryStreak");
+    if (!chipEl) {
+        return;
+    }
+
+    if (!Array.isArray(taskLogData) || taskLogData.length === 0) {
+        chipEl.textContent = "Streak: 0 days";
+        return;
+    }
+
+    const distinctDates = [...new Set(taskLogData.map(l => l.task_date))].sort();
+    const dateSet = new Set(distinctDates);
+
+    let current = 0;
+    let cursor = new Date(getToday() + "T00:00:00");
+
+    while (dateSet.has(toLocalDateStrTl(cursor))) {
+        current++;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    chipEl.textContent = current === 0 ? "Streak: 0 days" : `🔥 Streak: ${current} day${current === 1 ? "" : "s"}`;
+}
+
+
+function toLocalDateStrTl(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
 
 
 /* ==================================

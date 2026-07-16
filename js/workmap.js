@@ -1,4 +1,4 @@
-// AC v1.6 TODO NOTES
+// AC v1.7b DSHBRDNWRKMAP
 
 // ======================================================
 // Work Map — Milestone Cards Overview
@@ -35,6 +35,9 @@ document.addEventListener(
         await loadWorkMapData();
 
         renderWorkMap();
+
+        checkEodNudge();
+        loadLoggingStreak();
     }
 );
 
@@ -47,6 +50,92 @@ function populateMilestoneStatusOptions() {
         MASTERS.MILESTONE_STATUS
             .map(s => `<option value="${s}">${s}</option>`)
             .join("");
+}
+
+
+// 🌙 EOD Nudge — same pattern as Dashboard's, independently implemented
+// here since this page doesn't share a common utility file for it.
+async function checkEodNudge() {
+
+    const nudgeEl = document.getElementById("eodNudge");
+    if (!nudgeEl) {
+        return;
+    }
+
+    const todayStr = getToday();
+    const dismissKey = `EOD_NUDGE_DISMISSED_${todayStr}`;
+
+    if (sessionStorage.getItem(dismissKey)) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const currentHour = new Date().getHours();
+    if (currentHour < 17) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const todayLogs = await getData(`task_log?task_date=eq.${todayStr}`);
+    const hasLoggedToday = Array.isArray(todayLogs) && todayLogs.length > 0;
+
+    if (hasLoggedToday) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    nudgeEl.style.display = "flex";
+    nudgeEl.innerHTML = `
+        <div class="eod-nudge-text">🌙 It's after 5pm and nothing's logged today yet.</div>
+        <div class="eod-nudge-actions">
+            <button type="button" class="btn btn-primary" onclick="window.location.href='task-log.html?action=new'">Log Now</button>
+            <button type="button" class="btn btn-secondary" onclick="dismissEodNudge()">Dismiss</button>
+        </div>
+    `;
+}
+
+
+function dismissEodNudge() {
+    const todayStr = getToday();
+    sessionStorage.setItem(`EOD_NUDGE_DISMISSED_${todayStr}`, "1");
+    document.getElementById("eodNudge").style.display = "none";
+}
+
+
+// 🔥 Logging Streak — reuses wmTaskLogs (already loaded, all-time data),
+// no new fetch needed.
+function loadLoggingStreak() {
+
+    const chipEl = document.getElementById("wmSummaryStreak");
+    if (!chipEl) {
+        return;
+    }
+
+    if (!Array.isArray(wmTaskLogs) || wmTaskLogs.length === 0) {
+        chipEl.textContent = "Streak: 0 days";
+        return;
+    }
+
+    const distinctDates = [...new Set(wmTaskLogs.map(l => l.task_date))].sort();
+    const dateSet = new Set(distinctDates);
+
+    let current = 0;
+    let cursor = new Date(getToday() + "T00:00:00");
+
+    while (dateSet.has(toLocalDateStrWm(cursor))) {
+        current++;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    chipEl.textContent = current === 0 ? "Streak: 0 days" : `🔥 Streak: ${current} day${current === 1 ? "" : "s"}`;
+}
+
+
+function toLocalDateStrWm(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
 }
 
 
@@ -108,6 +197,46 @@ function getTodosForMilestoneId(milestoneId) {
     }
 
     return wmTodos.filter(t => t.milestone_id === milestoneId);
+}
+
+
+// Different question from getMilestoneStats (which tracks whether time
+// has been logged) — this tracks completion/due-date health: Done vs.
+// Open-not-yet-due vs. Overdue. Reuses todosForMilestone, already loaded
+// in memory — no new fetch needed.
+function getMilestoneHealthRatio(milestoneId) {
+
+    const todosForMilestone = getTodosForMilestoneId(milestoneId);
+
+    if (todosForMilestone.length === 0) {
+        return null;
+    }
+
+    const todayStr = getToday();
+
+    let done = 0;
+    let overdue = 0;
+    let open = 0;
+
+    todosForMilestone.forEach(todo => {
+
+        if (todo.status === "Completed" || todo.status === "Cancelled") {
+            done++;
+        } else if (todo.due_date && todo.due_date < todayStr) {
+            overdue++;
+        } else {
+            open++;
+        }
+    });
+
+    const total = todosForMilestone.length;
+
+    return {
+        donePct: (done / total) * 100,
+        openPct: (open / total) * 100,
+        overduePct: (overdue / total) * 100,
+        done, open, overdue, total
+    };
 }
 
 
@@ -491,6 +620,7 @@ function renderMilestoneCard(milestone, stats, nearest) {
             <div class="wm-card-top">
                 ${isStandalone ? `<span class="badge-pill badge-status-not-started">Standalone</span>` : statusBadgeHtml(milestone.status)}
                 ${(stats.isCritical && !closed) ? `<span class="wm-critical-flag" title="Has ToDo(s) started with zero task logs">⚠️ Needs attention</span>` : ""}
+                ${renderStalledFlag(milestone.milestone_id, closed)}
                 <div class="wm-card-actions">
                     ${isStandalone ? "" : `<button type="button" class="wm-icon-btn" title="Edit milestone" onclick="event.stopPropagation(); editMilestone('${milestone.milestone_id}')">✏️</button>`}
                 </div>
@@ -500,6 +630,8 @@ function renderMilestoneCard(milestone, stats, nearest) {
             <div class="wm-card-context">${milestone.project_name || ""}</div>
 
             ${renderNearestDateBlock(milestone, nearest, closed)}
+
+            ${renderMilestoneHealthBar(milestone.milestone_id, closed)}
 
             <div class="wm-card-stats-row">
                 <div class="wm-card-stat">
@@ -516,6 +648,58 @@ function renderMilestoneCard(milestone, stats, nearest) {
                 </div>
             </div>
 
+        </div>
+    `;
+}
+
+
+function renderStalledFlag(milestoneId, closed) {
+
+    if (closed) {
+        return "";
+    }
+
+    const STALLED_DAYS = 14;
+
+    const logsForMilestone = wmTaskLogs.filter(l => l.milestone_id === milestoneId);
+
+    if (logsForMilestone.length === 0) {
+        // No logs at all is already covered by the existing "Needs
+        // attention" critical flag — don't double up on the same signal.
+        return "";
+    }
+
+    const mostRecent = logsForMilestone.reduce((latest, l) => (l.task_date > latest ? l.task_date : latest), logsForMilestone[0].task_date);
+    const daysSince = Math.floor((new Date(getToday()) - new Date(mostRecent)) / (1000 * 60 * 60 * 24));
+
+    if (daysSince < STALLED_DAYS) {
+        return "";
+    }
+
+    return `<span class="wm-critical-flag" style="color:var(--text-muted);" title="No task log activity in ${daysSince} days">💤 Stalled — ${daysSince}d</span>`;
+}
+
+
+function renderMilestoneHealthBar(milestoneId, closed) {
+
+    // Closed milestones (Completed/Cancelled) don't need a health check —
+    // there's nothing left to track. Skip the bar entirely rather than
+    // showing a misleading all-green or empty one.
+    if (closed) {
+        return "";
+    }
+
+    const ratio = getMilestoneHealthRatio(milestoneId);
+
+    if (!ratio) {
+        return "";
+    }
+
+    return `
+        <div class="wm-health-bar" title="${ratio.done} Done · ${ratio.open} Open · ${ratio.overdue} Overdue">
+            ${ratio.donePct > 0 ? `<div class="wm-health-seg wm-health-done" style="width:${ratio.donePct}%;"></div>` : ""}
+            ${ratio.openPct > 0 ? `<div class="wm-health-seg wm-health-open" style="width:${ratio.openPct}%;"></div>` : ""}
+            ${ratio.overduePct > 0 ? `<div class="wm-health-seg wm-health-overdue" style="width:${ratio.overduePct}%;"></div>` : ""}
         </div>
     `;
 }
@@ -858,10 +1042,17 @@ function renderLogEditForm(log) {
                     <label>Date</label>
                     <input type="date" id="wmEditLogDate_${suffix}" value="${log.task_date || ""}">
                 </div>
+
                 <div>
                     <label>Minutes</label>
                     <input type="number" id="wmEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmCalcEditLogTime('${suffix}')">
                 </div>
+
+                <div>
+                    <label>Minutes</label>
+                    <input type="number" id="wmEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmCalcEditLogTime('${suffix}')">
+                </div>
+
             </div>
 
             <div class="wm-edit-field-row wm-edit-field-row-split">
@@ -1430,6 +1621,7 @@ function wmApplyTimeCalc(startEl, endEl, minutesEl) {
         startEl.value = d.toTimeString().substring(0, 5);
     }
 }
+
 
 
 function wmCalcNewLogTime(todoId) {

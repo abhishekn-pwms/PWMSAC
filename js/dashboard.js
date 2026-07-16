@@ -1,4 +1,4 @@
-// AC v1.6 - TODO NOTES
+// AC v1.7b DSHBRDNWRKMAP
 
 let dashboardMilestones = [];
 let dashboardTodos = [];
@@ -17,7 +17,9 @@ async function refreshFocusDashboard() {
         await Promise.all([
             loadDashboardMilestones(),
             loadDashboardTodos(),
-            loadDashboardPerformanceCounters()
+            loadDashboardPerformanceCounters(),
+            checkEodNudge(),
+            loadLoggingStreak()
         ]);
     } catch (error) {
         console.error("Dashboard engine synchronization error:", error);
@@ -31,7 +33,25 @@ async function refreshFocusDashboard() {
 async function loadDashboardMilestones() {
     const data = await getData("vw_milestone_details?enabled=eq.true&order=target_date.asc");
     dashboardMilestones = Array.isArray(data) ? data.filter(m => m.status !== "Completed" && m.status !== "Cancelled") : [];
-    
+
+    // Self-contained fetch for Stalled Milestone — deliberately separate
+    // from loadDashboardTodos's own task-log fetch (which is keyed by
+    // todo_id, not milestone_id) rather than sharing state across two
+    // functions that run in parallel via Promise.all.
+    const logData = await getData("vw_task_log_details?milestone_id=not.is.null");
+    const allMilestoneLogs = Array.isArray(logData) ? logData : [];
+
+    const lastLoggedByMilestone = {};
+    allMilestoneLogs.forEach(log => {
+        const current = lastLoggedByMilestone[log.milestone_id];
+        if (!current || log.task_date > current) {
+            lastLoggedByMilestone[log.milestone_id] = log.task_date;
+        }
+    });
+
+    const STALLED_DAYS = 14;
+    const todayStr = getToday();
+
     const container = document.getElementById("milestoneRunway");
     document.getElementById("countMilestones").textContent = dashboardMilestones.length;
     document.getElementById("summaryMilestones").textContent = dashboardMilestones.length;
@@ -49,6 +69,17 @@ async function loadDashboardMilestones() {
         const daysRemaining = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
         const isAtRisk = daysRemaining <= 10 && daysRemaining >= 0;
 
+        // Stalled — different question from At Risk. A comfortable
+        // deadline can still be quietly going nowhere if nothing's been
+        // logged in a while. Both badges can show together deliberately
+        // — a close deadline with zero recent activity is the worst
+        // combination, not something to hide behind one badge.
+        const lastLogged = lastLoggedByMilestone[item.milestone_id];
+        const daysSinceLog = lastLogged
+            ? Math.floor((new Date(todayStr) - new Date(lastLogged)) / (1000 * 60 * 60 * 24))
+            : null;
+        const isStalled = daysSinceLog !== null && daysSinceLog >= STALLED_DAYS;
+
         const borderPriorityColor = isAtRisk ? "var(--danger)" : (item.status === "In Progress" ? "#ca8a04" : "#cbd5e1");
         const customBackground = isAtRisk ? "#fef2f2" : "var(--background)";
 
@@ -56,7 +87,10 @@ async function loadDashboardMilestones() {
             <div class="stream-item" style="border-left-color: ${borderPriorityColor}; background: ${customBackground}; cursor:pointer;" onclick="window.location.href='workmap-detail.html?milestone_id=${item.milestone_id}'">
                 <div class="stream-item-top">
                     <span class="stream-item-title" style="${isAtRisk ? "color: var(--danger);" : ""}">${item.milestone_name}</span>
-                    ${isAtRisk ? `<span class="dashboard-badge badge-alert">🚨 AT RISK</span>` : ""}
+                    <span>
+                        ${isAtRisk ? `<span class="dashboard-badge badge-alert">🚨 AT RISK</span>` : ""}
+                        ${isStalled ? `<span class="dashboard-badge" style="background:var(--surface-alt); color:var(--text-muted);">💤 STALLED — ${daysSinceLog}d</span>` : ""}
+                    </span>
                 </div>
                 <div class="item-meta">
                     <span>${item.portfolio_name} | ${item.project_name}</span>
@@ -105,8 +139,10 @@ async function loadDashboardTodos() {
     });
 
     const container = document.getElementById("todoActionDesk");
+
     document.getElementById("countTodos").textContent = dashboardTodos.length;
     document.getElementById("summaryTodos").textContent = dashboardTodos.length;
+
     container.innerHTML = "";
 
     if (dashboardTodos.length === 0) {
@@ -134,11 +170,14 @@ async function loadDashboardTodos() {
 
     let html = "";
 
-    // Render Section A: Urgent Tasks
-    html += `<div style="font-weight:700; font-size:0.75rem; color:var(--danger); margin: 4px 0 6px 0;">🔥 URGENT DESK (TODAY / OVERDUE)</div>`;
-    if (urgentItems.length === 0) {
-        html += `<div class="empty-state is-good" style="padding:6px;">✨ No urgent actions!</div>`;
-    } else {
+    // Urgent — same panel as before, same position (first), but visually
+    // louder now: a solid highlighted block around the whole section,
+    // not just a plain text header.
+    if (urgentItems.length > 0) {
+
+        html += `<div class="focused-today-block">`;
+        html += `<div class="focused-today-block-title">🎯 Focused Today — ${urgentItems.length} need attention</div>`;
+
         urgentItems.forEach(item => {
             const isOverdue = item.due_date < todayStr;
             const detailUrl = `workmap-detail.html?milestone_id=${item.milestone_id || "__standalone__"}&todo_id=${item.todo_id}`;
@@ -158,9 +197,11 @@ async function loadDashboardTodos() {
                 </div>
             `;
         });
+
+        html += `</div>`;
     }
 
-    // Render Section B: Rest of the Pipeline
+    // Upcoming/backlog — unchanged, no duplication with the urgent block above.
     if (upcomingItems.length > 0) {
         html += `<div style="font-weight:700; font-size:0.75rem; color:var(--text-faint); margin: 12px 0 6px 0;">📅 UPCOMING & BACKLOG</div>`;
         upcomingItems.forEach(item => {
@@ -184,6 +225,10 @@ async function loadDashboardTodos() {
         });
     }
 
+    if (urgentItems.length === 0 && upcomingItems.length === 0) {
+        html = `<div class="empty-state is-good">🎉 Action Desk clear!</div>`;
+    }
+
     container.innerHTML = html;
 }
 
@@ -197,6 +242,126 @@ async function loadDashboardPerformanceCounters() {
         const timeSummary = data[0];
         document.getElementById("summaryToday").textContent = `${((timeSummary.today_minutes || 0) / 60).toFixed(1)} hrs`;
     }
+}
+
+
+// 🌙 EOD Nudge — after 5pm, if nothing's been logged today at all.
+// Dismissible for the rest of today specifically (sessionStorage keyed
+// by date), not just for this page load.
+async function checkEodNudge() {
+
+    const nudgeEl = document.getElementById("eodNudge");
+    if (!nudgeEl) {
+        return;
+    }
+
+    const todayStr = getToday();
+    const dismissKey = `EOD_NUDGE_DISMISSED_${todayStr}`;
+
+    if (sessionStorage.getItem(dismissKey)) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const currentHour = new Date().getHours();
+    if (currentHour < 17) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    const todayLogs = await getData(`task_log?task_date=eq.${todayStr}`);
+    const hasLoggedToday = Array.isArray(todayLogs) && todayLogs.length > 0;
+
+    if (hasLoggedToday) {
+        nudgeEl.style.display = "none";
+        return;
+    }
+
+    nudgeEl.style.display = "flex";
+    nudgeEl.innerHTML = `
+        <div class="eod-nudge-text">🌙 It's after 5pm and nothing's logged today yet.</div>
+        <div class="eod-nudge-actions">
+            <button type="button" class="btn btn-primary" onclick="window.location.href='task-log.html?action=new'">Log Now</button>
+            <button type="button" class="btn btn-secondary" onclick="dismissEodNudge()">Dismiss</button>
+        </div>
+    `;
+}
+
+
+function dismissEodNudge() {
+    const todayStr = getToday();
+    sessionStorage.setItem(`EOD_NUDGE_DISMISSED_${todayStr}`, "1");
+    document.getElementById("eodNudge").style.display = "none";
+}
+
+
+// 🔥 Logging Streak — consecutive calendar days with at least one
+// task_log entry, walking backward from today. Also finds the longest
+// streak ever seen across all history, for the small motivational sub-line.
+async function loadLoggingStreak() {
+
+    const valueEl = document.getElementById("summaryStreak");
+    const longestEl = document.getElementById("summaryStreakLongest");
+    if (!valueEl) {
+        return;
+    }
+
+    const logs = await getData("task_log?select=task_date&order=task_date.asc");
+
+    if (!Array.isArray(logs) || logs.length === 0) {
+        valueEl.textContent = "0 days";
+        longestEl.textContent = "";
+        return;
+    }
+
+    // Distinct logged dates only — multiple entries on the same day
+    // shouldn't count as extending the streak twice.
+    const distinctDates = [...new Set(logs.map(l => l.task_date))].sort();
+
+    // Current streak — walk backward from today.
+    const dateSet = new Set(distinctDates);
+    let current = 0;
+    let cursor = new Date(getToday() + "T00:00:00");
+
+    while (dateSet.has(toLocalDateStrDashboard(cursor))) {
+        current++;
+        cursor.setDate(cursor.getDate() - 1);
+    }
+
+    // Longest streak ever — single pass over the sorted distinct dates,
+    // counting consecutive-day runs.
+    let longest = current > 0 ? 1 : 0;
+    let run = 1;
+
+    for (let i = 1; i < distinctDates.length; i++) {
+        const prev = new Date(distinctDates[i - 1] + "T00:00:00");
+        const curr = new Date(distinctDates[i] + "T00:00:00");
+        const dayDiff = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+
+        if (dayDiff === 1) {
+            run++;
+        } else {
+            run = 1;
+        }
+
+        if (run > longest) {
+            longest = run;
+        }
+    }
+
+    valueEl.textContent = current === 0 ? "0 days" : `🔥 ${current} day${current === 1 ? "" : "s"}`;
+    longestEl.textContent = longest > 0 ? `Longest: ${longest} day${longest === 1 ? "" : "s"}` : "";
+}
+
+
+// Same timezone-safe date formatting used elsewhere in the app (avoids
+// the .toISOString() UTC-shift bug) — kept local to this file rather
+// than assuming app.js already exports an identically-named helper.
+function toLocalDateStrDashboard(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
 }
 
 
