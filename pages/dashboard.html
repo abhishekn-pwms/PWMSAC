@@ -1,12 +1,46 @@
-<!-- AC v1.6 TODO NOTES -->
+<!-- AC v1.7b DSHBRDNWRKMAP -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard AC v1.6 TODONOTES</title>
+    <title>Dashboard AC v1.7b</title>
     <link rel="stylesheet" href="../css/pwms.css">
+    <style>
+        .eod-nudge {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .eod-nudge-text { font-size: 0.82rem; color: #78350f; }
+        .eod-nudge-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .focused-today-block {
+            background: var(--danger-bg);
+            border: 1px solid #fca5a5;
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+        .focused-today-block-title {
+            font-weight: 800;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            color: var(--danger-strong);
+            margin-bottom: 8px;
+        }
+        .focused-today-block .stream-item {
+            background: var(--surface);
+        }
+    </style>
 </head>
 <body>
 
@@ -33,6 +67,8 @@
                     </div>
                 </div>
 
+                <div id="eodNudge" class="eod-nudge" style="display:none;"></div>
+
                 <div class="dashboard-summary-row">
                     <div class="dashboard-summary-card">
                         <div class="summary-label">Hours Today</div>
@@ -45,6 +81,11 @@
                     <div class="dashboard-summary-card">
                         <div class="summary-label">Active Milestones</div>
                         <div class="summary-value" id="summaryMilestones">0</div>
+                    </div>
+                    <div class="dashboard-summary-card" id="streakCard" style="background:linear-gradient(135deg, #fff7ed, #fff); border-color:#fdba74;">
+                        <div class="summary-label">Logging Streak</div>
+                        <div class="summary-value" id="summaryStreak">—</div>
+                        <div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;" id="summaryStreakLongest"></div>
                     </div>
                 </div>
 

@@ -1,13 +1,29 @@
-<!-- AC v1.3 Pass 4 FOCUSDASH & CMNFAB -->
+<!-- AC v1.7b DSHBRDNWRKMAP -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Work Map Detail AC v1.3 Pass 4 FOCUSDASH & CMNFAB</title>
+    <title>Work Map Detail AC v1.7b DSHBRDNWRKMAP</title>
     <link rel="stylesheet" href="../css/pwms.css">
     <link rel="stylesheet" href="../css/workmap.css?v=8">
+    <style>
+        .eod-nudge {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .eod-nudge-text { font-size: 0.82rem; color: #78350f; }
+        .eod-nudge-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    </style>
 </head>
 <body>
 
@@ -29,11 +45,14 @@
                     </div>
                 </div>
 
+                <div id="eodNudge" class="eod-nudge" style="display:none;"></div>
+
                 <div class="wmd-shell">
 
                     <div class="wmd-selector-bar">
                         <input type="search" id="wmdSearchBox" class="wmd-search-input" placeholder="Search milestones..." onkeyup="renderMilestonePills()">
                         <div id="wmdMilestonePills" class="wmd-milestone-pills"></div>
+                        <div class="stat-chip" id="wmdSummaryStreak" style="flex-shrink:0;"></div>
                     </div>
 
                     <div id="wmdDetailArea" class="wmd-detail-area">

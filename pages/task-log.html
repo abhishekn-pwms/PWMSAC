@@ -1,3 +1,5 @@
+<!-- AC v1.7b DSHBRDNWRKMAP -->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,6 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Logs AC v1.3 Pass 4 CMNFAB</title>
     <link rel="stylesheet" href="../css/pwms.css">
+    <style>
+        .eod-nudge {
+            background: var(--warning-bg);
+            border: 1px solid var(--warning);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .eod-nudge-text { font-size: 0.82rem; color: #78350f; }
+        .eod-nudge-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    </style>
 </head>
 <body>
 
@@ -47,10 +65,13 @@
                     </select>
                 </div>
 
+                <div id="eodNudge" class="eod-nudge" style="display:none;"></div>
+
                 <div class="stat-strip">
                     <div id="totalRecords" class="stat-chip">Total Records: 0</div>
                     <div id="totalMinutes" class="stat-chip">Total Minutes: 0</div>
                     <div id="totalHours" class="stat-chip">Total Hours: 0.0</div>
+                    <div id="summaryStreak" class="stat-chip"></div>
                 </div>
 
                 <div id="taskLogFeed"></div>
