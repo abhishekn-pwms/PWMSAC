@@ -1,4 +1,4 @@
-// AC v1.7 UPDTPREP - Instructions Prompt (Manager) Changes
+// AC v1.7b DSHBRDNWRKMAP & UPDATEPREP - SPOKEN STYLE PROMPT (COMMON) CHANGES
 
 // ======================================================
 // Update Prep — assembles copy-ready prompts (written +
@@ -72,12 +72,14 @@ const UP_DEFAULT_SPOKEN_STYLE =
     "Based on the attached final update, provide a Speaking Version.\n" +
     "## INSTRUCTIONS\n" +
     "- Follow the same project sequence as the report.\n" +
-    "- Cover every project included in the report in the same order, summarizing each in 1-3 concise sentences that cover the most significant accomplishment or current state, what remains in progress or pending and the immediate next step where relevant.\n" +
-    "- Where it helps the listener understand the current update, briefly incorporate relevant historical context from the report to provide continuity. Do not repeat historical details unless they help explain the current status or next step.\n" +
+    "- Cover every project in the same order. For each project, explain what changed during the current reporting period, the current state and the immediate next step where relevant, using 1-3 concise sentences.\n" +
+    "- Where relevant, naturally connect the current update to the previous reporting period so the listener understands how the work has progressed. Do not repeat historical details unless they help explain the current status or next step.\n" +
+    "- Lead each project update with the most significant milestone or current state achieved during the reporting period before describing work that remains in progress or pending.\n" +
     "- Sound natural when presented verbally during a leadership review, rather than reading the report word-for-word.\n" +
+    "- Speak like a senior leader giving a progress briefing rather than a presenter reading project notes.\n" +
     "- Use simple, confident, executive-level language suitable for senior leadership.\n" +
     "- Clearly distinguish what has been completed from what remains in progress or pending.\n" +
-    "- Complement the written report rather than repeating it verbatim.\n" +
+    "- Complement the written report rather than paraphrasing it. Explain the progression of each project in a natural, conversational manner suitable for verbal delivery.\n" +
     "- Do not introduce any new information, assumptions or business impact beyond what is supported by the written report.\n" +
     "- Ensure the overall flow is concise, conversational and suitable for presenting directly in the meeting.";
 
