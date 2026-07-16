@@ -1,4 +1,4 @@
-/* AC v1.6 TODO NOTES */
+/* AC v1.7b DSHBRDNWRKMAP */
 
 /* ==========================================================================
    WORK MAP — Milestone Cards + Detail View
@@ -68,6 +68,21 @@
 .wm-days-chip { background: var(--surface-alt); padding: 1px 7px; border-radius: var(--radius-pill); font-weight: 700; font-size: 0.62rem; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
 .wm-days-overdue { background: var(--danger-bg); color: var(--danger-strong); }
 .wm-date-placeholder { color: var(--text-faint); font-style: italic; }
+
+/* Status-ratio health bar — Done/Open/Overdue, at a glance without
+   needing to open workmap-detail.html to check. */
+.wm-health-bar {
+    display: flex;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    background: var(--surface-alt);
+    margin: 4px 0 6px;
+}
+.wm-health-seg { height: 100%; }
+.wm-health-done { background: var(--success); }
+.wm-health-open { background: var(--primary); opacity: 0.35; }
+.wm-health-overdue { background: var(--danger-strong); }
 
 .wm-card-stats-row { display: flex; justify-content: space-around; border-top: 1px solid var(--border); padding-top: 6px; margin-top: auto; }
 .wm-card-stat { text-align: center; }
@@ -161,6 +176,32 @@
 .wm-add-log-form { display: flex; gap: 6px; align-items: center; padding: 8px 10px 8px 34px; flex-wrap: wrap; background: var(--surface-alt); border-radius: var(--radius-sm); margin: 4px 0; }
 .wm-add-log-form input[type="text"] { flex: 2; min-width: 140px; }
 .wm-add-log-form input[type="date"], .wm-add-log-form input[type="number"] { flex: 1; min-width: 90px; }
+
+/* Quick +15m time chip — sits immediately before the Minutes input in
+   both the single-row Add Log form and the labeled Edit Log split row,
+   so it stays visually attached to Minutes regardless of wrap point. */
+
+/*
+   .time-chip-inline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.68rem;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    height: auto;
+    width: auto;
+}
+.time-chip-inline:active { transform: scale(0.95); background: var(--surface-alt); }
+
+.minutes-chip-row { display: flex; gap: 6px; align-items: center; }
+.minutes-chip-row input { flex: 1; min-width: 0; }
+*/
 
 .wmd-todo-notes-preview {
     font-size: 0.78rem;
