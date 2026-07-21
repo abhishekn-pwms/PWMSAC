@@ -1048,11 +1048,6 @@ function renderLogEditForm(log) {
                     <input type="number" id="wmEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmCalcEditLogTime('${suffix}')">
                 </div>
 
-                <div>
-                    <label>Minutes</label>
-                    <input type="number" id="wmEditLogMinutes_${suffix}" value="${log.minutes_spent || 0}" min="1" onchange="wmCalcEditLogTime('${suffix}')">
-                </div>
-
             </div>
 
             <div class="wm-edit-field-row wm-edit-field-row-split">
