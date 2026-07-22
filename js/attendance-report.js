@@ -120,7 +120,22 @@ function openAttEditModal(dateStr) {
     document.getElementById("attEditReason").value = entry.reason || "";
     document.getElementById("attEditOracle").checked = !!entry.oracle_updated;
 
+    document.getElementById("attEditLogStart").value = (entry.log_start_time || "08:30:00").substring(0, 5);
+    document.getElementById("attEditLogEnd").value = (entry.log_end_time || "17:00:00").substring(0, 5);
+
+    updateAttEditHoursDisplay();
+
     openModal("attEditModal");
+}
+
+
+function updateAttEditHoursDisplay() {
+
+    const start = document.getElementById("attEditLogStart").value;
+    const end = document.getElementById("attEditLogEnd").value;
+
+    document.getElementById("attEditHoursDisplay").textContent =
+        calculateHoursDisplay(start, end);
 }
 
 
@@ -139,6 +154,8 @@ async function saveAttendanceEditFromReport() {
     const code = document.getElementById("attEditCode").value;
     const reason = document.getElementById("attEditReason").value;
     const oracleUpdated = document.getElementById("attEditOracle").checked;
+    const logStart = document.getElementById("attEditLogStart").value;
+    const logEnd = document.getElementById("attEditLogEnd").value;
 
     const codeRow = attrCodes.find(c => c.code === code);
 
@@ -147,7 +164,9 @@ async function saveAttendanceEditFromReport() {
         reason,
         description: codeRow.attendance_type,
         hr_type_frozen: codeRow.hr_type,
-        oracle_updated: oracleUpdated
+        oracle_updated: oracleUpdated,
+        log_start_time: logStart ? `${logStart}:00` : "08:30:00",
+        log_end_time: logEnd ? `${logEnd}:00` : "17:00:00"
     });
 
     showSuccess("Entry updated");
@@ -444,6 +463,29 @@ function renderAttStatStrip(rows) {
 }
 
 
+// Same helper as attendance.js — duplicated rather than shared, since
+// these two files don't have a common utility file between them.
+function calculateHoursDisplay(startTime, endTime) {
+
+    if (!startTime || !endTime) {
+        return "—";
+    }
+
+    const [sh, sm] = startTime.split(":").map(Number);
+    const [eh, em] = endTime.split(":").map(Number);
+
+    const minutes = (eh * 60 + em) - (sh * 60 + sm);
+
+    if (minutes < 0) {
+        return "—";
+    }
+
+    const hours = Math.round((minutes / 60) * 10) / 10;
+
+    return `${hours}h`;
+}
+
+
 function renderAttReportRow(r) {
 
     const dayLabel = new Date(r.log_date + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short" });
@@ -463,7 +505,7 @@ function renderAttReportRow(r) {
             <tr class="att-row-missed-weekday" ${clickAttr}>
                 <td>${formatDate(r.log_date)}</td>
                 <td>${dayLabel}</td>
-                <td colspan="3">${message}</td>
+                <td colspan="5">${message}</td>
             </tr>
         `;
     }
@@ -473,12 +515,19 @@ function renderAttReportRow(r) {
         ? ""
         : `<span style="font-size:0.68rem; color:var(--warning); font-weight:700; margin-left:6px;">🔶 Oracle pending</span>`;
 
+    const startDisplay = r.log_start_time ? r.log_start_time.substring(0, 5) : "—";
+    const endDisplay = r.log_end_time ? r.log_end_time.substring(0, 5) : "—";
+    const hoursDisplay = calculateHoursDisplay(r.log_start_time, r.log_end_time);
+
     return `
         <tr onclick="openAttEditModal('${r.log_date}')">
             <td>${formatDate(r.log_date)}</td>
             <td>${dayLabel}</td>
             <td><span class="att-code-tag ${(r.hr_type_frozen || "").toLowerCase()}">${r.code}</span></td>
             <td>${r.reason || ""}${oracleTag} <span style="float:right; color:var(--primary);">✏️</span></td>
+            <td>${startDisplay}</td>
+            <td>${endDisplay}</td>
+            <td>${hoursDisplay}</td>
             <td>${r.hr_type_frozen || ""}</td>
         </tr>
     `;
@@ -548,7 +597,7 @@ function exportAttReportCsv() {
         rows = rows.filter(r => r.isGap);
     }
 
-    const headers = ["log_date", "code", "reason", "hr_type_frozen"];
+    const headers = ["log_date", "code", "reason", "log_start_time", "log_end_time", "total_hours", "hr_type_frozen"];
 
     const lines = [headers.join(",")];
 
@@ -560,6 +609,9 @@ function exportAttReportCsv() {
             r.log_date,
             isTrueGap ? "GAP" : (r.code || ""),
             isTrueGap ? "No entry logged" : (r.reason || "").replace(/,/g, ";"),
+            isTrueGap ? "" : (r.log_start_time ? r.log_start_time.substring(0, 5) : ""),
+            isTrueGap ? "" : (r.log_end_time ? r.log_end_time.substring(0, 5) : ""),
+            isTrueGap ? "" : calculateHoursDisplay(r.log_start_time, r.log_end_time),
             isTrueGap ? "" : (r.hr_type_frozen || "")
         ].join(","));
     });

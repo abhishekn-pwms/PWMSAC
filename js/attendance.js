@@ -203,7 +203,13 @@ async function saveAttendanceLog() {
         reason,
         description: codeRow.attendance_type,
         hr_type_frozen: codeRow.hr_type,
-        oracle_updated: oracleUpdated
+        oracle_updated: oracleUpdated,
+        // No UI for these on this form by design — every new entry gets
+        // the standard workday default explicitly, rather than relying
+        // on the DB column default (which is currently misconfigured —
+        // log_end_time defaults to 08:30:00, same as start).
+        log_start_time: "08:30:00",
+        log_end_time: "17:00:00"
     };
 
     await insertData("attendance_log", { log_date: logDate, ...payload });
@@ -241,6 +247,31 @@ async function loadRecentEntries() {
 }
 
 
+// Shared by the Recent Entries table and the Edit modal's live display —
+// one place this math can ever be wrong, not three. Accepts HH:MM or
+// HH:MM:SS either way. Returns "—" if either time is missing, or if end
+// is before start (can't produce a sane duration).
+function calculateHoursDisplay(startTime, endTime) {
+
+    if (!startTime || !endTime) {
+        return "—";
+    }
+
+    const [sh, sm] = startTime.split(":").map(Number);
+    const [eh, em] = endTime.split(":").map(Number);
+
+    const minutes = (eh * 60 + em) - (sh * 60 + sm);
+
+    if (minutes < 0) {
+        return "—";
+    }
+
+    const hours = Math.round((minutes / 60) * 10) / 10;
+
+    return `${hours}h`;
+}
+
+
 function renderRecentRow(dateStr) {
 
     const date = new Date(dateStr + "T00:00:00");
@@ -255,12 +286,19 @@ function renderRecentRow(dateStr) {
             ? ""
             : `<span style="font-size:0.68rem; color:var(--warning); font-weight:700; margin-left:6px;">🔶 Oracle pending</span>`;
 
+        const startDisplay = entry.log_start_time ? entry.log_start_time.substring(0, 5) : "—";
+        const endDisplay = entry.log_end_time ? entry.log_end_time.substring(0, 5) : "—";
+        const hoursDisplay = calculateHoursDisplay(entry.log_start_time, entry.log_end_time);
+
         return `
             <tr onclick="openAttEditModal('${dateStr}')">
                 <td>${formatDate(dateStr)}</td>
                 <td>${dayLabel}</td>
                 <td><span class="att-code-tag ${entry.hr_type_frozen.toLowerCase()}">${entry.code}</span></td>
                 <td>${entry.reason || ""}${oracleTag} <span style="float:right; color:var(--primary);">✏️</span></td>
+                <td>${startDisplay}</td>
+                <td>${endDisplay}</td>
+                <td>${hoursDisplay}</td>
             </tr>
         `;
     }
@@ -270,7 +308,7 @@ function renderRecentRow(dateStr) {
             <tr class="att-row-missed-weekend">
                 <td>${formatDate(dateStr)}</td>
                 <td>${dayLabel}</td>
-                <td colspan="2">No entry — use the bulk button above, or log manually</td>
+                <td colspan="5">No entry — use the bulk button above, or log manually</td>
             </tr>
         `;
     }
@@ -279,7 +317,7 @@ function renderRecentRow(dateStr) {
         <tr class="att-row-missed-weekday">
             <td>${formatDate(dateStr)}</td>
             <td>${dayLabel}</td>
-            <td colspan="2">⚠️ No entry logged</td>
+            <td colspan="5">⚠️ No entry logged</td>
         </tr>
     `;
 }
@@ -531,7 +569,25 @@ function openAttEditModal(dateStr) {
     document.getElementById("attEditReason").value = entry.reason || "";
     document.getElementById("attEditOracle").checked = !!entry.oracle_updated;
 
+    // <input type="time"> expects HH:MM, DB values come back as
+    // HH:MM:SS — strip to the first 5 characters. Fall back to the
+    // standard workday default if either field is somehow blank.
+    document.getElementById("attEditLogStart").value = (entry.log_start_time || "08:30:00").substring(0, 5);
+    document.getElementById("attEditLogEnd").value = (entry.log_end_time || "17:00:00").substring(0, 5);
+
+    updateAttEditHoursDisplay();
+
     openModal("attEditModal");
+}
+
+
+function updateAttEditHoursDisplay() {
+
+    const start = document.getElementById("attEditLogStart").value;
+    const end = document.getElementById("attEditLogEnd").value;
+
+    document.getElementById("attEditHoursDisplay").textContent =
+        calculateHoursDisplay(start, end);
 }
 
 
@@ -550,6 +606,8 @@ async function saveAttendanceEdit() {
     const code = document.getElementById("attEditCode").value;
     const reason = document.getElementById("attEditReason").value;
     const oracleUpdated = document.getElementById("attEditOracle").checked;
+    const logStart = document.getElementById("attEditLogStart").value;
+    const logEnd = document.getElementById("attEditLogEnd").value;
 
     const codeRow = attCodes.find(c => c.code === code);
 
@@ -558,7 +616,9 @@ async function saveAttendanceEdit() {
         reason,
         description: codeRow.attendance_type,
         hr_type_frozen: codeRow.hr_type,
-        oracle_updated: oracleUpdated
+        oracle_updated: oracleUpdated,
+        log_start_time: logStart ? `${logStart}:00` : "08:30:00",
+        log_end_time: logEnd ? `${logEnd}:00` : "17:00:00"
     });
 
     showSuccess("Entry updated");
