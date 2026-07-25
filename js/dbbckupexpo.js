@@ -332,13 +332,13 @@ async function generateSqlSeeds() {
 
         let rows = backupData[t.name];
 
-        // attendance_log is deliberately scoped to May–Dec 2022 only
+        // attendance_log is deliberately scoped to Jan 2020 to Dec 2022 only
         // here — enough real data to not start from nothing, without
         // seeding four-plus years of history every time this runs.
         // CSV/JSON export and Push to pwms_prev are unaffected — both
         // still use the full live dataset, unrestricted.
         if (t.name === "attendance_log") {
-            rows = rows.filter(r => r.log_date >= "2022-05-30" && r.log_date <= "2022-12-31");
+            rows = rows.filter(r => r.log_date >= "2020-01-01" && r.log_date <= "2022-12-31");
         }
 
         const number = seedNumbers[t.name];
