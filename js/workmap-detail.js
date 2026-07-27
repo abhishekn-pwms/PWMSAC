@@ -1,4 +1,4 @@
-// AC v1.7b DSHBRDNWRKMAP
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC
 
 // ======================================================
 // Work Map — Detail Page
@@ -750,8 +750,8 @@ function renderDetailTodoBlock(todo) {
             ${notesPreview ? `<div class="wmd-todo-notes-preview">📝 ${notesPreview}</div>` : ""}
             ${editPanelHtml}
             <div class="wb-todo-body" style="display:block;">
-                ${logs.length > 0 ? logsHtml : `<div class="wb-empty-state wb-empty-state-small">Not started — no task logs yet.</div>`}
                 ${addLogSection}
+                ${logs.length > 0 ? logsHtml : `<div class="wb-empty-state wb-empty-state-small">Not started — no task logs yet.</div>`}
             </div>
         </div>
     `;

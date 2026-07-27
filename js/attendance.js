@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE PASS 2
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC
 
 // attendance.js
 // Main Attendance page — Log Today, Recent Entries (15 days), gap badge
@@ -266,7 +266,7 @@ function calculateHoursDisplay(startTime, endTime) {
         return "—";
     }
 
-    const hours = Math.round((minutes / 60) * 10) / 10;
+    const hours = Math.round((minutes / 60) * 100) / 100;
 
     return `${hours}h`;
 }

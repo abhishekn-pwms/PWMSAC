@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE PASS 2
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC
 
 // attendance-report.js
 // Full attendance history — but scoped to the rolling 365-day window,
@@ -480,7 +480,7 @@ function calculateHoursDisplay(startTime, endTime) {
         return "—";
     }
 
-    const hours = Math.round((minutes / 60) * 10) / 10;
+    const hours = Math.round((minutes / 60) * 100) / 100;
 
     return `${hours}h`;
 }
