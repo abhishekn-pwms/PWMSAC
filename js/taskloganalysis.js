@@ -1,4 +1,4 @@
-// AC v1.5 - TASK LOG ANALYSIS
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC & TASKLOGTIMEOVRLAPVALIDATION
 
 // ======================================================
 // Task Log Analysis — a flat, sortable, filterable table
@@ -132,8 +132,8 @@ function getTlaFilteredSortedRows() {
             const timeA = a.start_time || "";
             const timeB = b.start_time || "";
 
-            if (timeA < timeB) return (tlaSortDirection === "asc") ? -1 : 1;
-            if (timeA > timeB) return (tlaSortDirection === "asc") ? 1 : -1;
+            if (timeA < timeB) return -1;
+            if (timeA > timeB) return 1;
         }
 
         return 0;

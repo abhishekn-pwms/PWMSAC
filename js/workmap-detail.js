@@ -1,4 +1,4 @@
-// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC & TASKLOGTIMEOVRLAPVALIDATION
 
 // ======================================================
 // Work Map — Detail Page
@@ -1189,6 +1189,42 @@ function cancelDetailAddLog() {
 }
 
 
+// Overlap check — same logic as workmap.js's findTimeOverlapWm and
+// task-log.js's findTimeOverlap, duplicated per file since none of
+// these share a common utility file. Reuses wmdTaskLogs (already
+// loaded, all-time data).
+function findTimeOverlapWmd(dateStr, newStart, newEnd, excludeLogId) {
+
+    if (!newStart || !newEnd) {
+        return null;
+    }
+
+    // Normalize to HH:MM — same fix as the other two files' overlap
+    // checks. Comparing "17:15" (input) against "17:15:00" (stored) as
+    // raw strings treats the shorter as "less than" even at an
+    // identical moment, falsely flagging a legitimate back-to-back
+    // boundary.
+    const normStart = newStart.substring(0, 5);
+    const normEnd = newEnd.substring(0, 5);
+
+    for (const log of wmdTaskLogs) {
+
+        if (log.task_date !== dateStr) continue;
+        if (excludeLogId && String(log.task_log_id) === String(excludeLogId)) continue;
+        if (!log.start_time || !log.end_time) continue;
+
+        const logStart = log.start_time.substring(0, 5);
+        const logEnd = log.end_time.substring(0, 5);
+
+        if (normStart < logEnd && logStart < normEnd) {
+            return log;
+        }
+    }
+
+    return null;
+}
+
+
 async function saveDetailNewLog(todoId) {
 
     const date = document.getElementById(`wmdNewLogDate_${todoId}`).value;
@@ -1206,12 +1242,20 @@ async function saveDetailNewLog(todoId) {
         return;
     }
 
+    const newLogDate = date || getToday();
+    const conflict = findTimeOverlapWmd(newLogDate, startTime, endTime, null);
+
+    if (conflict) {
+        showError(`Time overlaps with an existing entry on this date: "${conflict.task_description}" (${formatTime(conflict.start_time)}–${formatTime(conflict.end_time)}) under ToDo: ${conflict.todo_text || "(Standalone)"}`);
+        return;
+    }
+
     try {
 
         await insertData("task_log", {
             todo_id: realTodoId,
             activity_id: realTodoId || WMD_FALLBACK_ACTIVITY_ID,
-            task_date: date || getToday(),
+            task_date: newLogDate,
             task_description: description,
             minutes_spent: minutes,
             start_time: startTime,
@@ -1288,10 +1332,18 @@ async function saveDetailLogEdit(taskLogId) {
         return;
     }
 
+    const editLogDate = date || getToday();
+    const conflict = findTimeOverlapWmd(editLogDate, startTime, endTime, taskLogId);
+
+    if (conflict) {
+        showError(`Time overlaps with an existing entry on this date: "${conflict.task_description}" (${formatTime(conflict.start_time)}–${formatTime(conflict.end_time)}) under ToDo: ${conflict.todo_text || "(Standalone)"}`);
+        return;
+    }
+
     try {
 
         await updateData("task_log", "task_log_id", taskLogId, {
-            task_date: date || getToday(),
+            task_date: editLogDate,
             task_description: description,
             minutes_spent: minutes,
             todo_id: todoId,

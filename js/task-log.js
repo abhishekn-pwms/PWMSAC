@@ -1,4 +1,4 @@
-// AC v1.7b DSHBRDNWRKMAP
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC & TASKLOGTIMEOVRLAPVALIDATION
 
 let taskLogData = [];
 
@@ -553,7 +553,7 @@ async function loadTaskLogs() {
     // Safely reads from your updated view endpoint
     taskLogData =
         await getData(
-            "vw_task_log_details?order=task_date.desc,start_time.desc"
+            "vw_task_log_details?order=task_date.desc,start_time.asc"
         );
 
     if (
@@ -863,9 +863,9 @@ function renderTaskLogFeed() {
                     }
 
                     return (
-                        (b.start_time || "")
+                        (a.start_time || "")
                             .localeCompare(
-                                a.start_time || ""
+                                b.start_time || ""
                             )
                     );
                 }
@@ -1169,6 +1169,43 @@ function editTaskLog(id) {
 /* ==================================
    SAVE TASK LOG (EXACT STRUCTURE FIXED)
 ================================== */
+// Overlap check — same date only, hard block. Two ranges [s1,e1] and
+// [s2,e2] overlap if s1 < e2 AND s2 < e1. Skips any existing entry
+// missing either time (can't meaningfully compare), and skips the
+// entry being edited (comparing against itself would always "overlap").
+function findTimeOverlap(dateStr, newStart, newEnd, excludeLogId) {
+
+    if (!newStart || !newEnd) {
+        return null;
+    }
+
+    // Normalize to HH:MM before comparing — inputs come as "17:15",
+    // stored values come back as "17:15:00". String comparison treats
+    // the shorter one as "less than" the longer one even when they
+    // represent the identical moment, causing a false overlap exactly
+    // at a legitimate back-to-back boundary (one entry ending exactly
+    // when the next begins).
+    const normStart = newStart.substring(0, 5);
+    const normEnd = newEnd.substring(0, 5);
+
+    for (const log of taskLogData) {
+
+        if (log.task_date !== dateStr) continue;
+        if (excludeLogId && String(log.task_log_id) === String(excludeLogId)) continue;
+        if (!log.start_time || !log.end_time) continue;
+
+        const logStart = log.start_time.substring(0, 5);
+        const logEnd = log.end_time.substring(0, 5);
+
+        if (normStart < logEnd && logStart < normEnd) {
+            return log;
+        }
+    }
+
+    return null;
+}
+
+
 async function saveTaskLog() {
 
     const todoId = document.getElementById("todoId")?.value || null;
@@ -1209,6 +1246,13 @@ async function saveTaskLog() {
         end_time: getInputValue("endTime") || null,
         updated_by: getCurrentUser()
     };
+
+    const conflict = findTimeOverlap(taskDate, payload.start_time, payload.end_time, taskLogId);
+
+    if (conflict) {
+        showError(`Time overlaps with an existing entry on this date: "${conflict.task_description}" (${formatTime(conflict.start_time)}–${formatTime(conflict.end_time)}) under ToDo: ${conflict.todo_text || "(Standalone)"}`);
+        return;
+    }
 
     try {
 
