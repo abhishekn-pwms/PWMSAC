@@ -2,20 +2,21 @@
 Date : Mon, 27-Jul-2026
 === === === === === ===
 
-Release PWMS AC v1.7c WORKMAPS NEW TASK REPOSITION & ATTENDANCES TOTAL HOURS 2 DECIMALS
+Release PWMS AC v1.7c WORKMAPS NEW TASK REPOSITION & ATTENDANCES TOTAL HOURS 2 DECIMALS & TASK LOG TIME OVERLAP VALIDATION BEFORE SAVE
 
 ------------------
 
 What's New
-* Add New Task Reposition to Top of list in Workmap & Details pages and Total Hours display with 2 decimals in Attendance & Report Pages.
+* Add New Task Reposition to Top of list in WorkMap & Details pages and Total Hours display with 2 decimals in Attendance & Report Pages and Time Overlap Validation Before Save or Edit Task Logs.
 
 ** WORKMAP ADD TASK ON TOP
 ** ATTENDANCE TOTAL HOURS 2 DECIMALS
+** TASK LOG TIME OVERLAP VALIDITY
 
 ## <Comment Block>
-# "AC v1.7c WORKMAPS NEW TASK REPOSITION & ATTENDANCES TOTAL HOURS 2 DECIMALS"
 # "AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC"
-
+# "AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC & TASKLOGTIMEOVRLAPVALIDATION"
+# "AC v1.7c WORKMAP & ATTENDANCE & TASKLOGS"
 
 
 
