@@ -1,4 +1,25 @@
 === === === === === ===
+Date : Mon, 27-Jul-2026
+=== === === === === ===
+
+Release PWMS AC v1.7c WORKMAPS NEW TASK REPOSITION & ATTENDANCES TOTAL HOURS 2 DECIMALS
+
+------------------
+
+What's New
+* Add New Task Reposition to Top of list in Workmap & Details pages and Total Hours display with 2 decimals in Attendance & Report Pages.
+
+** WORKMAP ADD TASK ON TOP
+** ATTENDANCE TOTAL HOURS 2 DECIMALS
+
+## <Comment Block>
+# "AC v1.7c WORKMAPS NEW TASK REPOSITION & ATTENDANCES TOTAL HOURS 2 DECIMALS"
+# "AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC"
+
+
+
+
+=== === === === === ===
 Date : Tue, 16-Jul-2026
 === === === === === ===
 
