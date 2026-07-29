@@ -1,4 +1,4 @@
-<!-- AC v1.7 DBBCKUPNEXPONATT -->
+<!-- AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC -->
 
 <!DOCTYPE html>
 <html>
@@ -41,7 +41,13 @@
 
             <div id="errorMessage"></div>
 
-            <text class="login-workspace-tag">Abhi's workspace</text>
+            <text class="login-workspace-tag">Abhi's Workspace</text>
+
+            <text id="loginHostname" style="text-align: center;"></text>
+
+            <script>
+                document.getElementById("loginHostname").textContent = "-- " + window.location.hostname + " --";
+            </script>
 
         </div>
 
