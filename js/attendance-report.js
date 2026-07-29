@@ -203,10 +203,14 @@ async function deleteAttendanceLogFromReport() {
 
 async function loadAttReportData() {
 
-    const today = getToday();
     const from = getWindowStartDate(ATTR_WINDOW_MONTHS);
 
-    const rows = await getData(`attendance_log?log_date=gte.${from}&log_date=lte.${today}&order=log_date.desc`);
+    // No upper bound on log_date — a real future-dated entry (e.g. a
+    // planned leave logged ahead of time) must actually be fetched to
+    // be editable here. Only the window's lower bound restricts how
+    // far BACK this page looks; there was never a real reason to also
+    // cap how far forward it can see.
+    const rows = await getData(`attendance_log?log_date=gte.${from}&order=log_date.desc`);
 
     attrAllRows = Array.isArray(rows) ? rows : [];
 }
@@ -359,11 +363,6 @@ function buildScopedRows() {
     const today = getToday();
     const windowStart = getWindowStartDate(ATTR_WINDOW_MONTHS);
 
-    // Never scan past today — a future day hasn't happened yet.
-    if (to > today) {
-        to = today;
-    }
-
     // Never scan before the window start — attrAllRows was only ever
     // fetched from that point forward, so anything earlier would show
     // as a false gap (never fetched) rather than a genuine one.
@@ -392,7 +391,11 @@ function buildScopedRows() {
             result.push({ ...entry, isGap: false });
         } else if (entry && !entry.oracle_updated) {
             result.push({ ...entry, isGap: true, gapType: "oracle" });
-        } else if (!isWeekend) {
+        } else if (!isWeekend && dateStr <= today) {
+            // Only a genuinely PAST empty weekday counts as a gap — a
+            // future day with nothing logged yet simply hasn't happened,
+            // it's not a lapse. Still omitted as a row either way, same
+            // as unlogged weekends always have been.
             result.push({ log_date: dateStr, isGap: true, gapType: "none" });
         }
 

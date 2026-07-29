@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE
+// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC
 
 // leaveplan.js
 // Combines two different sources into one simple list:
@@ -41,13 +41,15 @@ async function loadLeavePlanData() {
     const leaves = (Array.isArray(leaveRows) ? leaveRows : []).map(r => ({
         date: r.log_date,
         type: "Leave",
-        details: r.description || r.reason || r.code
+        details: r.description || r.reason || r.code,
+        oracleUpdated: r.oracle_updated
     }));
 
     const holidays = (Array.isArray(holidayRows) ? holidayRows : []).map(r => ({
         date: r.holiday_date,
         type: "Holiday",
-        details: `${r.holiday_name} (${r.holiday_type})`
+        details: `${r.holiday_name} (${r.holiday_type})`,
+        oracleUpdated: null
     }));
 
     lpAllRows = [...leaves, ...holidays].sort((a, b) => a.date.localeCompare(b.date));
@@ -69,7 +71,7 @@ function renderLeavePlan() {
     const tbody = document.getElementById("lpBody");
 
     if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="wb-empty-state">No entries in this range.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="wb-empty-state">No entries in this range.</td></tr>`;
         return;
     }
 
@@ -78,6 +80,7 @@ function renderLeavePlan() {
             <td>${formatDate(r.date)}</td>
             <td><span class="att-code-tag ${r.type.toLowerCase()}">${r.type}</span></td>
             <td>${r.details}</td>
+            <td>${r.oracleUpdated === null ? "—" : (r.oracleUpdated ? "✅" : "🔶 Pending")}</td>
         </tr>
     `).join("");
 }
@@ -95,10 +98,11 @@ function exportLeavePlanCsv() {
         rows = rows.filter(r => r.type === typeFilter);
     }
 
-    const lines = ["Date,Type,Details"];
+    const lines = ["Date,Type,Details,Oracle Updated"];
 
     rows.forEach(r => {
-        lines.push([r.date, r.type, r.details.replace(/,/g, ";")].join(","));
+        const oracleText = r.oracleUpdated === null ? "" : (r.oracleUpdated ? "Yes" : "Pending");
+        lines.push([r.date, r.type, r.details.replace(/,/g, ";"), oracleText].join(","));
     });
 
     const blob = new Blob([lines.join("\n")], { type: "text/csv" });
