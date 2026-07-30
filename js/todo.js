@@ -1,4 +1,4 @@
-// PWMS AC v1.2 - REMOVE ACTIVITY FROM PWMS
+// PWMS AC v1.7d TODOATTACH
 
 /* ==================================
    DATA
@@ -42,6 +42,15 @@ document.addEventListener(
             if (actionType === 'log' && targetId) {
                 // Ensure your local edit function loads the specific task data mapping
                 editTodo(targetId);
+            }
+
+            // Coming from a Work Map / Work Map Detail "+ New ToDo" link —
+            // that milestone is already known, so pre-select it instead of
+            // leaving the new ToDo defaulted to Standalone.
+            const presetMilestoneId = urlParams.get('milestone_id');
+            if (actionType === 'new' && presetMilestoneId) {
+                document.getElementById("milestoneId").value = presetMilestoneId;
+                milestoneChanged();
             }
         }
 
@@ -158,7 +167,12 @@ function getFilteredTodos() {
                         .toLowerCase()
                         .includes(search);
 
-        const matchesStatus = (status === "All") ? true : item.status === status;
+        const matchesStatus =
+            (status === "All")
+                ? true
+                : (status === "OpenAndInProgress")
+                    ? (item.status === "Open" || item.status === "In Progress")
+                    : item.status === status;
         const matchesMilestone = (milestoneFilterValue === "All") ? true : item.milestone_id === milestoneFilterValue;
 
         return matchesSearch && matchesStatus && matchesMilestone;
@@ -618,13 +632,205 @@ async function createInlineMilestone() {
    NEW TODO
 ================================== */
 
+// ======================================
+// ATTACHMENTS
+// Staged files sit in memory only until Save actually succeeds —
+// "upload on save", not immediate. Oversized files are rejected the
+// moment they're picked and never enter the staged list at all, so
+// Save can never be blocked by something that shouldn't have been
+// staged in the first place.
+// ======================================
+
+let todoStagedAttachments = [];
+
+const TODO_ATTACHMENT_BUCKET = "todo-attachments";
+const TODO_ATTACHMENT_MAX_MB = 49;
+
+
+function sanitizeFileNameForPath(name) {
+    return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+
+function addStagedAttachment(input) {
+
+    const rejected = [];
+
+    Array.from(input.files).forEach(file => {
+
+        const sizeMB = file.size / (1024 * 1024);
+
+        if (sizeMB > TODO_ATTACHMENT_MAX_MB) {
+            rejected.push(`"${file.name}" (${sizeMB.toFixed(1)} MB)`);
+            return; // never staged at all
+        }
+
+        todoStagedAttachments.push({ file, label: "" });
+    });
+
+    renderStagedAttachments(rejected);
+
+    input.value = "";
+}
+
+
+function renderStagedAttachments(rejected) {
+
+    const container = document.getElementById("todoStagedAttachments");
+    if (!container) return;
+
+    let html = "";
+
+    todoStagedAttachments.forEach((staged, index) => {
+
+        const sizeMB = staged.file.size / (1024 * 1024);
+
+        html += `
+            <div class="staged-attachment-row" style="display:flex; align-items:center; gap:8px; padding:6px 8px; background:var(--surface-alt); border-radius:6px; margin-top:6px;">
+                <span style="font-size:0.9rem;">📄</span>
+                <span style="font-size:0.78rem; font-weight:600; flex:1;">${staged.file.name}</span>
+                <input type="text" placeholder="Label (optional)" value="${staged.label}"
+                    style="font-size:0.72rem; padding:3px 6px; border:1px solid var(--border); border-radius:4px; width:130px;"
+                    onchange="updateStagedAttachmentLabel(${index}, this.value)">
+                <span style="font-size:0.68rem; color:var(--text-muted);">${sizeMB.toFixed(1)} MB</span>
+                <span style="color:var(--danger); cursor:pointer; font-size:0.85rem;" onclick="removeStagedAttachment(${index})">✕</span>
+            </div>
+        `;
+    });
+
+    // One capped warning slot, updated in place rather than stacking a
+    // new line on every rejected selection attempt.
+    let warn = document.getElementById("todoAttachmentWarning");
+
+    if (rejected && rejected.length > 0) {
+        html += `<div id="todoAttachmentWarning" style="background:var(--danger-bg); color:var(--danger); font-size:0.72rem; padding:6px 8px; border-radius:4px; margin-top:6px;">⚠️ Too large (over ${TODO_ATTACHMENT_MAX_MB} MB), not attached: ${rejected.join(", ")}</div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+
+function updateStagedAttachmentLabel(index, value) {
+    if (todoStagedAttachments[index]) {
+        todoStagedAttachments[index].label = value;
+    }
+}
+
+
+function removeStagedAttachment(index) {
+    todoStagedAttachments.splice(index, 1);
+    renderStagedAttachments();
+}
+
+
+async function loadExistingAttachments(todoId) {
+
+    const container = document.getElementById("todoExistingAttachments");
+    if (!container) return;
+
+    if (!todoId) {
+        container.innerHTML = "";
+        return;
+    }
+
+    const rows = await getData(`todo_attachments?todo_id=eq.${todoId}&order=uploaded_at.asc`);
+    const attachments = Array.isArray(rows) ? rows : [];
+
+    if (attachments.length === 0) {
+        container.innerHTML = `<div style="font-size:0.75rem; color:var(--text-faint);">No attachments yet.</div>`;
+        return;
+    }
+
+    let html = "";
+
+    for (const att of attachments) {
+
+        const { data: signedData } = await supabaseClient
+            .storage
+            .from(TODO_ATTACHMENT_BUCKET)
+            .createSignedUrl(att.storage_path, 3600);
+
+        const url = signedData ? signedData.signedUrl : "#";
+        const sizeMB = att.file_size ? (att.file_size / (1024 * 1024)).toFixed(1) : "?";
+
+        html += `
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 8px; border-bottom:1px solid var(--border);">
+                <span style="font-size:0.9rem;">📄</span>
+                <div style="flex:1;">
+                    <a href="${url}" target="_blank" style="font-size:0.78rem; font-weight:600; color:var(--primary); text-decoration:none;">${att.label || att.file_name}</a>
+                    <div style="font-size:0.66rem; color:var(--text-muted);">${att.file_name} · ${sizeMB} MB</div>
+                </div>
+                <span style="color:var(--danger); cursor:pointer; font-size:0.8rem;" onclick="deleteAttachment('${att.attachment_id}', '${att.storage_path}', '${todoId}')">🗑️</span>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+
+async function deleteAttachment(attachmentId, storagePath, todoId) {
+
+    if (!confirmAction("Delete this attachment?")) {
+        return;
+    }
+
+    try {
+        await supabaseClient.storage.from(TODO_ATTACHMENT_BUCKET).remove([storagePath]);
+        await deleteData("todo_attachments", "attachment_id", attachmentId);
+        await loadExistingAttachments(todoId);
+        showSuccess("Attachment deleted");
+    } catch (error) {
+        console.error(error);
+        showError("Unable to delete attachment");
+    }
+}
+
+
+async function uploadStagedAttachments(todoId) {
+
+    for (const staged of todoStagedAttachments) {
+
+        const uniquePrefix = crypto.randomUUID();
+        const safeName = sanitizeFileNameForPath(staged.file.name);
+        const storagePath = `${todoId}/${uniquePrefix}-${safeName}`;
+
+        const { error: uploadError } = await supabaseClient
+            .storage
+            .from(TODO_ATTACHMENT_BUCKET)
+            .upload(storagePath, staged.file);
+
+        if (uploadError) {
+            console.error(uploadError);
+            showError(`Failed to upload "${staged.file.name}" — the ToDo itself was still saved`);
+            continue;
+        }
+
+        await insertData("todo_attachments", {
+            todo_id: todoId,
+            file_name: staged.file.name,
+            storage_path: storagePath,
+            file_size: staged.file.size,
+            label: staged.label || null,
+            uploaded_by: getCurrentUser()
+        });
+    }
+
+    todoStagedAttachments = [];
+}
+
+
 function newTodo() {
     document.getElementById("todoId").value = "";
     document.getElementById("todoText").value = "";
     document.getElementById("dueDate").value = "";
     document.getElementById("notes").value = "";
     document.getElementById("todoStatus").value = "Open";
-    
+
+    todoStagedAttachments = [];
+    document.getElementById("todoStagedAttachments").innerHTML = "";
+    document.getElementById("todoExistingAttachments").innerHTML = "";
+
     resetMilestoneSearch();
     
     // 🎯 FIX: Forces the form to default to the standalone action option at index 0
@@ -644,6 +850,10 @@ function newTodo() {
 function editTodo(id) {
     const item = todoData.find(x => x.todo_id === id);
     if (!item) return;
+
+    todoStagedAttachments = [];
+    document.getElementById("todoStagedAttachments").innerHTML = "";
+    loadExistingAttachments(id);
 
     // 🎯 FIX: Force-populate dropdown items immediately to handle instant URL deep-links safely
     populateMilestoneDropdown();
@@ -699,12 +909,20 @@ async function saveTodo() {
     };
 
     try {
+        let effectiveTodoId = todoId;
+
         if (!todoId) {
             payload.created_by = getCurrentUser();
-            await insertData("todo", payload);
+            const result = await insertData("todo", payload);
+            effectiveTodoId = Array.isArray(result) && result[0] ? result[0].todo_id : null;
         } else {
             await updateData("todo", "todo_id", todoId, payload);
         }
+
+        if (effectiveTodoId && todoStagedAttachments.length > 0) {
+            await uploadStagedAttachments(effectiveTodoId);
+        }
+
         closeModal("todoModal");
         await loadTodos();
         showSuccess("ToDo saved successfully");

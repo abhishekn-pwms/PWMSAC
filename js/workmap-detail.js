@@ -1,4 +1,4 @@
-// AC v1.7c WORKMAPNEWTASK & ATTENDHOURS2DEC & TASKLOGTIMEOVRLAPVALIDATION
+// AC v1.7db TODOATTACH
 
 // ======================================================
 // Work Map — Detail Page
@@ -17,6 +17,7 @@ let wmdSelectedMilestoneId = null;
 let wmdEditingTodoId = null;
 let wmdAddingLogForTodoId = null;
 let wmdEditingLogId = null;
+let wmdAddingTodoForMilestoneId = null;
 
 const WMD_CLOSED_STATUSES = ["Completed", "Cancelled"];
 const WMD_STANDALONE_ID = "__standalone__";
@@ -564,10 +565,15 @@ function renderDetailArea() {
                 return dateA.localeCompare(dateB);
             });
 
+    const addTodoBlock = (wmdAddingTodoForMilestoneId === milestone.milestone_id)
+        ? renderDetailAddTodoForm(milestone.milestone_id, isStandalone)
+        : `<button type="button" class="wm-add-log-btn" onclick="showDetailAddTodoForm('${milestone.milestone_id}')">+ New ToDo</button>`;
+
     const todoTreeHtml =
-        todos.length === 0
+        addTodoBlock +
+        (todos.length === 0
             ? `<div class="wb-empty-state">No ToDos under this milestone yet.</div>`
-            : todos.map(todo => renderDetailTodoBlock(todo)).join("");
+            : todos.map(todo => renderDetailTodoBlock(todo)).join(""));
 
     area.innerHTML = `
 
@@ -783,6 +789,312 @@ function renderDetailLogRow(log) {
 }
 
 
+// ======================================
+// ATTACHMENTS — same design as workmap.js's, wmd-prefixed to match this
+// file's convention.
+// ======================================
+
+let wmdStagedAttachments = {};
+
+const WMD_ATTACHMENT_BUCKET = "todo-attachments";
+const WMD_ATTACHMENT_MAX_MB = 49;
+
+
+function wmdSanitizeFileNameForPath(name) {
+    return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+
+function wmdAddStagedAttachment(input, todoId) {
+
+    if (!wmdStagedAttachments[todoId]) {
+        wmdStagedAttachments[todoId] = [];
+    }
+
+    const rejected = [];
+
+    Array.from(input.files).forEach(file => {
+
+        const sizeMB = file.size / (1024 * 1024);
+
+        if (sizeMB > WMD_ATTACHMENT_MAX_MB) {
+            rejected.push(`"${file.name}" (${sizeMB.toFixed(1)} MB)`);
+            return;
+        }
+
+        wmdStagedAttachments[todoId].push({ file, label: "" });
+    });
+
+    wmdRenderStagedAttachments(todoId, rejected);
+
+    input.value = "";
+}
+
+
+function wmdRenderStagedAttachments(todoId, rejected) {
+
+    const container = document.getElementById(`wmdStagedAttachments_${todoId}`);
+    if (!container) return;
+
+    let html = "";
+
+    (wmdStagedAttachments[todoId] || []).forEach((staged, index) => {
+
+        const sizeMB = staged.file.size / (1024 * 1024);
+
+        html += `
+            <div style="display:flex; align-items:center; gap:8px; padding:6px 8px; background:var(--surface-alt); border-radius:6px; margin-top:6px;">
+                <span style="font-size:0.9rem;">📄</span>
+                <span style="font-size:0.72rem; font-weight:600; flex:1;">${staged.file.name}</span>
+                <input type="text" placeholder="Label (optional)" value="${staged.label}"
+                    style="font-size:0.68rem; padding:3px 6px; border:1px solid var(--border); border-radius:4px; width:110px;"
+                    onchange="wmdUpdateStagedAttachmentLabel('${todoId}', ${index}, this.value)">
+                <span style="font-size:0.64rem; color:var(--text-muted);">${sizeMB.toFixed(1)} MB</span>
+                <span style="color:var(--danger); cursor:pointer; font-size:0.8rem;" onclick="wmdRemoveStagedAttachment('${todoId}', ${index})">✕</span>
+            </div>
+        `;
+    });
+
+    if (rejected && rejected.length > 0) {
+        html += `<div style="background:var(--danger-bg); color:var(--danger); font-size:0.68rem; padding:6px 8px; border-radius:4px; margin-top:6px;">⚠️ Too large (over ${WMD_ATTACHMENT_MAX_MB} MB), not attached: ${rejected.join(", ")}</div>`;
+    }
+
+    container.innerHTML = html;
+}
+
+
+function wmdUpdateStagedAttachmentLabel(todoId, index, value) {
+    if (wmdStagedAttachments[todoId] && wmdStagedAttachments[todoId][index]) {
+        wmdStagedAttachments[todoId][index].label = value;
+    }
+}
+
+
+function wmdRemoveStagedAttachment(todoId, index) {
+    wmdStagedAttachments[todoId].splice(index, 1);
+    wmdRenderStagedAttachments(todoId);
+}
+
+
+async function wmdLoadExistingAttachments(todoId) {
+
+    const container = document.getElementById(`wmdExistingAttachments_${todoId}`);
+    if (!container) return;
+
+    const rows = await getData(`todo_attachments?todo_id=eq.${todoId}&order=uploaded_at.asc`);
+    const attachments = Array.isArray(rows) ? rows : [];
+
+    if (attachments.length === 0) {
+        container.innerHTML = `<div style="font-size:0.7rem; color:var(--text-faint);">No attachments yet.</div>`;
+        return;
+    }
+
+    let html = "";
+
+    for (const att of attachments) {
+
+        const { data: signedData } = await supabaseClient
+            .storage
+            .from(WMD_ATTACHMENT_BUCKET)
+            .createSignedUrl(att.storage_path, 3600);
+
+        const url = signedData ? signedData.signedUrl : "#";
+        const sizeMB = att.file_size ? (att.file_size / (1024 * 1024)).toFixed(1) : "?";
+
+        html += `
+            <div style="display:flex; align-items:center; gap:8px; padding:5px 6px; border-bottom:1px solid var(--border);">
+                <span style="font-size:0.85rem;">📄</span>
+                <div style="flex:1;">
+                    <a href="${url}" target="_blank" style="font-size:0.72rem; font-weight:600; color:var(--primary); text-decoration:none;">${att.label || att.file_name}</a>
+                    <div style="font-size:0.6rem; color:var(--text-muted);">${att.file_name} · ${sizeMB} MB</div>
+                </div>
+                <span style="color:var(--danger); cursor:pointer; font-size:0.75rem;" onclick="wmdDeleteAttachment('${att.attachment_id}', '${att.storage_path}', '${todoId}')">🗑️</span>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+
+async function wmdDeleteAttachment(attachmentId, storagePath, todoId) {
+
+    if (!confirmAction("Delete this attachment?")) {
+        return;
+    }
+
+    try {
+        await supabaseClient.storage.from(WMD_ATTACHMENT_BUCKET).remove([storagePath]);
+        await deleteData("todo_attachments", "attachment_id", attachmentId);
+        await wmdLoadExistingAttachments(todoId);
+        showSuccess("Attachment deleted");
+    } catch (error) {
+        console.error(error);
+        showError("Unable to delete attachment");
+    }
+}
+
+
+async function wmdUploadStagedAttachments(todoId) {
+
+    const staged = wmdStagedAttachments[todoId] || [];
+
+    for (const item of staged) {
+
+        const uniquePrefix = crypto.randomUUID();
+        const safeName = wmdSanitizeFileNameForPath(item.file.name);
+        const storagePath = `${todoId}/${uniquePrefix}-${safeName}`;
+
+        const { error: uploadError } = await supabaseClient
+            .storage
+            .from(WMD_ATTACHMENT_BUCKET)
+            .upload(storagePath, item.file);
+
+        if (uploadError) {
+            console.error(uploadError);
+            showError(`Failed to upload "${item.file.name}" — the ToDo itself was still saved`);
+            continue;
+        }
+
+        await insertData("todo_attachments", {
+            todo_id: todoId,
+            file_name: item.file.name,
+            storage_path: storagePath,
+            file_size: item.file.size,
+            label: item.label || null,
+            uploaded_by: getCurrentUser()
+        });
+    }
+
+    wmdStagedAttachments[todoId] = [];
+}
+
+
+function showDetailAddTodoForm(milestoneId) {
+
+    wmdAddingTodoForMilestoneId = milestoneId;
+    wmdEditingTodoId = null;
+    wmdAddingLogForTodoId = null;
+    wmdEditingLogId = null;
+
+    wmdStagedAttachments[milestoneId] = [];
+
+    renderDetailArea();
+}
+
+
+function cancelDetailAddTodo() {
+
+    if (wmdAddingTodoForMilestoneId) {
+        delete wmdStagedAttachments[wmdAddingTodoForMilestoneId];
+    }
+
+    wmdAddingTodoForMilestoneId = null;
+
+    renderDetailArea();
+}
+
+
+function renderDetailAddTodoForm(milestoneId, isStandalone) {
+
+    return `
+        <div class="wm-inline-edit-form wm-inline-edit-form-full">
+
+            <div class="wm-edit-field-row">
+                <label>ToDo</label>
+                <input type="text" id="wmdNewTodoText_${milestoneId}" maxlength="200" placeholder="What needs to be done?">
+            </div>
+
+            <div class="wm-edit-field-row wm-edit-field-row-split">
+                <div>
+                    <label>Status</label>
+                    <select id="wmdNewTodoStatus_${milestoneId}">
+                        <option value="Open" selected>Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Due Date</label>
+                    <input type="date" id="wmdNewTodoDue_${milestoneId}">
+                </div>
+            </div>
+
+            <div class="wm-edit-field-row">
+                <label>Notes</label>
+                <textarea id="wmdNewTodoNotes_${milestoneId}" rows="2"></textarea>
+            </div>
+
+            <div class="wm-edit-field-row">
+                <label>Attachments</label>
+                <label style="display:inline-block; border:1px dashed var(--border); background:var(--surface-alt); border-radius:6px; padding:6px 12px; font-size:0.72rem; color:var(--primary); cursor:pointer; margin-top:6px;">
+                    📎 Add Files
+                    <input type="file" multiple style="display:none;" onchange="wmdAddStagedAttachment(this, '${milestoneId}')">
+                </label>
+                <div id="wmdStagedAttachments_${milestoneId}"></div>
+            </div>
+
+            <div class="wm-inline-edit-actions">
+                <button type="button" class="btn btn-primary" onclick="saveDetailNewTodo('${milestoneId}', ${isStandalone})">Save</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelDetailAddTodo()">Cancel</button>
+            </div>
+        </div>
+    `;
+}
+
+
+async function saveDetailNewTodo(milestoneId, isStandalone) {
+
+    const text = document.getElementById(`wmdNewTodoText_${milestoneId}`).value.trim();
+
+    if (!text) {
+        showError("ToDo text is required");
+        return;
+    }
+
+    const status = document.getElementById(`wmdNewTodoStatus_${milestoneId}`).value;
+    const dueDate = document.getElementById(`wmdNewTodoDue_${milestoneId}`).value;
+    const notes = document.getElementById(`wmdNewTodoNotes_${milestoneId}`).value;
+
+    try {
+        const result = await insertData("todo", {
+            todo_text: text,
+            status: status,
+            due_date: dueDate || null,
+            milestone_id: isStandalone ? null : milestoneId,
+            notes: notes || null,
+            activity_id: "00000000-0000-0000-0000-000000000000",
+            display_order: 100,
+            enabled: true,
+            created_by: getCurrentUser(),
+            updated_by: getCurrentUser()
+        });
+
+        const newTodoId = Array.isArray(result) && result[0] ? result[0].todo_id : null;
+
+        if (newTodoId) {
+            wmdStagedAttachments[newTodoId] = wmdStagedAttachments[milestoneId] || [];
+            delete wmdStagedAttachments[milestoneId];
+
+            if (wmdStagedAttachments[newTodoId].length > 0) {
+                await wmdUploadStagedAttachments(newTodoId);
+            }
+        }
+
+        wmdAddingTodoForMilestoneId = null;
+
+        await loadWorkMapDetailData();
+        renderDetailArea();
+
+        showSuccess("ToDo added");
+    } catch (error) {
+        console.error(error);
+        showError("Unable to add ToDo");
+    }
+}
+
+
 function renderDetailTodoEditForm(todo) {
 
     const suffix = todo.todo_id;
@@ -827,6 +1139,16 @@ function renderDetailTodoEditForm(todo) {
             <div class="wm-edit-field-row">
                 <label>Notes</label>
                 <textarea id="wmdEditTodoNotes_${suffix}" rows="2">${todo.notes || ""}</textarea>
+            </div>
+
+            <div class="wm-edit-field-row">
+                <label>Attachments</label>
+                <div id="wmdExistingAttachments_${suffix}"></div>
+                <label style="display:inline-block; border:1px dashed var(--border); background:var(--surface-alt); border-radius:6px; padding:6px 12px; font-size:0.72rem; color:var(--primary); cursor:pointer; margin-top:6px;">
+                    📎 Add Files
+                    <input type="file" multiple style="display:none;" onchange="wmdAddStagedAttachment(this, '${suffix}')">
+                </label>
+                <div id="wmdStagedAttachments_${suffix}"></div>
             </div>
 
             <div class="wm-inline-edit-actions">
@@ -981,6 +1303,9 @@ function editDetailTodoInline(todoId) {
     wmdEditingLogId = null;
 
     renderDetailArea();
+
+    wmdStagedAttachments[todoId] = [];
+    wmdLoadExistingAttachments(todoId);
 }
 
 
@@ -1015,6 +1340,10 @@ async function saveDetailTodoEdit(todoId) {
             notes: notes || null,
             updated_by: getCurrentUser()
         });
+
+        if ((wmdStagedAttachments[todoId] || []).length > 0) {
+            await wmdUploadStagedAttachments(todoId);
+        }
 
         wmdEditingTodoId = null;
 
