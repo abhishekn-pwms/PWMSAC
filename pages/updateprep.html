@@ -1,11 +1,11 @@
-<!-- v1.4 Pass 7 - UPDATEPREP ENHANCE -->
+<!-- AC v1.7e UPDATEPREPATTACH -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Prep AC v1.4 Pass 7</title>
+    <title>Update Prep AC v1.7e</title>
     <link rel="stylesheet" href="../css/pwms.css">
     <link rel="stylesheet" href="../css/workdigest.css">
     <link rel="stylesheet" href="../css/updateprep.css">
@@ -88,6 +88,14 @@
 
                 </div>
 
+                <div class="up-panel">
+                    <div class="up-panel-header">
+                        <span>Reference Screenshots (Previous Period)</span>
+                        <span class="up-panel-hint">Right-click an image → Copy Image, then paste into your AI assistant alongside the prompt below</span>
+                    </div>
+                    <div id="upReferenceAttachments" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;"></div>
+                </div>
+
                 <div class="up-pair-row">
 
                     <div class="up-panel up-pair-half">
@@ -103,6 +111,16 @@
                             <span>Paste Finished Update Back Here <span id="upFormatLabel4"></span> <span id="upRetrievedTagUpdate" class="up-retrieved-tag" style="display:none;">↺ Retrieved</span></span>
                         </div>
                         <textarea id="upFinishedUpdate" rows="14" placeholder="After the AI drafts your update, paste the final version here..." onchange="syncFinishedUpdateToSpokenSource()"></textarea>
+
+                        <div id="upExistingAttachment"></div>
+                        <div id="upAttachmentPasteZone" tabindex="0" style="outline:none;">
+                            <label class="file-picker-btn" style="display:inline-block; border:1px dashed var(--border); background:var(--surface-alt); border-radius:6px; padding:6px 12px; font-size:0.8rem; color:var(--primary); cursor:pointer; margin-top:6px;">
+                                📎 <span id="upAttachmentPickerLabel">Add Screenshot</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="addStagedUpAttachment(this)">
+                            </label>
+                            <span style="font-size:0.68rem; color:var(--text-muted); margin-left:8px;">or click here and press Ctrl+V after snipping</span>
+                            <div id="upStagedAttachment"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -154,6 +172,20 @@
     </div>
 
     <div id="fab"></div>
+
+    <div id="upScreenshotModal" class="modal">
+        <div class="modal-content" style="max-width:720px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px;">
+                <h2 id="upScreenshotModalTitle" style="margin:0; font-size:0.95rem;"></h2>
+                <button class="btn btn-secondary" onclick="closeModal('upScreenshotModal')">Close</button>
+            </div>
+            <img id="upScreenshotModalImg" style="max-width:100%; max-height:70vh; border-radius:6px; border:1px solid var(--border); display:block; margin-bottom:10px;">
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="copyScreenshotModalImage()">📋 Copy Image</button>
+                <span style="font-size:0.72rem; color:var(--text-muted);">or right-click the image above → Copy Image</span>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/config.js"></script>
