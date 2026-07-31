@@ -1,4 +1,4 @@
-// AC v1.7b DSHBRDNWRKMAP & UPDATEPREP - SPOKEN STYLE PROMPT (COMMON) CHANGES
+// AC v1.7e UPDATEPREPATTACH
 
 // ======================================================
 // Update Prep — assembles copy-ready prompts (written +
@@ -132,6 +132,12 @@ document.addEventListener(
 
         await loadLastSavedTimestamp();
         await loadExistingHistoryIntoBoxes();
+        await loadReferenceAttachments();
+
+        const pasteZone = document.getElementById("upAttachmentPasteZone");
+        if (pasteZone) {
+            pasteZone.addEventListener("paste", handleUpAttachmentPaste);
+        }
     }
 );
 
@@ -346,6 +352,7 @@ async function setUpdatePrepFormat(format) {
 
     await loadLastSavedTimestamp();
     await loadExistingHistoryIntoBoxes();
+    await loadReferenceAttachments();
 }
 
 
@@ -355,6 +362,7 @@ function onUpdatePrepPeriodChanged() {
 
     loadLastSavedTimestamp();
     loadExistingHistoryIntoBoxes();
+    loadReferenceAttachments();
 }
 
 
@@ -384,6 +392,7 @@ function setUpdatePrepPreset(preset) {
 
     loadLastSavedTimestamp();
     loadExistingHistoryIntoBoxes();
+    loadReferenceAttachments();
 
     rebuildUpdatePrepPrompt();
 }
@@ -749,6 +758,7 @@ async function loadExistingHistoryIntoBoxes() {
         spokenTag.style.display = "none";
         sourceTag.style.display = "none";
         rebuildSpokenPrompt();
+        await loadExistingUpAttachment(null);
         return;
     }
 
@@ -770,6 +780,8 @@ async function loadExistingHistoryIntoBoxes() {
     sourceTag.style.display = savedUpdate ? "inline" : "none";
 
     rebuildSpokenPrompt();
+
+    await loadExistingUpAttachment(existingId);
 }
 
 
@@ -836,11 +848,16 @@ async function saveUpdatePrepToHistory() {
 
     try {
 
-        await ensureCurrentHistoryRow(extraFields);
+        const historyId = await ensureCurrentHistoryRow(extraFields);
+
+        if (finishedUpdate && upStagedAttachment) {
+            await uploadStagedUpAttachment(historyId);
+        }
 
         showSuccess("Saved to history");
 
         await loadLastSavedTimestamp();
+        await loadExistingUpAttachment(historyId);
 
     } catch (error) {
 
@@ -867,5 +884,470 @@ async function loadLastSavedTimestamp() {
         label.textContent = `Last saved: ${formatDateTime(rows[0].updated_at)}`;
     } else {
         label.textContent = "Not saved yet for this period";
+    }
+}
+
+
+// ======================================================
+// SCREENSHOT ATTACHMENT — written update only, one file
+// per saved update_prep_history row (replace, not add).
+// Mirrors ToDo's attachment pattern but single-file, and
+// only ever uploads once a history row genuinely exists.
+// ======================================================
+
+let upStagedAttachment = null;
+let upStagedAttachmentPreviewUrl = null;
+let upStagedAttachmentLabel = "";
+let upExistingAttachmentPreview = null;
+
+const UP_ATTACHMENT_BUCKET = "updateprep-attachments";
+const UP_ATTACHMENT_MAX_MB = 49;
+
+
+function sanitizeUpFileNameForPath(name) {
+    return name.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+
+function formatUpDateForLabel(dateStr) {
+
+    if (!dateStr) return "";
+
+    const parts = dateStr.split("-");
+    if (parts.length !== 3) return dateStr;
+
+    const [year, month, day] = parts;
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthIndex = parseInt(month, 10) - 1;
+
+    if (monthIndex < 0 || monthIndex > 11) return dateStr;
+
+    return `${day} ${months[monthIndex]} ${year}`;
+}
+
+
+function buildDefaultUpAttachmentLabel() {
+
+    const formatLabel = upCurrentFormat === "manager" ? "Manager" : "CSAIO";
+    const fromDate = document.getElementById("upFromDate").value;
+    const toDate = document.getElementById("upToDate").value;
+
+    return `${formatLabel} ${formatUpDateForLabel(fromDate)} to ${formatUpDateForLabel(toDate)}`;
+}
+
+
+function escapeUpAttrValue(value) {
+    return String(value || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+
+function addStagedUpAttachment(input) {
+
+    const file = input.files[0];
+    input.value = "";
+
+    if (!file) {
+        return;
+    }
+
+    stageUpAttachmentFile(file);
+}
+
+
+function stageUpAttachmentFile(file) {
+
+    const sizeMB = file.size / (1024 * 1024);
+
+    if (sizeMB > UP_ATTACHMENT_MAX_MB) {
+        showError(`"${file.name}" (${sizeMB.toFixed(1)} MB) is too large — max ${UP_ATTACHMENT_MAX_MB} MB`);
+        return;
+    }
+
+    if (upStagedAttachmentPreviewUrl) {
+        URL.revokeObjectURL(upStagedAttachmentPreviewUrl);
+    }
+
+    upStagedAttachment = file;
+    upStagedAttachmentPreviewUrl = URL.createObjectURL(file);
+    upStagedAttachmentLabel = buildDefaultUpAttachmentLabel();
+
+    renderStagedUpAttachment();
+}
+
+
+function handleUpAttachmentPaste(event) {
+
+    const items = (event.clipboardData || window.clipboardData).items;
+
+    for (const item of items) {
+
+        if (item.type.indexOf("image/") === 0) {
+
+            const file = item.getAsFile();
+
+            if (file) {
+                const renamedFile = new File([file], `snip-${Date.now()}.png`, { type: file.type });
+                stageUpAttachmentFile(renamedFile);
+            }
+
+            event.preventDefault();
+            break;
+        }
+    }
+}
+
+
+function updateStagedUpAttachmentLabel(value) {
+    upStagedAttachmentLabel = value;
+}
+
+
+function renderStagedUpAttachment() {
+
+    const container = document.getElementById("upStagedAttachment");
+    if (!container) return;
+
+    if (!upStagedAttachment) {
+        container.innerHTML = "";
+        return;
+    }
+
+    const sizeMB = upStagedAttachment.size / (1024 * 1024);
+
+    container.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; padding:6px 8px; background:var(--surface-alt); border-radius:6px; margin-top:6px;">
+            <img src="${upStagedAttachmentPreviewUrl}" style="width:48px; height:48px; object-fit:cover; border-radius:4px; border:1px solid var(--border); cursor:pointer; flex-shrink:0;" onclick="openScreenshotModal(-1)">
+            <div style="flex:1; min-width:0;">
+                <input type="text" value="${escapeUpAttrValue(upStagedAttachmentLabel)}" oninput="updateStagedUpAttachmentLabel(this.value)" style="width:100%; font-size:0.78rem; font-weight:600; border:0.5px solid var(--border); border-radius:4px; padding:3px 6px; background:var(--surface); box-sizing:border-box;">
+                <div style="font-size:0.66rem; color:var(--text-muted); margin-top:3px;">${sizeMB.toFixed(1)} MB · click thumbnail to check it before saving · saves with next "Save to History"</div>
+            </div>
+            <span style="color:var(--danger); cursor:pointer; font-size:0.85rem; flex-shrink:0;" onclick="clearStagedUpAttachment()">✕</span>
+        </div>
+    `;
+}
+
+
+function clearStagedUpAttachment() {
+
+    if (upStagedAttachmentPreviewUrl) {
+        URL.revokeObjectURL(upStagedAttachmentPreviewUrl);
+    }
+
+    upStagedAttachment = null;
+    upStagedAttachmentPreviewUrl = null;
+    upStagedAttachmentLabel = "";
+
+    renderStagedUpAttachment();
+}
+
+
+async function loadExistingUpAttachment(historyId) {
+
+    const container = document.getElementById("upExistingAttachment");
+    const pickerLabel = document.getElementById("upAttachmentPickerLabel");
+
+    if (!container) return;
+
+    if (!historyId) {
+        container.innerHTML = "";
+        if (pickerLabel) pickerLabel.textContent = "Add Screenshot";
+        upExistingAttachmentPreview = null;
+        return;
+    }
+
+    const rows = await getData(`update_prep_attachments?history_id=eq.${historyId}`);
+    const attachment = (Array.isArray(rows) && rows.length > 0) ? rows[0] : null;
+
+    if (!attachment) {
+        container.innerHTML = "";
+        if (pickerLabel) pickerLabel.textContent = "Add Screenshot";
+        upExistingAttachmentPreview = null;
+        return;
+    }
+
+    if (pickerLabel) pickerLabel.textContent = "Replace Screenshot";
+
+    const { data: signedData } = await supabaseClient
+        .storage
+        .from(UP_ATTACHMENT_BUCKET)
+        .createSignedUrl(attachment.storage_path, 3600);
+
+    const url = signedData ? signedData.signedUrl : null;
+    const sizeMB = attachment.file_size ? (attachment.file_size / (1024 * 1024)).toFixed(1) : "?";
+    const displayLabel = attachment.label || attachment.file_name;
+
+    upExistingAttachmentPreview = { url, label: displayLabel };
+
+    container.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; padding:6px 8px; border-bottom:1px solid var(--border); margin-top:6px;">
+            <img src="${url}" style="width:48px; height:48px; object-fit:cover; border-radius:4px; border:1px solid var(--border); cursor:pointer;" onclick="openScreenshotModal(-2)">
+            <div style="flex:1;">
+                <div style="font-size:0.78rem; font-weight:600;">${displayLabel}</div>
+                <div style="font-size:0.66rem; color:var(--text-muted);">${sizeMB} MB</div>
+            </div>
+            <span style="color:var(--danger); cursor:pointer; font-size:0.8rem;" onclick="deleteUpAttachment('${attachment.attachment_id}', '${attachment.storage_path}', '${historyId}')">🗑️</span>
+        </div>
+    `;
+}
+
+
+async function deleteUpAttachment(attachmentId, storagePath, historyId) {
+
+    if (!confirmAction("Delete this screenshot?")) {
+        return;
+    }
+
+    try {
+        await supabaseClient.storage.from(UP_ATTACHMENT_BUCKET).remove([storagePath]);
+        await deleteData("update_prep_attachments", "attachment_id", attachmentId);
+        await loadExistingUpAttachment(historyId);
+        showSuccess("Screenshot deleted");
+    } catch (error) {
+        console.error(error);
+        showError("Unable to delete screenshot");
+    }
+}
+
+
+async function uploadStagedUpAttachment(historyId) {
+
+    if (!upStagedAttachment || !historyId) {
+        return;
+    }
+
+    // Enforce "one per history row" at the app level too —
+    // replace whatever is already there rather than adding.
+    const existingRows = await getData(`update_prep_attachments?history_id=eq.${historyId}`);
+
+    if (Array.isArray(existingRows) && existingRows.length > 0) {
+
+        const existing = existingRows[0];
+
+        await supabaseClient.storage.from(UP_ATTACHMENT_BUCKET).remove([existing.storage_path]);
+        await deleteData("update_prep_attachments", "attachment_id", existing.attachment_id);
+    }
+
+    const uniquePrefix = crypto.randomUUID();
+    const safeName = sanitizeUpFileNameForPath(upStagedAttachment.name);
+    const storagePath = `${historyId}/${uniquePrefix}-${safeName}`;
+
+    const { error: uploadError } = await supabaseClient
+        .storage
+        .from(UP_ATTACHMENT_BUCKET)
+        .upload(storagePath, upStagedAttachment);
+
+    if (uploadError) {
+        console.error(uploadError);
+        showError(`Failed to upload screenshot — the update itself was still saved`);
+        clearStagedUpAttachment();
+        return;
+    }
+
+    await insertData("update_prep_attachments", {
+        history_id: historyId,
+        file_name: upStagedAttachment.name,
+        storage_path: storagePath,
+        file_size: upStagedAttachment.size,
+        label: upStagedAttachmentLabel || null,
+        uploaded_by: getCurrentUser()
+    });
+
+    clearStagedUpAttachment();
+}
+
+
+// ======================================================
+// REFERENCE SCREENSHOTS PANEL — last 2 saved screenshots
+// per format (Manager, CSAIO), newest first, so the user
+// no longer has to reopen last period's slide/doc and
+// re-snip it manually before drafting this period's update.
+// ======================================================
+
+let upReferenceSlots = [];
+
+
+async function loadReferenceAttachments() {
+
+    const container = document.getElementById("upReferenceAttachments");
+    if (!container) return;
+
+    const fromDate = document.getElementById("upFromDate").value;
+
+    upReferenceSlots = [];
+
+    const formatSections = [
+        { key: "manager", label: "Manager" },
+        { key: "csaio", label: "CSAIO" }
+    ];
+
+    const sectionsHtml = [];
+
+    for (const section of formatSections) {
+
+        let historyRows = [];
+
+        if (fromDate) {
+
+            const rows = await getData(
+                `update_prep_history?format=eq.${section.key}&period_from=lt.${fromDate}&order=period_from.desc&limit=2`
+            );
+
+            historyRows = Array.isArray(rows) ? rows : [];
+        }
+
+        const slotsHtml = [];
+
+        for (let i = 0; i < 2; i++) {
+
+            const row = historyRows[i];
+
+            if (!row) {
+                slotsHtml.push(buildEmptyReferenceSlot(null));
+                continue;
+            }
+
+            const attachmentRows = await getData(`update_prep_attachments?history_id=eq.${row.history_id}`);
+            const attachment = (Array.isArray(attachmentRows) && attachmentRows.length > 0) ? attachmentRows[0] : null;
+
+            if (!attachment) {
+                slotsHtml.push(buildEmptyReferenceSlot(row));
+                continue;
+            }
+
+            const { data: signedData } = await supabaseClient
+                .storage
+                .from(UP_ATTACHMENT_BUCKET)
+                .createSignedUrl(attachment.storage_path, 3600);
+
+            const url = signedData ? signedData.signedUrl : null;
+
+            if (!url) {
+                slotsHtml.push(buildEmptyReferenceSlot(row));
+                continue;
+            }
+
+            const captionLabel = attachment.label || formatUpPeriodLabel(row);
+
+            const slotIndex = upReferenceSlots.length;
+            upReferenceSlots.push({ url, label: `${section.label} — ${captionLabel}` });
+
+            slotsHtml.push(buildFilledReferenceSlot(captionLabel, slotIndex));
+        }
+
+        sectionsHtml.push(`
+            <div>
+                <div style="font-size:0.85rem; font-weight:600; margin-bottom:8px;">${section.label}</div>
+                <div style="display:flex; gap:10px;">
+                    ${slotsHtml.join("")}
+                </div>
+            </div>
+        `);
+    }
+
+    container.innerHTML = `
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; width:100%;">
+            ${sectionsHtml.join("")}
+        </div>
+    `;
+}
+
+
+function formatUpPeriodLabel(row) {
+    if (!row) return "No record";
+    return `${row.period_from} to ${row.period_to}`;
+}
+
+
+function buildEmptyReferenceSlot(row) {
+
+    return `
+        <div style="flex:1;">
+            <div style="aspect-ratio:4/3; background:var(--surface-alt); border:1px dashed var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:var(--text-muted); text-align:center; padding:4px;">
+                No record
+            </div>
+            <div style="font-size:0.66rem; color:var(--text-muted); text-align:center; margin-top:4px;">${formatUpPeriodLabel(row)}</div>
+        </div>
+    `;
+}
+
+
+function buildFilledReferenceSlot(captionLabel, slotIndex) {
+
+    const slot = upReferenceSlots[slotIndex];
+
+    return `
+        <div style="flex:1;">
+            <div style="aspect-ratio:4/3; border-radius:6px; overflow:hidden; border:1px solid var(--border); cursor:pointer;" onclick="openScreenshotModal(${slotIndex})">
+                <img src="${slot.url}" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            <div style="font-size:0.66rem; color:var(--text-secondary); text-align:center; margin-top:4px;">${captionLabel}</div>
+        </div>
+    `;
+}
+
+
+// ======================================================
+// FULL-SIZE SCREENSHOT MODAL — used by staged (-1),
+// currently saved (-2), and reference panel (0+) thumbnails
+// ======================================================
+
+let upScreenshotModalCurrentUrl = null;
+
+
+function openScreenshotModal(index) {
+
+    let url = null;
+    let label = "";
+
+    if (index === -1) {
+
+        if (!upStagedAttachmentPreviewUrl) return;
+
+        url = upStagedAttachmentPreviewUrl;
+        label = "Staged screenshot (not yet saved)";
+
+    } else if (index === -2) {
+
+        if (!upExistingAttachmentPreview || !upExistingAttachmentPreview.url) return;
+
+        url = upExistingAttachmentPreview.url;
+        label = upExistingAttachmentPreview.label;
+
+    } else {
+
+        const slot = upReferenceSlots[index];
+        if (!slot || !slot.url) return;
+
+        url = slot.url;
+        label = slot.label;
+    }
+
+    document.getElementById("upScreenshotModalTitle").textContent = label;
+    document.getElementById("upScreenshotModalImg").src = url;
+    upScreenshotModalCurrentUrl = url;
+
+    openModal("upScreenshotModal");
+}
+
+
+async function copyScreenshotModalImage() {
+
+    if (!upScreenshotModalCurrentUrl) return;
+
+    try {
+
+        const response = await fetch(upScreenshotModalCurrentUrl);
+        const blob = await response.blob();
+
+        await navigator.clipboard.write([
+            new ClipboardItem({ [blob.type]: blob })
+        ]);
+
+        showSuccess("Image copied — paste it into your AI assistant");
+
+    } catch (error) {
+
+        console.error(error);
+        showError("Couldn't copy automatically — right-click the image above and choose Copy Image instead");
     }
 }

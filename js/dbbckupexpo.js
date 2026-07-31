@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT PASS 2
+// AC v1.7e UPDATEPREPATTACHPUSHSAFE
 
 // backup.js
 // Data Safety page — exports and full-replace backup push to pwms_prev.
@@ -10,15 +10,26 @@ const BACKUP_TABLES = [
     { name: "milestone", pk: "milestone_id" },
     { name: "activity", pk: "activity_id" },
     { name: "todo", pk: "todo_id" },
+    { name: "todo_attachments", pk: "attachment_id" },
     { name: "task_log", pk: "task_log_id" },
     { name: "update_prep_settings", pk: "setting_key" },
     { name: "update_prep_history", pk: "history_id" },
+    { name: "update_prep_attachments", pk: "attachment_id" },
     { name: "personal_profile", pk: "profile_id" },
     { name: "employment_history", pk: "employment_id" },
     { name: "attendance_codes", pk: "code" },
     { name: "holiday_master", pk: "holiday_id" },
     { name: "attendance_log", pk: "log_date" }
 ];
+
+// Maps each attachment table to the Storage bucket its storage_path
+// values live in. Table rows and bucket files are backed up/restored
+// as separate steps below (REST for rows, Storage REST for files) —
+// there is no single call that does both together.
+const ATTACHMENT_BUCKETS = {
+    todo_attachments: "todo-attachments",
+    update_prep_attachments: "updateprep-attachments"
+};
 
 // Parents before children, so a child's foreign key always has
 // somewhere valid to point during insert. attendance_codes must
@@ -27,17 +38,19 @@ const BACKUP_TABLES = [
 // dependencies and can sit anywhere.
 const INSERT_ORDER = [
     "portfolio", "project", "milestone", "activity",
-    "todo", "task_log",
-    "update_prep_settings", "update_prep_history",
+    "todo", "todo_attachments", "task_log",
+    "update_prep_settings", "update_prep_history", "update_prep_attachments",
     "personal_profile", "employment_history",
     "attendance_codes", "holiday_master", "attendance_log"
 ];
 
 // Children before parents, so nothing is still referenced when its
 // parent gets deleted. attendance_log must precede attendance_codes.
+// todo_attachments must precede todo; update_prep_attachments must
+// precede update_prep_history — same cascade logic as todo/task_log.
 const DELETE_ORDER = [
-    "task_log", "todo", "activity", "milestone", "project", "portfolio",
-    "update_prep_settings", "update_prep_history",
+    "task_log", "todo_attachments", "todo", "activity", "milestone", "project", "portfolio",
+    "update_prep_settings", "update_prep_attachments", "update_prep_history",
     "attendance_log", "attendance_codes",
     "personal_profile", "employment_history", "holiday_master"
 ];
@@ -162,6 +175,29 @@ async function exportCsvZip() {
         logBackup(`  Added ${t.name}.csv (${backupData[t.name].length} row(s))`);
     });
 
+    logBackup("Fetching attachment files from Storage...");
+
+    for (const tableName of Object.keys(ATTACHMENT_BUCKETS)) {
+
+        const bucket = ATTACHMENT_BUCKETS[tableName];
+        const rows = backupData[tableName] || [];
+
+        for (const row of rows) {
+
+            const { data: blob, error } =
+                await supabaseClient.storage.from(bucket).download(row.storage_path);
+
+            if (error || !blob) {
+                logBackup(`  ⚠️ Could not fetch ${tableName}/${row.storage_path} — skipped (row still exported in CSV)`);
+                continue;
+            }
+
+            zip.file(`attachments/${tableName}/${row.storage_path}`, blob);
+        }
+
+        logBackup(`  Added ${rows.length} file(s) from ${bucket}`);
+    }
+
     logBackup("Compressing zip...");
 
     const blob = await zip.generateAsync({ type: "blob" });
@@ -266,6 +302,18 @@ async function pushToPrev() {
             logBackup(`  Cleared ${tableName}.`);
         }
 
+        for (const tableName of Object.keys(ATTACHMENT_BUCKETS)) {
+
+            const bucket = ATTACHMENT_BUCKETS[tableName];
+
+            statusEl.textContent = `Clearing ${bucket} bucket in pwms_prev...`;
+            logBackup(`  Clearing all files in ${bucket} (pwms_prev)...`);
+
+            await clearBucketPrev(bucket);
+
+            logBackup(`  Cleared ${bucket}.`);
+        }
+
         for (const tableName of INSERT_ORDER) {
 
             const rows = backupData[tableName] || [];
@@ -281,6 +329,32 @@ async function pushToPrev() {
             await insertDataPrev(tableName, rows);
 
             logBackup(`  Inserted ${tableName}.`);
+
+            if (ATTACHMENT_BUCKETS[tableName]) {
+
+                const bucket = ATTACHMENT_BUCKETS[tableName];
+
+                statusEl.textContent = `Copying files for ${tableName} (${rows.length})...`;
+                logBackup(`  Copying ${rows.length} file(s) into ${bucket} (pwms_prev)...`);
+
+                for (const row of rows) {
+
+                    const { data: blob, error } =
+                        await supabaseClient.storage.from(bucket).download(row.storage_path);
+
+                    if (error || !blob) {
+                        throw new Error(`Could not download ${tableName}/${row.storage_path} from live Storage — aborting so pwms_prev doesn't end up with rows pointing at missing files.`);
+                    }
+
+                    const uploaded = await uploadFilePrev(bucket, row.storage_path, blob);
+
+                    if (!uploaded) {
+                        throw new Error(`Failed to upload ${row.storage_path} into ${bucket} on pwms_prev.`);
+                    }
+                }
+
+                logBackup(`  Copied ${rows.length} file(s) into ${bucket}.`);
+            }
         }
 
         statusEl.textContent = `✅ Push complete — ${new Date().toLocaleString()}`;
@@ -318,9 +392,11 @@ async function generateSqlSeeds() {
         milestone: "3030",
         activity: "3040",
         todo: "3050",
+        todo_attachments: "3055",
         task_log: "3060",
         update_prep_settings: "3070",
         update_prep_history: "3080",
+        update_prep_attachments: "3085",
         personal_profile: "3090",
         employment_history: "3100",
         attendance_codes: "3110",
