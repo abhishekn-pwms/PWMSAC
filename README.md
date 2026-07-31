@@ -2,19 +2,25 @@
 Date : Mon, 29-Jul-2026
 === === === === === ===
 
+Release PWMS AC v1.7e UPDATE PREP ATTACHMENTS AND DATA SAFETY PUSH
 Release PWMS AC v1.7d TODO ATTACHMENTS AND WORKMAPS ADD NEW TODO
 
 ------------------
 
 What's New
+* Added support for UpdatePrep Attachments and Included Attachments in Data Safety Push.
 * Added support for ToDo Attachments and Add New Todo option included in WorkMap & Details pages.
 
+** ATTACHMENTS FOR UPDATEPREP
 ** ATTACHMENTS FOR TODOs
+** DATA SAFETY PUSH FOR ATTACHMENTS
 ** WORKMAP ADD TODO ON TOP
 
 ## <Comment Block>
+# "AC v1.7e UPDATEPREPATTACHPUSHSAFE"
+# "AC v1.7e UPDATEPREPATTACH"
 # "AC v1.7d TODOATTACH"
-
+# "AC v1.7d UPDATEPREPATTACH"
 
 
 
