@@ -1,3 +1,5 @@
+// AC v1.7e UPDATEPREPATTACHTODOATTACHPUSHSAFE
+
 const APP_BASE = (() => {
 
     // alert(window.location.hostname)
@@ -92,7 +94,7 @@ function getDefaultLandingPage() {
 
 const APP_CONFIG = {
 
-    APP_NAME: "PWMS GG",
+    APP_NAME: "PWMS AC",
 
     VERSION: "2.0",
 
@@ -102,6 +104,7 @@ const APP_CONFIG = {
 
     ALLOWED_EMAILS: [
         "abhishek.n.space@gmail.com",
+        "abhishek.nandrajog@outlook.com",
         "abhishek.nandrajog@gmail.com"
     ],
 
