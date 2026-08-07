@@ -1,11 +1,11 @@
-<!-- AC v1.7e UPDATEPREPATTACHPUSHSAFE -->
+<!-- AC v1.7f QUICKLOG -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Safety AC v1.7e UPDATEPREPATTACHPUSHSAFE</title>
+    <title>Data Safety AC v1.7f QUICKLOG</title>
     <link rel="stylesheet" href="../css/pwms.css">
     <link rel="stylesheet" href="../css/dbbckupexpo.css">
 </head>
@@ -34,7 +34,7 @@
 
                 <div class="bk-panel">
                     <div class="bk-panel-header">Export</div>
-                    <p class="bk-panel-hint">All 15 tables, every time — no partial exports. Downloads a snapshot of live data as it stands right now. CSV export also includes the actual attachment files from Storage; JSON export is metadata only.</p>
+                    <p class="bk-panel-hint">All 16 tables, every time — no partial exports. Downloads a snapshot of live data as it stands right now. CSV export also includes the actual attachment files from Storage; JSON export is metadata only.</p>
                     <div class="bk-action-row">
                         <button class="btn btn-primary" onclick="exportCsvZip()">⬇️ Download CSV (.zip)</button>
                         <button class="btn btn-primary" onclick="exportJson()">⬇️ Download JSON</button>
@@ -62,7 +62,7 @@
 
                 <div class="bk-panel bk-panel-muted">
                     <div class="bk-panel-header">Generate SQL Seed Files</div>
-                    <p class="bk-panel-hint">Not part of the standard backup flow. Generates real INSERT statements from live data for all 15 tables, matching the 30xx seed-file numbering convention — including replacing the current placeholder todo seed with real data. Meant to be run once, not on a regular cadence.</p>
+                    <p class="bk-panel-hint">Not part of the standard backup flow. Generates real INSERT statements from live data for all 16 tables, matching the 30xx seed-file numbering convention — including replacing the current placeholder todo seed with real data. Meant to be run once, not on a regular cadence.</p>
                     <div class="bk-action-row">
                         <button class="btn btn-secondary" onclick="generateSqlSeeds()">📄 Generate Seed SQL (.zip)</button>
                     </div>
