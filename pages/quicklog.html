@@ -1,0 +1,79 @@
+<!-- AC v1.7f QUICKLOG -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Log AC v1.7f</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Quick Log</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="loadQuickLogEntries()" title="Refresh">🔄</button>
+                    </div>
+                </div>
+
+                <div class="ql-panel" style="margin-bottom:16px;">
+
+                    <div style="display:flex; gap:6px; margin-bottom:8px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+                        <button type="button" class="btn btn-secondary" style="font-weight:bold; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('bold')">B</button>
+                        <button type="button" class="btn btn-secondary" style="font-style:italic; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('italic')">I</button>
+                        <button type="button" class="btn btn-secondary" style="text-decoration:underline; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('underline')">U</button>
+                        <button type="button" class="btn btn-secondary" style="padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('insertUnorderedList')">• List</button>
+                        <button type="button" class="btn btn-secondary" style="padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('insertOrderedList')">1. List</button>
+                    </div>
+
+                    <div
+                        id="qlNewEntryBox"
+                        contenteditable="true"
+                        style="border:1px solid var(--border); border-radius:6px; padding:10px; font-size:0.85rem; line-height:1.6; white-space:pre-wrap;"
+                        onfocus="onQuickLogBoxFocus()"
+                        onkeydown="onQuickLogKeydown(event)"
+                        onpaste="handleQuickLogPaste(event, 'qlNewEntryBox')"
+                    ></div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span style="font-size:0.7rem; color:var(--text-muted);">Auto-fills date/time on focus if empty · paste images or Office content · Ctrl+Enter to save</span>
+                        <button class="btn btn-primary" onclick="saveQuickLogEntry()">💾 Save</button>
+                    </div>
+
+                </div>
+
+                <input type="search" id="qlSearchBox" class="search-box" placeholder="Search Quick Log..." onkeyup="renderQuickLogEntries()" style="width:100%; box-sizing:border-box; margin-bottom:14px;">
+
+                <div id="qlFeed"></div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+    </div>
+
+    <div id="fab"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/quicklog.js"></script>
+    <script>initializeAppIcon();</script>
+
+</body>
+</html>
