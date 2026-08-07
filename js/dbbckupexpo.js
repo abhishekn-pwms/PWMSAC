@@ -1,4 +1,4 @@
-// AC v1.7e UPDATEPREPATTACHPUSHSAFE
+// AC v1.7f QUICKLOG
 
 // backup.js
 // Data Safety page — exports and full-replace backup push to pwms_prev.
@@ -19,7 +19,8 @@ const BACKUP_TABLES = [
     { name: "employment_history", pk: "employment_id" },
     { name: "attendance_codes", pk: "code" },
     { name: "holiday_master", pk: "holiday_id" },
-    { name: "attendance_log", pk: "log_date" }
+    { name: "attendance_log", pk: "log_date" },
+    { name: "quicklog_entries", pk: "entry_id" }
 ];
 
 // Maps each attachment table to the Storage bucket its storage_path
@@ -41,14 +42,18 @@ const INSERT_ORDER = [
     "todo", "todo_attachments", "task_log",
     "update_prep_settings", "update_prep_history", "update_prep_attachments",
     "personal_profile", "employment_history",
-    "attendance_codes", "holiday_master", "attendance_log"
+    "attendance_codes", "holiday_master", "attendance_log",
+    "quicklog_entries"
 ];
 
 // Children before parents, so nothing is still referenced when its
 // parent gets deleted. attendance_log must precede attendance_codes.
 // todo_attachments must precede todo; update_prep_attachments must
 // precede update_prep_history — same cascade logic as todo/task_log.
+// quicklog_entries has no foreign keys at all, so its position here
+// doesn't matter — placed first since it's the simplest case.
 const DELETE_ORDER = [
+    "quicklog_entries",
     "task_log", "todo_attachments", "todo", "activity", "milestone", "project", "portfolio",
     "update_prep_settings", "update_prep_attachments", "update_prep_history",
     "attendance_log", "attendance_codes",
@@ -401,7 +406,8 @@ async function generateSqlSeeds() {
         employment_history: "3100",
         attendance_codes: "3110",
         holiday_master: "3120",
-        attendance_log: "3130"
+        attendance_log: "3130",
+        quicklog_entries: "3140"
     };
 
     BACKUP_TABLES.forEach(t => {
