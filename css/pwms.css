@@ -912,3 +912,72 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     /* Hide redundant top action buttons on mobile — FAB covers Quick Add */
     .page-header-actions .hide-on-mobile { display: none !important; }
 }
+
+/* ==================================
+   QUICK LINKS PILL — static, always-visible row of shortcuts in both
+   #header and #footer. No animation, no open/close — just there.
+   Two contexts need different contrast: #header is dark (--header-bg,
+   white text), #footer is light (--surface). Same markup, different
+   background/border per context below.
+================================== */
+
+.quick-links-pill {
+    display: flex;
+    gap: 4px;
+    border-radius: var(--radius-pill);
+    padding: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.quick-link-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 6px 8px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+}
+
+#header .quick-links-pill {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+#header .quick-link-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+#footer .quick-links-pill {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+}
+
+#footer .quick-link-btn:hover {
+    background: var(--border);
+}
+
+/* ==================================
+   QUICK LOG — quicklog.html referenced "bk-panel" (a class that only
+   exists in dbbckupexpo.css, never loaded here), so the entry-box
+   wrapper had no actual styling. Real class defined here instead.
+================================== */
+
+.ql-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 14px;
+}
+
+/* contenteditable divs don't get a native resize handle the way
+   <textarea> does — "resize" + a non-visible "overflow" brings it
+   back on any block element, contenteditable included. */
+#qlNewEntryBox,
+[id^="qlEditBox_"] {
+    min-height: 120px;
+    resize: vertical;
+    overflow-y: auto;
+}
