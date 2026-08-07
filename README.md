@@ -1,4 +1,23 @@
 === === === === === ===
+Date : Fri, 07-Aug-2026
+=== === === === === ===
+
+Release PWMS AC v1.7f QUICKLOG
+
+------------------
+
+What's New
+* Added Quick Log module
+
+** QUICK LOG MODULE WITH SUPPORT FOR RICH TEXT
+
+## <Comment Block>
+# "AC v1.7f QUICKLOG"
+
+
+
+
+=== === === === === ===
 Date : Mon, 29-Jul-2026
 === === === === === ===
 
@@ -270,7 +289,11 @@ This release focuses entirely on Re-designing the PWMS GG version.
 Backend: Supabase
 ------------------
 
-Authentication: Google OAuth
+Authentication:
+Google OAuth
+GitHub OAuth
+OTP
+
 ------------------
 
 Allowed Email Validation
