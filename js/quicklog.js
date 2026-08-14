@@ -200,15 +200,18 @@ async function saveQuickLogEntry() {
 // EDIT / DELETE
 // ======================================================
 
-function quickLogToolbarHtml() {
+function quickLogToolbarHtml(topActionsHtml) {
 
     return `
-        <div style="display:flex; gap:6px; margin-bottom:6px; border-bottom:1px solid var(--border); padding-bottom:6px;">
-            <button type="button" class="btn btn-secondary" style="font-weight:bold; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('bold')">B</button>
-            <button type="button" class="btn btn-secondary" style="font-style:italic; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('italic')">I</button>
-            <button type="button" class="btn btn-secondary" style="text-decoration:underline; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('underline')">U</button>
-            <button type="button" class="btn btn-secondary" style="padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('insertUnorderedList')">• List</button>
-            <button type="button" class="btn btn-secondary" style="padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('insertOrderedList')">1. List</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px; border-bottom:1px solid var(--border); padding-bottom:6px;">
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-secondary" style="font-weight:bold; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('bold')">B</button>
+                <button type="button" class="btn btn-secondary" style="font-style:italic; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('italic')">I</button>
+                <button type="button" class="btn btn-secondary" style="text-decoration:underline; padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('underline')">U</button>
+                <button type="button" class="btn btn-secondary" style="padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('insertUnorderedList')">• List</button>
+                <button type="button" class="btn btn-secondary" style="padding:4px 10px;" onmousedown="event.preventDefault()" onclick="document.execCommand('insertOrderedList')">1. List</button>
+            </div>
+            ${topActionsHtml || ""}
         </div>
     `;
 }
@@ -224,13 +227,21 @@ function startEditQuickLogEntry(entryId) {
 
     const card = document.querySelector(`[data-entry-id="${entryId}"]`);
 
+    const topActions = `
+        <div style="display:flex; gap:8px;">
+            <button class="btn btn-secondary" onclick="renderQuickLogEntries()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditQuickLogEntry('${entryId}')">Save</button>
+        </div>
+    `;
+
     card.innerHTML = `
-        ${quickLogToolbarHtml()}
+        ${quickLogToolbarHtml(topActions)}
         <div
             id="qlEditBox_${entryId}"
             contenteditable="true"
             style="min-height:60px; border:1px solid var(--border); border-radius:6px; padding:8px; font-size:0.85rem; line-height:1.6; white-space:pre-wrap;"
             onpaste="handleQuickLogPaste(event, 'qlEditBox_${entryId}')"
+            onkeydown="onQuickLogEditKeydown(event, '${entryId}')"
         >${entry.entry_text}</div>
         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
             <button class="btn btn-secondary" onclick="renderQuickLogEntries()">Cancel</button>
@@ -239,6 +250,15 @@ function startEditQuickLogEntry(entryId) {
     `;
 
     document.getElementById(`qlEditBox_${entryId}`).focus();
+}
+
+
+function onQuickLogEditKeydown(event, entryId) {
+
+    if (event.ctrlKey && event.key === "Enter") {
+        event.preventDefault();
+        saveEditQuickLogEntry(entryId);
+    }
 }
 
 
