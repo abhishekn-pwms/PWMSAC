@@ -1,0 +1,74 @@
+<!-- AC v2.0 FAMILY -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invest dashboard AC v2.0 FAMILY</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Invest dashboard</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="refreshInvest()" title="Refresh">&#128260;</button>
+                    </div>
+                </div>
+
+                <div class="inv-load-note" id="invLoadNote" style="display:none;"></div>
+
+                <div class="inv-tiles">
+                    <a class="inv-tile" id="invTileDeposits" href="deposits.html"></a>
+                    <a class="inv-tile" id="invTileInsurance" href="insurance.html"></a>
+                    <a class="inv-tile" id="invTileFunds" href="mutualfunds.html"></a>
+                    <a class="inv-tile" id="invTileVault" href="vault.html"></a>
+                    <a class="inv-tile" id="invTileFamily" href="family-summary.html"></a>
+                </div>
+
+                <div class="inv-card">
+                    <div class="inv-card-head">
+                        <div class="inv-card-title">Upcoming</div>
+                        <select id="invWindow" onchange="renderUpcoming()">
+                            <option value="30">Next 30 days</option>
+                            <option value="90" selected>Next 90 days</option>
+                            <option value="6m">Next 6 months</option>
+                        </select>
+                    </div>
+                    <div id="invFeed"></div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/insurance-schedule.js"></script>
+    <script src="../js/invest-dashboard.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div id="fab"></div>
+
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!-- AC v2.0 BANKNDEPOSITS -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance AC v2.0 BANKNDEPOSITS</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Insurance</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="openPeople()">&#128101; People</button>
+                        <button class="btn btn-primary hide-on-mobile" onclick="newPolicy()">+ New Policy</button>
+                        <button class="btn btn-secondary" onclick="refreshInsurance()" title="Refresh">&#128260;</button>
+                    </div>
+                </div>
+
+                <div class="stat-strip">
+                    <div id="insChipActive" class="stat-chip">Active policies: 0</div>
+                    <div id="insChipDue" class="stat-chip">Due in 60 days: 0</div>
+                    <div id="insChipShort" class="stat-chip">Funding short: 0</div>
+                    <div id="insChipNoRd" class="stat-chip">No RD for next due: 0</div>
+                </div>
+
+                <div class="toolbar">
+                    <input type="search" id="insSearch" class="search-box" placeholder="Search policy or insurer..." onkeyup="renderInsuranceFeed()">
+                    <select id="insStatusFilter" onchange="renderInsuranceFeed()">
+                        <option value="Active" selected>Active</option>
+                        <option value="Closed">Closed</option>
+                        <option value="All">All</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-secondary">
+                    <select id="insTypeFilter" onchange="renderInsuranceFeed()"></select>
+                    <select id="insSort" onchange="renderInsuranceFeed()">
+                        <option value="due" selected>Next due, soonest first</option>
+                        <option value="name">Policy name</option>
+                    </select>
+                </div>
+
+                <div id="insuranceFeed"></div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="policyModal" class="modal">
+        <div class="modal-content">
+            <h2 id="polModalTitle">Policy</h2>
+            <input type="hidden" id="polId">
+
+            <div class="form-row">
+                <label>Policy name</label>
+                <input id="polName" maxlength="200">
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Type</label>
+                    <select id="polType"></select>
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select id="polStatus"></select>
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Insurer</label>
+                    <input id="polInsurer" maxlength="200">
+                </div>
+                <div>
+                    <label>Policy number</label>
+                    <input id="polNo" maxlength="60">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Insured</label>
+                    <select id="polPerson"></select>
+                </div>
+                <div>
+                    <label>Sum assured (&#8377;)</label>
+                    <input type="number" id="polSum" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Issue date</label>
+                    <input type="date" id="polIssue">
+                </div>
+                <div>
+                    <label>Matures or renews</label>
+                    <input type="date" id="polMaturity">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Term (years)</label>
+                    <input type="number" id="polTerm" min="0" step="1">
+                </div>
+                <div>
+                    <label>Premium paying term (years)</label>
+                    <input type="number" id="polPremTerm" min="0" step="1">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Premium mode</label>
+                    <select id="polMode" onchange="updateDueHint()"></select>
+                </div>
+                <div>
+                    <label>Premium amount (&#8377;)</label>
+                    <input type="number" id="polPremium" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>First due date</label>
+                <input type="date" id="polFirstDue" onchange="updateDueHint()">
+                <div class="ins-hint" id="polDueHint"></div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Nominee</label>
+                    <input id="polNominee" maxlength="300">
+                </div>
+                <div>
+                    <label>Purchased via</label>
+                    <input id="polVia" maxlength="200">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Linked mobile and email</label>
+                    <input id="polContact" maxlength="300">
+                </div>
+                <div>
+                    <label>Tax section</label>
+                    <input id="polTax" maxlength="40" placeholder="e.g. 80C">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="polNotes" rows="3" maxlength="2000"></textarea>
+            </div>
+
+            <div class="ins-fundedby" id="polFundedBy"></div>
+
+            <div class="att-section" id="insAttachments"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="savePolicy()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('policyModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="peopleModal" class="modal">
+        <div class="modal-content" style="max-width:520px;">
+            <div class="ins-people-head">
+                <h2>People</h2>
+                <button class="btn btn-secondary btn-sm" onclick="addPerson()">+ Add person</button>
+            </div>
+            <div id="peopleList"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('peopleModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/insurance-schedule.js"></script>
+    <script src="../js/attachments.js"></script>
+    <script src="../js/insurance.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div id="fab"></div>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!-- AC v2.0 BANKNDEPOSITS -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mutual funds AC v2.0 BANKNDEPOSITS</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Mutual funds</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="openUpdate()">&#128200; Update values</button>
+                        <button class="btn btn-primary hide-on-mobile" onclick="newHolding()">+ New Holding</button>
+                        <button class="btn btn-secondary" onclick="refreshMf()" title="Refresh">&#128260;</button>
+                    </div>
+                </div>
+
+                <div class="stat-strip">
+                    <div id="mfChipHolding" class="stat-chip">Holding: 0</div>
+                    <div id="mfChipInvested" class="stat-chip">Invested: &mdash;</div>
+                    <div id="mfChipCurrent" class="stat-chip">Current value: &mdash;</div>
+                    <div id="mfChipGain" class="stat-chip">Gain: &mdash;</div>
+                    <div id="mfChipAsOf" class="stat-chip">Values as of: &mdash;</div>
+                </div>
+                <div class="mf-totals-note" id="mfTotalsNote"></div>
+
+                <div class="toolbar">
+                    <input type="search" id="mfSearch" class="search-box" placeholder="Search fund, folio or bank..." onkeyup="renderMf()">
+                    <select id="mfStatusFilter" onchange="renderMf()">
+                        <option value="Holding" selected>Holding now</option>
+                        <option value="Active">Active</option>
+                        <option value="Locked">Locked</option>
+                        <option value="Redeemed">Redeemed</option>
+                        <option value="All">All</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-secondary">
+                    <select id="mfPersonFilter" onchange="renderMf()"></select>
+                    <select id="mfSort" onchange="renderMf()">
+                        <option value="value" selected>Current value, highest first</option>
+                        <option value="gain">Gain, highest first</option>
+                        <option value="name">Fund name</option>
+                    </select>
+                </div>
+
+                <div id="mfFeed"></div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="mfModal" class="modal">
+        <div class="modal-content">
+            <h2 id="mfModalTitle">Holding</h2>
+            <input type="hidden" id="mfId">
+
+            <div class="time-row">
+                <div>
+                    <label>Holder</label>
+                    <select id="mfPerson"></select>
+                </div>
+                <div>
+                    <label>Status</label>
+                    <select id="mfStatus" onchange="onMfStatusChanged()"></select>
+                </div>
+            </div>
+            <div class="vault-hint" id="mfStatusHint"></div>
+
+            <div class="form-row">
+                <label>Fund name</label>
+                <input id="mfFund" maxlength="200" placeholder="e.g. Axis Bluechip Fund">
+            </div>
+
+            <div class="form-row">
+                <label>Full scheme name</label>
+                <input id="mfScheme" maxlength="300" placeholder="Fund house, scheme, plan and option">
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Held through</label>
+                    <select id="mfBank"></select>
+                </div>
+                <div>
+                    <label>Account number</label>
+                    <input id="mfAccount" maxlength="40" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Folio number</label>
+                    <input id="mfFolio" maxlength="60" autocomplete="off">
+                </div>
+                <div>
+                    <label>Scheme code</label>
+                    <input id="mfCode" maxlength="40" autocomplete="off">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Holding pattern</label>
+                    <select id="mfPattern"></select>
+                </div>
+                <div>
+                    <label>Invested as</label>
+                    <select id="mfMode" onchange="onMfModeChanged()"></select>
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Start date</label>
+                    <input type="date" id="mfStart">
+                </div>
+                <div>
+                    <label id="mfAmountLabel">Amount (&#8377;)</label>
+                    <input type="number" id="mfAmount" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Nominee</label>
+                <input id="mfNominee" maxlength="300">
+            </div>
+
+            <div class="mf-redeem" id="mfRedeemBox" style="display:none;">
+                <div class="time-row" style="margin-bottom:0;">
+                    <div>
+                        <label>Redeemed on</label>
+                        <input type="date" id="mfRedeemedOn">
+                    </div>
+                    <div>
+                        <label>Amount received (&#8377;)</label>
+                        <input type="number" id="mfRedeemedAmount" min="0" step="0.01">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="mfNotes" rows="2" maxlength="2000"></textarea>
+            </div>
+
+            <div id="mfHistoryBox" style="display:none;">
+                <div class="mf-hist-title">Value history</div>
+                <div id="mfHistory"></div>
+            </div>
+
+            <div class="att-section" id="mfAttachments"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveHolding()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('mfModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="updModal" class="modal">
+        <div class="modal-content" style="max-width:640px;">
+            <h2>Update values</h2>
+
+            <div class="form-row">
+                <label>Values as of</label>
+                <input type="date" id="updDate" onchange="renderUpdateRows()">
+                <div class="vault-hint" id="updHint"></div>
+            </div>
+
+            <div class="mf-upd-list" id="updRows"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="updSaveBtn" onclick="saveUpdates()">Save values</button>
+                <button class="btn btn-secondary" onclick="closeModal('updModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/insurance-schedule.js"></script>
+    <script src="../js/attachments.js"></script>
+    <script src="../js/mutualfunds.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div id="fab"></div>
+
+</body>
+</html>

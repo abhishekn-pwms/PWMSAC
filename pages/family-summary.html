@@ -1,0 +1,88 @@
+<!-- AC v2.0 FAMILY -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family summary AC v1.8 PACK</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+    <style media="print">
+        @page { size: A4 landscape; margin: 12mm; }
+    </style>
+</head>
+<body class="fs-page">
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header fs-noprint">
+                    <div class="page-title">Family summary</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="refreshFamily()" title="Refresh">&#128260;</button>
+                    </div>
+                </div>
+
+                <div class="fs-load-note fs-noprint" id="fsLoadNote" style="display:none;"></div>
+
+                <div class="fs-banner fs-noprint" id="fsBanner" style="display:none;"></div>
+
+                <div class="fs-card fs-noprint" id="fsShareCard" style="display:none;">
+                    <div class="fs-card-title">Share with family</div>
+                    <p class="fs-hint">This makes a PDF of the summary and, if you have marked any scans for family, a zip of those scans, both locked with ONE password you choose now. The password is used once, in this browser, and is never stored. Tell your family the password in person, not in the same message as the files.</p>
+                    <div class="fs-action-row">
+                        <input type="password" id="fsPassword" maxlength="100" autocomplete="new-password" placeholder="Choose a passphrase (10+ characters)" oninput="onPasswordInput()">
+                        <button class="btn btn-primary" id="fsBtnDownload" onclick="downloadPack()" disabled>&#11015;&#65039; Download</button>
+                        <button class="btn btn-primary" id="fsBtnShare" onclick="sharePack()" style="display:none;" disabled>&#128228; Share&hellip;</button>
+                        <button class="btn btn-secondary" id="fsBtnPrint" onclick="printSummary()">&#128424;&#65039; Print</button>
+                    </div>
+                    <div class="fs-meter"><i id="fsMeterBar"></i></div>
+                    <div class="fs-hint" id="fsStrength">10+ characters needed</div>
+                    <div class="fs-hint fs-bad" id="fsPassNote" style="display:none;"></div>
+                    <div class="fs-hint" id="fsScanInfo"></div>
+                    <div class="fs-hint">Both files are encrypted with AES-256. The PDF opens in Acrobat, Chrome, Edge, Safari and phone viewers. The zip needs 7-Zip or a similar program, and you will also get a plain READ_ME_FIRST.txt telling your family how to open it. A long phrase matters more than symbols. Print makes an <b>unlocked</b> copy of the summary, so keep it somewhere safe; printing does not count as sharing for the reminder.</div>
+                    <div class="fs-status" id="fsStatus"></div>
+                </div>
+
+                <div class="fs-card">
+                    <div class="fs-card-head">
+                        <div class="fs-card-title fs-noprint">What the pack contains</div>
+                        <span class="fs-tag fs-noprint" id="fsPreviewTag"></span>
+                        <button class="btn btn-secondary fs-noprint" id="fsBtnPrintView" onclick="printSummary()" style="display:none;">&#128424;&#65039; Print</button>
+                    </div>
+                    <div id="fsPreview"></div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.3.13/build/pdfmake.min.js" integrity="sha384-/JVvlU2iyYp0inj2VW4i5tkJYTSn1bVkfuhFeEXFTXMMgiSjR+dDD1pnRqgl5csu" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.3.13/build/vfs_fonts.js" integrity="sha384-pkBUW1wxcm6m7ZjKDxADnNHqnz+Sx9sAL1ndsLNv/GZnWZgodPYsju1yxeyQnn0c" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.24.0/dist/zip.min.js" integrity="sha384-IQSO75gzWxUu8d5fBrmYP/++ztYeZnYcVgY1gvWiW5XTVZpOxEEd5dvgu8lIJl9R" crossorigin="anonymous"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/insurance-schedule.js"></script>
+    <script src="../js/family-summary.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div id="fab"></div>
+
+</body>
+</html>

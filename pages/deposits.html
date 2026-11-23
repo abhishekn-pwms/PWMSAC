@@ -1,0 +1,191 @@
+<!-- AC AC v2.0 BANKNDEPOSITS -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposits AC v2.0 BANKNDEPOSITS</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Deposits</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary" onclick="openBankAccounts()">&#127974; Bank accounts</button>
+                        <button class="btn btn-primary hide-on-mobile" onclick="newDeposit()">+ New Deposit</button>
+                        <button class="btn btn-secondary" onclick="refreshDeposits()" title="Refresh">&#128260;</button>
+                    </div>
+                </div>
+
+                <div class="stat-strip">
+                    <div id="depChipActive" class="stat-chip">Active: 0</div>
+                    <div id="depChipSoon" class="stat-chip">Maturing in 30 days: 0</div>
+                    <div id="depChipMatured" class="stat-chip">Matured, not closed: 0</div>
+                    <div id="depChipNoDate" class="stat-chip">No needed-by date: 0</div>
+                </div>
+
+                <div class="toolbar">
+                    <input type="search" id="depSearch" class="search-box" placeholder="Search purpose or account..." onkeyup="renderDepositFeed()">
+                    <select id="depStatusFilter" onchange="renderDepositFeed()">
+                        <option value="Active" selected>Active</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Closed early">Closed early</option>
+                        <option value="All">All</option>
+                    </select>
+                </div>
+
+                <div class="toolbar-secondary">
+                    <select id="depTypeFilter" onchange="renderDepositFeed()"></select>
+                    <select id="depBankFilter" onchange="renderDepositFeed()">
+                        <option value="All">All banks</option>
+                    </select>
+                    <select id="depSort" onchange="renderDepositFeed()">
+                        <option value="maturity" selected>Matures, soonest first</option>
+                        <option value="needed">Needed by, soonest first</option>
+                    </select>
+                </div>
+
+                <div id="depositFeed"></div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <h2 id="depModalTitle">Deposit</h2>
+            <input type="hidden" id="depId">
+
+            <div class="form-row">
+                <label>Purpose</label>
+                <input id="depPurpose" maxlength="200">
+            </div>
+
+            <div class="form-row">
+                <label>Bank account</label>
+                <select id="depBankAccount" onchange="updateBankInfo()"></select>
+                <div class="dep-hint" id="depBankInfo"></div>
+            </div>
+
+            <div class="dep-type-row">
+                <div>
+                    <label>Type</label>
+                    <select id="depType" onchange="onDepositTypeChanged()"></select>
+                </div>
+                <div>
+                    <label>Account number</label>
+                    <input id="depAccountNo" maxlength="40" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Start date</label>
+                    <input type="date" id="depStartDate" onchange="recalcMaturity()">
+                </div>
+                <div>
+                    <label>Tenure</label>
+                    <select id="depTenure" onchange="onTenureChanged()"></select>
+                    <input type="number" id="depTenureOther" min="1" step="1" placeholder="Months" style="display:none; margin-top:6px;" oninput="recalcMaturity()">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Matures</label>
+                    <input type="date" id="depMaturityDate" oninput="markMaturityTouched()">
+                    <div class="dep-hint">Filled from start and tenure. Editable.</div>
+                </div>
+                <div>
+                    <label>Instalment (&#8377; a month)</label>
+                    <input type="number" id="depInstallment" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Maturity amount (&#8377;)</label>
+                    <input type="number" id="depMaturityAmount" min="0" step="0.01">
+                </div>
+                <div>
+                    <label>Interest rate (%)</label>
+                    <input type="number" id="depInterestRate" min="0" max="100" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Needed by</label>
+                <input type="date" id="depNeededBy" onchange="updateNeededHint()">
+                <div class="dep-hint" id="depNeededHint"></div>
+            </div>
+
+            <div class="form-row">
+                <label>Funds policy</label>
+                <select id="depPolicy" onchange="updatePolicyHint()"></select>
+                <div class="dep-hint" id="depPolicyHint"></div>
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="depNotes" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div class="att-section" id="depAttachments"></div>
+
+            <details id="depCloseSection" class="optional-section" style="display:none;">
+                <summary>Close this deposit</summary>
+                <div class="optional-content" id="depCloseContent"></div>
+            </details>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveDeposit()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('depositModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bankModal" class="modal">
+        <div class="modal-content" style="max-width:560px;">
+            <div class="dep-bank-head">
+                <h2>Bank accounts</h2>
+                <button class="btn btn-secondary btn-sm" onclick="addBankAccount()">+ Add account</button>
+            </div>
+            <div id="bankList"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('bankModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/insurance-schedule.js"></script>
+    <script src="../js/attachments.js"></script>
+    <script src="../js/deposits.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div id="fab"></div>
+
+</body>
+</html>

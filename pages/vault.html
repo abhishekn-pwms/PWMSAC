@@ -1,0 +1,370 @@
+<!-- AC v2.0 BANKNDEPOSITS -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault AC v2.0 BANKNDEPOSITS</title>
+    <link rel="stylesheet" href="../css/pwms.css">
+</head>
+<body>
+
+    <div class="app-layout">
+
+        <div id="header"></div>
+
+        <div class="app-body-container">
+
+            <div id="sidebar"></div>
+
+            <div id="content">
+
+                <div class="page-header">
+                    <div class="page-title">Vault</div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary hide-on-mobile" id="vaultNewBtn" onclick="newVaultItem()">+ New Document</button>
+                        <button class="btn btn-secondary" onclick="refreshVault()" title="Refresh">&#128260;</button>
+                    </div>
+                </div>
+
+                <div class="vault-tabs">
+                    <button type="button" class="vault-tab active" id="tabBtn-identity" onclick="showVaultTab('identity')">Identity documents</button>
+                    <button type="button" class="vault-tab" id="tabBtn-cards" onclick="showVaultTab('cards')">Cards</button>
+                    <button type="button" class="vault-tab" id="tabBtn-lockers" onclick="showVaultTab('lockers')">Lockers</button>
+                    <button type="button" class="vault-tab" id="tabBtn-contacts" onclick="showVaultTab('contacts')">Contacts</button>
+                </div>
+
+                <div id="panel-identity">
+                    <div class="stat-strip">
+                        <div id="docChipTotal" class="stat-chip">Documents: 0</div>
+                        <div id="docChipSoon" class="stat-chip">Expiring in 90 days: 0</div>
+                        <div id="docChipExpired" class="stat-chip">Expired: 0</div>
+                        <div id="docChipNoScan" class="stat-chip">Without a scan: 0</div>
+                    </div>
+                    <div class="toolbar">
+                        <input type="search" id="docSearch" class="search-box" placeholder="Search documents..." onkeyup="renderIdentity()">
+                        <select id="docPersonFilter" onchange="renderIdentity()"></select>
+                    </div>
+                    <div class="toolbar-secondary">
+                        <select id="docTypeFilter" onchange="renderIdentity()"></select>
+                    </div>
+                    <div id="docFeed"></div>
+                </div>
+
+                <div id="panel-cards" style="display:none;">
+                    <div class="stat-strip">
+                        <div id="cardChipTotal" class="stat-chip">Cards: 0</div>
+                        <div id="cardChipSoon" class="stat-chip">Expiring in 90 days: 0</div>
+                        <div id="cardChipExpired" class="stat-chip">Expired: 0</div>
+                    </div>
+                    <div class="toolbar">
+                        <input type="search" id="cardSearch" class="search-box" placeholder="Search cards..." onkeyup="renderCards()">
+                        <select id="cardTypeFilter" onchange="renderCards()"></select>
+                    </div>
+                    <div id="cardFeed"></div>
+                </div>
+
+                <div id="panel-lockers" style="display:none;">
+                    <div class="stat-strip">
+                        <div id="lockChipTotal" class="stat-chip">Lockers: 0</div>
+                        <div id="lockChipRent" class="stat-chip">Rent due in 90 days: 0</div>
+                    </div>
+                    <div class="toolbar">
+                        <input type="search" id="lockSearch" class="search-box" placeholder="Search lockers..." onkeyup="renderLockers()">
+                    </div>
+                    <div id="lockFeed"></div>
+                </div>
+
+                <div id="panel-contacts" style="display:none;">
+                    <div class="stat-strip">
+                        <div id="contChipTotal" class="stat-chip">Contacts: 0</div>
+                    </div>
+                    <div class="toolbar">
+                        <input type="search" id="contSearch" class="search-box" placeholder="Search contacts..." onkeyup="renderContacts()">
+                    </div>
+                    <div id="contFeed"></div>
+                </div>
+
+            </div>
+        </div>
+        <div id="footer"></div>
+
+    </div>
+
+    <div id="docModal" class="modal">
+        <div class="modal-content">
+            <h2 id="docModalTitle">Document</h2>
+            <input type="hidden" id="docId">
+
+            <div class="time-row">
+                <div>
+                    <label>Person</label>
+                    <select id="docPerson"></select>
+                </div>
+                <div>
+                    <label>Document type</label>
+                    <select id="docType"></select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Number</label>
+                <div class="vault-number-row">
+                    <input id="docNumber" maxlength="60" autocomplete="off">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="copyFormNumber()" title="Copy the number">&#128203;</button>
+                </div>
+                <div class="vault-hint">Shown masked in the list. The eye reveals it there and the copy icon copies it.</div>
+            </div>
+
+            <div class="form-row">
+                <label>Name on the document</label>
+                <input id="docNameOn" maxlength="200">
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Father's or husband's name</label>
+                    <input id="docRelative" maxlength="200">
+                </div>
+                <div>
+                    <label>Place or authority of issue</label>
+                    <input id="docIssuedBy" maxlength="200">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Issue date</label>
+                    <input type="date" id="docIssue">
+                </div>
+                <div>
+                    <label>Expiry date</label>
+                    <input type="date" id="docExpiry" onchange="updateDocExpiryHint()">
+                    <div class="vault-hint" id="docExpiryHint"></div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Linked mobile and email</label>
+                <input id="docLinked" maxlength="300">
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="docNotes" rows="2" maxlength="2000"></textarea>
+            </div>
+
+            <div class="vault-share">
+                <input type="checkbox" id="docShare">
+                <div>
+                    <div class="vault-share-title">Share this document with family</div>
+                    <div class="vault-hint">Family will see the full number and the details on this page, and only the scans you tick below. Off by default.</div>
+                </div>
+            </div>
+
+            <div class="att-section" id="docAttachments"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveDocument()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('docModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <h2 id="cardModalTitle">Card</h2>
+            <input type="hidden" id="cardId">
+
+            <div class="time-row">
+                <div>
+                    <label>Card holder</label>
+                    <select id="cardPerson"></select>
+                </div>
+                <div>
+                    <label>Type</label>
+                    <select id="cardType"></select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Card name</label>
+                <input id="cardName" maxlength="120" placeholder="e.g. HDFC Regalia">
+            </div>
+
+            <div class="form-row">
+                <label>Bank account (for a debit card)</label>
+                <select id="cardBank"></select>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Last 4 digits</label>
+                    <input id="cardDigits" maxlength="4" inputmode="numeric" autocomplete="off">
+                </div>
+                <div>
+                    <label>Valid till</label>
+                    <input type="month" id="cardValid">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Linked mobile</label>
+                <input id="cardMobile" maxlength="40">
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="cardNotes" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div class="vault-hint vault-warn-note">Only the last digits are kept: never the full number or the CVV. Don't attach a photo of the back of a card.</div>
+
+            <div class="att-section" id="cardAttachments"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveCard()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('cardModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lockModal" class="modal">
+        <div class="modal-content">
+            <h2 id="lockModalTitle">Locker</h2>
+            <input type="hidden" id="lockId">
+
+            <div class="form-row">
+                <label>Bank and branch</label>
+                <input id="lockBranch" maxlength="200" placeholder="e.g. HDFC Bank, Malad">
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Branch contact</label>
+                    <input id="lockContact" maxlength="200">
+                </div>
+                <div>
+                    <label>Locker number</label>
+                    <input id="lockNo" maxlength="40">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>In the name of</label>
+                    <select id="lockPerson"></select>
+                </div>
+                <div>
+                    <label>Your account there</label>
+                    <select id="lockBank"></select>
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Rent (&#8377; a year)</label>
+                    <input type="number" id="lockRent" min="0" step="0.01">
+                </div>
+                <div>
+                    <label>Rent renews</label>
+                    <input type="date" id="lockRenewal">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Nominee</label>
+                <input id="lockNominee" maxlength="300">
+            </div>
+
+            <div class="form-row">
+                <label>Contents</label>
+                <textarea id="lockContents" rows="2" maxlength="1000" placeholder="e.g. Property papers, jewellery, passports"></textarea>
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="lockNotes" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div class="att-section" id="lockAttachments"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveLocker()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('lockModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contModal" class="modal">
+        <div class="modal-content">
+            <h2 id="contModalTitle">Contact</h2>
+            <input type="hidden" id="contId">
+
+            <div class="form-row">
+                <label>Name</label>
+                <input id="contName" maxlength="200">
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Role</label>
+                    <input id="contRole" maxlength="120" placeholder="e.g. Relationship manager">
+                </div>
+                <div>
+                    <label>Organisation</label>
+                    <input id="contOrg" maxlength="200">
+                </div>
+            </div>
+
+            <div class="time-row">
+                <div>
+                    <label>Phone</label>
+                    <input id="contPhone" maxlength="60">
+                </div>
+                <div>
+                    <label>Mobile</label>
+                    <input id="contMobile" maxlength="60">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label>Email</label>
+                <input id="contEmail" maxlength="200">
+            </div>
+
+            <div class="form-row">
+                <label>Notes</label>
+                <textarea id="contNotes" rows="2" maxlength="1000"></textarea>
+            </div>
+
+            <div class="vault-manages" id="contManages"></div>
+
+            <div class="att-section" id="contAttachments"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveContact()">Save</button>
+                <button class="btn btn-secondary" onclick="closeModal('contModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/masters.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/insurance-schedule.js"></script>
+    <script src="../js/attachments.js"></script>
+    <script src="../js/vault.js"></script>
+
+    <script>initializeAppIcon();</script>
+
+    <div id="fab"></div>
+
+</body>
+</html>

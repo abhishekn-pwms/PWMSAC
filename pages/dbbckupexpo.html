@@ -1,11 +1,11 @@
-<!-- AC v1.7f QUICKLOG -->
+<!-- AC v2.0 FAMILY -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Safety AC v1.7f QUICKLOG</title>
+    <title>Data Safety AC v2.0 FAMILY</title>
     <link rel="stylesheet" href="../css/pwms.css">
     <link rel="stylesheet" href="../css/dbbckupexpo.css">
 </head>
@@ -34,7 +34,7 @@
 
                 <div class="bk-panel">
                     <div class="bk-panel-header">Export</div>
-                    <p class="bk-panel-hint">All 16 tables, every time — no partial exports. Downloads a snapshot of live data as it stands right now. CSV export also includes the actual attachment files from Storage; JSON export is metadata only.</p>
+                    <p class="bk-panel-hint">All 28 tables, every time — no partial exports. Downloads a snapshot of live data as it stands right now. CSV export also includes the actual attachment files from Storage; JSON export is metadata only.</p>
                     <div class="bk-action-row">
                         <button class="btn btn-primary" onclick="exportCsvZip()">⬇️ Download CSV (.zip)</button>
                         <button class="btn btn-primary" onclick="exportJson()">⬇️ Download JSON</button>
@@ -44,10 +44,35 @@
                 <div class="bk-panel bk-panel-warning">
                     <div class="bk-panel-header">Push to pwms_prev</div>
                     <p class="bk-panel-hint">Full-replace: deletes everything currently in pwms_prev, then inserts a fresh copy of live data. This is the actual disaster-recovery mechanism — a genuine second copy of your data on a separate Supabase project.</p>
+                    <p class="bk-panel-hint">pwms_prev is locked to one dedicated backup login. Type its password below — it is used once for this push and never stored.</p>
                     <div class="bk-action-row">
+                        <input type="password" id="bkPrevPassword" placeholder="Backup login password" autocomplete="new-password" style="max-width:260px;">
                         <button class="btn btn-danger" onclick="pushToPrev()">🔁 Push to pwms_prev</button>
                     </div>
                     <div id="bkPushStatus" class="bk-push-status"></div>
+                </div>
+
+                <div class="bk-panel">
+                    <div class="bk-panel-header">Verify backup</div>
+                    <p class="bk-panel-hint">Reads everything in pwms_prev and everything in live, and compares them table by table and file by file. It only reads: nothing is changed on either side. Run it after each push, so you know the backup is good before you ever need it.</p>
+                    <div class="bk-action-row">
+                        <input type="password" id="bkVerifyPassword" placeholder="Backup login password" autocomplete="new-password" style="max-width:260px;">
+                        <button class="btn btn-primary" onclick="verifyBackup()">&#9989; Verify backup</button>
+                    </div>
+                    <div id="bkVerifyStatus" class="bk-push-status"></div>
+                    <div id="bkVerifyResults"></div>
+                </div>
+
+                <div class="bk-panel bk-panel-warning">
+                    <div class="bk-panel-header">Restore from pwms_prev</div>
+                    <p class="bk-panel-hint">Only for recovery. Replaces ALL live data and files with the copy in pwms_prev, so anything you changed after the last push is lost. Before it changes anything it downloads a complete copy of what live holds now, and it stops if that can't be saved. It never changes pwms_prev.</p>
+                    <p class="bk-panel-hint">It refuses on its own if the backup is empty or incomplete. Run Verify backup first, and if it fails partway just run it again: it is safe to repeat.</p>
+                    <div class="bk-action-row">
+                        <input type="password" id="bkRestorePassword" placeholder="Backup login password" autocomplete="new-password" style="max-width:260px;">
+                        <input type="text" id="bkRestoreConfirm" placeholder="Type RESTORE to confirm" autocomplete="off" style="max-width:220px;">
+                        <button class="btn btn-danger" onclick="restoreFromPrev()">&#9851;&#65039; Restore live from pwms_prev</button>
+                    </div>
+                    <div id="bkRestoreStatus" class="bk-push-status"></div>
                 </div>
 
                 <div class="bk-panel">
@@ -62,7 +87,7 @@
 
                 <div class="bk-panel bk-panel-muted">
                     <div class="bk-panel-header">Generate SQL Seed Files</div>
-                    <p class="bk-panel-hint">Not part of the standard backup flow. Generates real INSERT statements from live data for all 16 tables, matching the 30xx seed-file numbering convention — including replacing the current placeholder todo seed with real data. Meant to be run once, not on a regular cadence.</p>
+                    <p class="bk-panel-hint">Not part of the standard backup flow. Generates real INSERT statements from live data for all 28 tables, matching the 30xx seed-file numbering convention — including replacing the current placeholder todo seed with real data. Meant to be run once, not on a regular cadence.</p>
                     <div class="bk-action-row">
                         <button class="btn btn-secondary" onclick="generateSqlSeeds()">📄 Generate Seed SQL (.zip)</button>
                     </div>
@@ -87,6 +112,7 @@
     <script src="../js/pwms-prev-config.js"></script>
     <script src="../js/dbbckupexpo-supabase.js"></script>
     <script src="../js/dbbckupexpo.js"></script>
+    <script src="../js/dbbckupexpo-restore.js"></script>
     <script>initializeAppIcon();</script>
 
 </body>
