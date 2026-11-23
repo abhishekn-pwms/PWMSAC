@@ -1,3 +1,5 @@
+// AC v2.0 BANKNDEPOSITS
+
 // Supabase connection
 
 const SUPABASE_URL =
@@ -14,16 +16,72 @@ const supabaseClient =
     );
 
 
-const HEADERS = {
+// ======================================
+// REQUEST HEADERS
+//
+// Every database request carries the signed-in user's own session token in
+// Authorization. The public key (apikey) only identifies the project -- on
+// its own it opens nothing, because the database now answers only to a
+// session whose email is on the allow-list (see 4001_RLS_AllTables.sql).
+//
+// The previous static HEADERS constant (public key as the bearer token) is
+// gone on purpose: anything still using it fails loudly instead of quietly
+// getting empty results.
+//
+// No session -> straight to the login page. Without this, a locked-out
+// request would come back as an empty list rather than an error, and a
+// page would look as though your data had vanished.
+// ======================================
 
-    apikey: SUPABASE_ANON_KEY,
+function redirectToLogin() {
 
-    Authorization:
-        `Bearer ${SUPABASE_ANON_KEY}`,
+    if (window.location.pathname.endsWith("/login.html")) {
+        return;
+    }
 
-    "Content-Type":
-        "application/json"
-};
+    window.location.href = appUrl("/login.html");
+}
+
+
+async function authHeaders(extra) {
+
+    const { data } = await supabaseClient.auth.getSession();
+
+    const session = data ? data.session : null;
+
+    if (!session) {
+
+        redirectToLogin();
+
+        throw new Error("Not signed in");
+    }
+
+    return {
+
+        apikey: SUPABASE_ANON_KEY,
+
+        Authorization:
+            `Bearer ${session.access_token}`,
+
+        "Content-Type":
+            "application/json",
+
+        ...(extra || {})
+    };
+}
+
+
+// A 401 means the session token was rejected (expired and could not be
+// refreshed, or revoked) -- send the user to login. The error body is still
+// handed back, as before, so pages that check for a non-array keep working.
+async function readResponse(response) {
+
+    if (response.status === 401) {
+        redirectToLogin();
+    }
+
+    return await response.json();
+}
 
 // ======================================
 // READ
@@ -35,11 +93,11 @@ async function getData(tableOrView) {
         await fetch(
             `${SUPABASE_URL}/rest/v1/${tableOrView}`,
             {
-                headers: HEADERS
+                headers: await authHeaders()
             }
         );
 
-    return await response.json();
+    return await readResponse(response);
 }
 
 // ======================================
@@ -57,18 +115,17 @@ async function insertData(
             {
                 method: "POST",
 
-                headers: {
-                    ...HEADERS,
+                headers: await authHeaders({
                     Prefer:
                         "return=representation"
-                },
+                }),
 
                 body:
                     JSON.stringify(payload)
             }
         );
 
-    return await response.json();
+    return await readResponse(response);
 }
 
 // ======================================
@@ -88,18 +145,17 @@ async function updateData(
             {
                 method: "PATCH",
 
-                headers: {
-                    ...HEADERS,
+                headers: await authHeaders({
                     Prefer:
                         "return=representation"
-                },
+                }),
 
                 body:
                     JSON.stringify(payload)
             }
         );
 
-    return await response.json();
+    return await readResponse(response);
 }
 
 // ======================================
@@ -118,13 +174,12 @@ async function deleteData(
             {
                 method: "DELETE",
 
-                headers: {
-                    ...HEADERS,
+                headers: await authHeaders({
                     Prefer:
                         "return=representation"
-                }
+                })
             }
         );
 
-    return await response.json();
+    return await readResponse(response);
 }

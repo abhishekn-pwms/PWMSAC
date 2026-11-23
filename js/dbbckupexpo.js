@@ -1,4 +1,4 @@
-// AC v1.7f QUICKLOG
+// AC v2.0 FAMILY
 
 // backup.js
 // Data Safety page — exports and full-replace backup push to pwms_prev.
@@ -20,7 +20,19 @@ const BACKUP_TABLES = [
     { name: "attendance_codes", pk: "code" },
     { name: "holiday_master", pk: "holiday_id" },
     { name: "attendance_log", pk: "log_date" },
-    { name: "quicklog_entries", pk: "entry_id" }
+    { name: "quicklog_entries", pk: "entry_id" },
+    { name: "bank_account", pk: "bank_account_id" },
+    { name: "deposit", pk: "deposit_id" },
+    { name: "person", pk: "person_id" },
+    { name: "insurance_policy", pk: "insurance_policy_id" },
+    { name: "attachment", pk: "attachment_id" },
+    { name: "contact", pk: "contact_id" },
+    { name: "identity_document", pk: "identity_document_id" },
+    { name: "card", pk: "card_id" },
+    { name: "locker", pk: "locker_id" },
+    { name: "mf_holding", pk: "mf_holding_id" },
+    { name: "mf_valuation", pk: "mf_valuation_id" },
+    { name: "family_summary_log", pk: "family_summary_log_id" }
 ];
 
 // Maps each attachment table to the Storage bucket its storage_path
@@ -29,7 +41,8 @@ const BACKUP_TABLES = [
 // there is no single call that does both together.
 const ATTACHMENT_BUCKETS = {
     todo_attachments: "todo-attachments",
-    update_prep_attachments: "updateprep-attachments"
+    update_prep_attachments: "updateprep-attachments",
+    attachment: "records-attachments"
 };
 
 // Parents before children, so a child's foreign key always has
@@ -43,7 +56,12 @@ const INSERT_ORDER = [
     "update_prep_settings", "update_prep_history", "update_prep_attachments",
     "personal_profile", "employment_history",
     "attendance_codes", "holiday_master", "attendance_log",
-    "quicklog_entries"
+    "quicklog_entries",
+    "person", "contact", "insurance_policy", "bank_account", "deposit",
+    "identity_document", "card", "locker",
+    "mf_holding", "mf_valuation",
+    "family_summary_log",
+    "attachment"
 ];
 
 // Children before parents, so nothing is still referenced when its
@@ -52,8 +70,16 @@ const INSERT_ORDER = [
 // precede update_prep_history — same cascade logic as todo/task_log.
 // quicklog_entries has no foreign keys at all, so its position here
 // doesn't matter — placed first since it's the simplest case.
+// deposit must precede bank_account and insurance_policy (it points at both);
+// attachment points at person, bank_account, deposit and insurance_policy, so it
+// goes first; insurance_policy must precede person. bank_account points at
+// contact, so it is cleared first; card and locker point at person and
+// bank_account, identity_document at person; mf_holding at person and
+// bank_account, and mf_valuation at mf_holding, so valuations go first.
 const DELETE_ORDER = [
-    "quicklog_entries",
+    "quicklog_entries", "family_summary_log",
+    "attachment", "mf_valuation", "mf_holding", "locker", "card", "identity_document",
+    "deposit", "bank_account", "contact", "insurance_policy", "person",
     "task_log", "todo_attachments", "todo", "activity", "milestone", "project", "portfolio",
     "update_prep_settings", "update_prep_attachments", "update_prep_history",
     "attendance_log", "attendance_codes",
@@ -61,6 +87,11 @@ const DELETE_ORDER = [
 ];
 
 let backupData = {};
+
+// The tables that could not be read at the last refresh. A table that fails to
+// read must never be treated as "empty": the push would then wipe the backup
+// and copy nothing.
+let backupLoadErrors = [];
 
 
 // ======================================
@@ -77,10 +108,21 @@ async function fetchAllRowsPaginated(tableName) {
     let allRows = [];
     let offset = 0;
 
+    // Ordered by the primary key, so the pages never overlap or skip a row.
+    const table = BACKUP_TABLES.find(t => t.name === tableName);
+    const order = table ? `order=${table.pk}.asc&` : "";
+
     while (true) {
 
-        const page = await getData(`${tableName}?limit=${PAGE_SIZE}&offset=${offset}`);
-        const pageRows = Array.isArray(page) ? page : [];
+        const page = await getData(`${tableName}?${order}limit=${PAGE_SIZE}&offset=${offset}`);
+
+        // A rejected or failed read comes back as an error object, not an array.
+        // Fail loudly rather than carry on with a short or empty table.
+        if (!Array.isArray(page)) {
+            throw new Error(`Could not read ${tableName}`);
+        }
+
+        const pageRows = page;
 
         allRows = allRows.concat(pageRows);
 
@@ -142,16 +184,57 @@ async function loadAllBackupData() {
 
     logBackup("Refreshing table counts from live...");
 
+    backupLoadErrors = [];
+
     for (const t of BACKUP_TABLES) {
 
-        backupData[t.name] = await fetchAllRowsPaginated(t.name);
+        try {
 
-        logBackup(`  ${t.name}: ${backupData[t.name].length} row(s)`);
+            backupData[t.name] = await fetchAllRowsPaginated(t.name);
+
+            logBackup(`  ${t.name}: ${backupData[t.name].length} row(s)`);
+
+        } catch (error) {
+
+            console.error(error);
+
+            backupData[t.name] = [];
+            backupLoadErrors.push(t.name);
+
+            logBackup(`  \u26A0\uFE0F ${t.name}: could not be read`);
+        }
     }
 
-    logBackup("Table counts refreshed.");
+    if (backupLoadErrors.length > 0) {
+
+        logBackup(`Table counts refreshed WITH ERRORS \u2014 could not read: ${backupLoadErrors.join(", ")}.`);
+
+        showError(`Could not read from live: ${backupLoadErrors.join(", ")}`);
+
+    } else {
+
+        logBackup("Table counts refreshed.");
+    }
 
     renderSummary();
+
+    return backupLoadErrors.length === 0;
+}
+
+
+// Reloads live data fresh and says whether every table was read. Everything that
+// copies or exports live data goes through this first, so it always acts on what
+// is in the database now (not what was loaded when the page was opened) and never
+// on a table that failed to read.
+async function refreshLiveFor(action) {
+
+    const ok = await loadAllBackupData();
+
+    if (!ok) {
+        showError(`${action} not done \u2014 live could not be read. Nothing was changed.`);
+    }
+
+    return ok;
 }
 
 
@@ -160,7 +243,9 @@ function renderSummary() {
     const strip = document.getElementById("bkSummaryStrip");
 
     strip.innerHTML = BACKUP_TABLES
-        .map(t => `<div class="stat-chip">${t.name}: ${backupData[t.name].length}</div>`)
+        .map(t => backupLoadErrors.includes(t.name)
+            ? `<div class="stat-chip bk-chip-bad">${t.name}: not read</div>`
+            : `<div class="stat-chip">${t.name}: ${backupData[t.name].length}</div>`)
         .join("");
 }
 
@@ -172,6 +257,10 @@ function renderSummary() {
 async function exportCsvZip() {
 
     logBackup("Starting CSV export...");
+
+    if (!(await refreshLiveFor("CSV export"))) {
+        return;
+    }
 
     const zip = new JSZip();
 
@@ -252,9 +341,13 @@ function convertToCsv(rows) {
 // JSON EXPORT — single file, one key per table
 // ======================================
 
-function exportJson() {
+async function exportJson() {
 
     logBackup("Starting JSON export...");
+
+    if (!(await refreshLiveFor("JSON export"))) {
+        return;
+    }
 
     const combined = {};
 
@@ -281,7 +374,48 @@ function exportJson() {
 // partway through is surfaced explicitly rather than hidden.
 // ======================================
 
+// Returns the names of any tables pwms_prev can't be read from (missing, or
+// no read policy). Empty array means every table is there.
+async function findUnreachablePrevTables() {
+
+    const unreachable = [];
+
+    for (const t of BACKUP_TABLES) {
+
+        try {
+
+            const probe = await getDataPrev(`${t.name}?limit=1`);
+
+            if (!Array.isArray(probe)) {
+                unreachable.push(t.name);
+            }
+
+        } catch (error) {
+
+            unreachable.push(t.name);
+        }
+    }
+
+    return unreachable;
+}
+
+
 async function pushToPrev() {
+
+    const statusEl = document.getElementById("bkPushStatus");
+    const passwordEl = document.getElementById("bkPrevPassword");
+    const password = passwordEl ? passwordEl.value : "";
+
+    // pwms_prev only lets in the dedicated backup login, so the push needs
+    // its password. Checked first, before anything else is asked or done.
+    if (!password) {
+
+        statusEl.textContent = "Enter the backup login password above, then push again.";
+
+        showError("Enter the backup login password first");
+
+        return;
+    }
 
     if (!confirmAction(
         "This will DELETE all data currently in pwms_prev and replace it with a fresh copy of live data. This cannot be undone. Continue?"
@@ -289,95 +423,180 @@ async function pushToPrev() {
         return;
     }
 
-    const statusEl = document.getElementById("bkPushStatus");
     statusEl.textContent = "Starting push to pwms_prev...";
 
     logBackup("=== Push to pwms_prev started ===");
 
+    // Read live fresh first, before signing in or deleting anything: the push
+    // must copy what is in the database NOW, and must never run on a table that
+    // failed to read (it would wipe the backup and copy nothing).
+    statusEl.textContent = "Reading live data...";
+
+    if (!(await refreshLiveFor("Push"))) {
+
+        statusEl.textContent = `\u274C Push not started \u2014 could not read from live: ${backupLoadErrors.join(", ")}. Nothing was deleted.`;
+        logBackup(`=== Push NOT started: could not read ${backupLoadErrors.join(", ")} from live \u2014 nothing was deleted ===`);
+
+        return;
+    }
+
+    statusEl.textContent = "Signing in to pwms_prev...";
+    logBackup(`  Signing in to pwms_prev as ${PWMS_PREV_CONFIG.BACKUP_EMAIL}...`);
+
+    const signedIn = await signInPrev(password);
+
+    // The password has done its job — clear the box either way so it is
+    // never left sitting on the page.
+    passwordEl.value = "";
+
+    if (!signedIn.ok) {
+
+        statusEl.textContent = `❌ Push not started — could not sign in to pwms_prev (${signedIn.message}). Nothing was deleted.`;
+        logBackup(`=== Push NOT started: pwms_prev sign-in failed (${signedIn.message}) — nothing was deleted ===`);
+
+        showError("Could not sign in to pwms_prev — check the backup password");
+
+        return;
+    }
+
+    logBackup("  Signed in to pwms_prev.");
+
     try {
 
-        for (const tableName of DELETE_ORDER) {
+        // Safeguard 1 — this push is delete-then-insert, so a table missing in
+        // pwms_prev would otherwise be discovered only AFTER earlier tables had
+        // already been emptied. Check every table is reachable first, and stop
+        // before deleting anything if one isn't.
+        statusEl.textContent = "Checking pwms_prev has every table...";
+        logBackup("  Checking pwms_prev has every table...");
 
-            statusEl.textContent = `Clearing ${tableName}...`;
-            logBackup(`  Clearing ${tableName} in pwms_prev...`);
+        const missingPrev = await findUnreachablePrevTables();
 
-            const table = BACKUP_TABLES.find(t => t.name === tableName);
-            await deleteAllDataPrev(table.name, table.pk);
+        if (missingPrev.length > 0) {
 
-            logBackup(`  Cleared ${tableName}.`);
+            const names = missingPrev.join(", ");
+
+            statusEl.textContent = `❌ Push not started — pwms_prev can't read: ${names}. Nothing was deleted. Create those tables there (and their RLS policies) first.`;
+            logBackup(`=== Push NOT started: pwms_prev can't read ${names} — nothing was deleted ===`);
+
+            showError(`Push not started — pwms_prev is missing: ${names}`);
+
+            return;
         }
 
-        for (const tableName of Object.keys(ATTACHMENT_BUCKETS)) {
+        logBackup("  All tables present in pwms_prev.");
 
-            const bucket = ATTACHMENT_BUCKETS[tableName];
+        try {
 
-            statusEl.textContent = `Clearing ${bucket} bucket in pwms_prev...`;
-            logBackup(`  Clearing all files in ${bucket} (pwms_prev)...`);
+            for (const tableName of DELETE_ORDER) {
 
-            await clearBucketPrev(bucket);
+                statusEl.textContent = `Clearing ${tableName}...`;
+                logBackup(`  Clearing ${tableName} in pwms_prev...`);
 
-            logBackup(`  Cleared ${bucket}.`);
-        }
+                const table = BACKUP_TABLES.find(t => t.name === tableName);
 
-        for (const tableName of INSERT_ORDER) {
+                // Safeguard 2 — deleteAllDataPrev reports failure by returning
+                // false rather than throwing; don't carry on as if it worked.
+                const cleared = await deleteAllDataPrev(table.name, table.pk);
 
-            const rows = backupData[tableName] || [];
+                if (!cleared) {
+                    throw new Error(`Could not clear ${tableName} in pwms_prev.`);
+                }
 
-            if (rows.length === 0) {
-                logBackup(`  Skipping ${tableName} — no rows to insert.`);
-                continue;
+                logBackup(`  Cleared ${tableName}.`);
             }
 
-            statusEl.textContent = `Inserting ${tableName} (${rows.length} rows)...`;
-            logBackup(`  Inserting ${rows.length} row(s) into ${tableName}...`);
-
-            await insertDataPrev(tableName, rows);
-
-            logBackup(`  Inserted ${tableName}.`);
-
-            if (ATTACHMENT_BUCKETS[tableName]) {
+            for (const tableName of Object.keys(ATTACHMENT_BUCKETS)) {
 
                 const bucket = ATTACHMENT_BUCKETS[tableName];
 
-                statusEl.textContent = `Copying files for ${tableName} (${rows.length})...`;
-                logBackup(`  Copying ${rows.length} file(s) into ${bucket} (pwms_prev)...`);
+                statusEl.textContent = `Clearing ${bucket} bucket in pwms_prev...`;
+                logBackup(`  Clearing all files in ${bucket} (pwms_prev)...`);
 
-                for (const row of rows) {
+                // A refused delete comes back as false, not an exception.
+                const bucketCleared = await clearBucketPrev(bucket);
 
-                    const { data: blob, error } =
-                        await supabaseClient.storage.from(bucket).download(row.storage_path);
-
-                    if (error || !blob) {
-                        throw new Error(`Could not download ${tableName}/${row.storage_path} from live Storage — aborting so pwms_prev doesn't end up with rows pointing at missing files.`);
-                    }
-
-                    const uploaded = await uploadFilePrev(bucket, row.storage_path, blob);
-
-                    if (!uploaded) {
-                        throw new Error(`Failed to upload ${row.storage_path} into ${bucket} on pwms_prev.`);
-                    }
+                if (!bucketCleared) {
+                    throw new Error(`Could not clear the ${bucket} bucket in pwms_prev.`);
                 }
 
-                logBackup(`  Copied ${rows.length} file(s) into ${bucket}.`);
+                logBackup(`  Cleared ${bucket}.`);
             }
+
+            for (const tableName of INSERT_ORDER) {
+
+                const rows = backupData[tableName] || [];
+
+                if (rows.length === 0) {
+                    logBackup(`  Skipping ${tableName} — no rows to insert.`);
+                    continue;
+                }
+
+                statusEl.textContent = `Inserting ${tableName} (${rows.length} rows)...`;
+                logBackup(`  Inserting ${rows.length} row(s) into ${tableName}...`);
+
+                // Safeguard 3 — a rejected insert comes back as an error object,
+                // not an array. Treat it as a failure instead of logging success.
+                const inserted = await insertDataPrev(tableName, rows);
+
+                if (!Array.isArray(inserted)) {
+
+                    const detail = inserted && (inserted.message || inserted.hint);
+
+                    throw new Error(`Insert into ${tableName} on pwms_prev failed${detail ? ` — ${detail}` : ""}.`);
+                }
+
+                logBackup(`  Inserted ${tableName}.`);
+
+                if (ATTACHMENT_BUCKETS[tableName]) {
+
+                    const bucket = ATTACHMENT_BUCKETS[tableName];
+
+                    statusEl.textContent = `Copying files for ${tableName} (${rows.length})...`;
+                    logBackup(`  Copying ${rows.length} file(s) into ${bucket} (pwms_prev)...`);
+
+                    for (const row of rows) {
+
+                        const { data: blob, error } =
+                            await supabaseClient.storage.from(bucket).download(row.storage_path);
+
+                        if (error || !blob) {
+                            throw new Error(`Could not download ${tableName}/${row.storage_path} from live Storage — aborting so pwms_prev doesn't end up with rows pointing at missing files.`);
+                        }
+
+                        const uploaded = await uploadFilePrev(bucket, row.storage_path, blob);
+
+                        if (!uploaded.ok) {
+                            throw new Error(`Failed to upload ${row.storage_path} into ${bucket} on pwms_prev${uploaded.message ? ` \u2014 ${uploaded.message}` : ""}.`);
+                        }
+                    }
+
+                    logBackup(`  Copied ${rows.length} file(s) into ${bucket}.`);
+                }
+            }
+
+            statusEl.textContent = `✅ Push complete — ${new Date().toLocaleString()}`;
+            logBackup("=== Push to pwms_prev complete ===");
+
+            showSuccess("Push to pwms_prev complete");
+
+        } catch (error) {
+
+            console.error(error);
+
+            statusEl.textContent = "❌ Push failed partway through — pwms_prev may be in a partial state. Check console, fix the issue, then run the push again from the start.";
+            logBackup(`=== Push FAILED: ${error.message || error} ===`);
+
+            showError("Push to pwms_prev failed — see status message for details");
         }
 
-        statusEl.textContent = `✅ Push complete — ${new Date().toLocaleString()}`;
-        logBackup("=== Push to pwms_prev complete ===");
+    } finally {
 
-        showSuccess("Push to pwms_prev complete");
+        await signOutPrev();
 
-    } catch (error) {
-
-        console.error(error);
-
-        statusEl.textContent = "❌ Push failed partway through — pwms_prev may be in a partial state. Check console, fix the issue, then run the push again from the start.";
-        logBackup(`=== Push FAILED: ${error.message || error} ===`);
-
-        showError("Push to pwms_prev failed — see status message for details");
+        logBackup("  Signed out of pwms_prev.");
     }
 }
-
 
 // ======================================
 // SQL SEED GENERATION — one-time tool, separate from the standard
@@ -388,6 +607,10 @@ async function pushToPrev() {
 async function generateSqlSeeds() {
 
     logBackup("Starting SQL seed generation...");
+
+    if (!(await refreshLiveFor("Seed generation"))) {
+        return;
+    }
 
     const zip = new JSZip();
 
@@ -407,7 +630,19 @@ async function generateSqlSeeds() {
         attendance_codes: "3110",
         holiday_master: "3120",
         attendance_log: "3130",
-        quicklog_entries: "3140"
+        quicklog_entries: "3140",
+        bank_account: "3150",
+        deposit: "3160",
+        person: "3170",
+        insurance_policy: "3180",
+        attachment: "3200",
+        contact: "3210",
+        identity_document: "3220",
+        card: "3230",
+        locker: "3250",
+        mf_holding: "3260",
+        mf_valuation: "3270",
+        family_summary_log: "3280"
     };
 
     BACKUP_TABLES.forEach(t => {

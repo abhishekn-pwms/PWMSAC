@@ -1,4 +1,4 @@
-// AC v1.7e UPDATEPREPATTACHTODOATTACHPUSHSAFE
+// AC v2.0 FAMILY
 
 async function authenticate(
     email,
@@ -30,104 +30,6 @@ async function login() {
 }
 
 
-async function loginGithub() {
-
-    await supabaseClient.auth.signInWithOAuth({
-
-        provider: "github",
-
-        options: {
-
-            redirectTo:
-                window.location.origin +
-                appUrl(getDefaultLandingPage())
-
-        }
-    });
-}
-
-
-// ======================================================
-// EMAIL OTP — fallback sign-in for when Google is slow/
-// unavailable, or you're on a device you can't finish a
-// magic-link click-through on. Requires the Supabase project's
-// "Magic Link" email template to use {{ .Token }} instead of
-// {{ .ConfirmationURL }} — a one-time dashboard setting, not
-// something this code can configure.
-//
-// shouldCreateUser: false — only emails with an existing account
-// (yours, from Google sign-in) can request a code. Otherwise
-// anyone typing an arbitrary email into the box would trigger
-// Supabase to email *them* a code and create a stray account.
-// ======================================================
-
-async function sendOtpCode() {
-
-    const email = document.getElementById("otpEmail").value.trim();
-    const messageEl = document.getElementById("otpMessage");
-
-    if (!email) {
-        messageEl.textContent = "Enter your email first";
-        return;
-    }
-
-    messageEl.textContent = "Sending code...";
-
-    const { error } = await supabaseClient.auth.signInWithOtp({
-
-        email,
-
-        options: {
-            shouldCreateUser: false
-        }
-    });
-
-    if (error) {
-        messageEl.textContent = `Could not send code — ${error.message}`;
-        return;
-    }
-
-    messageEl.textContent = "Code sent — check your email.";
-
-    document.getElementById("otpCodeRow").style.display = "flex";
-}
-
-
-async function verifyOtpCode() {
-
-    const email = document.getElementById("otpEmail").value.trim();
-    const code = document.getElementById("otpCode").value.trim();
-    const messageEl = document.getElementById("otpMessage");
-
-    if (!code) {
-        messageEl.textContent = "Enter the code from your email";
-        return;
-    }
-
-    messageEl.textContent = "Verifying...";
-
-    const { error } = await supabaseClient.auth.verifyOtp({
-        email,
-        token: code,
-        type: "email"
-    });
-
-    if (error) {
-        messageEl.textContent = `Invalid or expired code — ${error.message}`;
-        return;
-    }
-
-    // Same allow-list check + redirect the Google flow relies on after
-    // its own OAuth redirect lands back on the app — checkAuthentication
-    // already handles rejecting a valid-but-not-allow-listed email.
-    const authenticated = await checkAuthentication();
-
-    if (authenticated) {
-        window.location.href = appUrl(getDefaultLandingPage());
-    }
-}
-
-
 async function logout() {
 
     await supabaseClient.auth.signOut();
@@ -136,6 +38,57 @@ async function logout() {
 
     window.location.href =
         appUrl("/login.html");
+}
+
+
+// ---- Who may come in, and as what ----
+//
+//   OWNER  : an email in APP_CONFIG.ALLOWED_EMAILS. Every page, as before.
+//   FAMILY : an email in APP_CONFIG.FAMILY_EMAILS. Read-only, and only the Family summary page.
+//
+// The DATABASE is what really protects the data: row-level security uses the same two lists
+// (private.is_owner() and private.is_family() in the security script), so keep them in step.
+// The page restriction further down is for tidiness: it sends a family login straight to
+// the one page meant for them instead of a screen of "not allowed" errors.
+// An email on both lists is an owner. Emails are compared in lower case.
+
+const FAMILY_HOME_PAGE = "/pages/family-summary.html";
+
+
+function emailListHas(list, email) {
+
+    const wanted = String(email || "").trim().toLowerCase();
+
+    return wanted !== "" &&
+        Array.isArray(list) &&
+        list.some(e => String(e).trim().toLowerCase() === wanted);
+}
+
+
+function roleForEmail(email) {
+
+    if (emailListHas(APP_CONFIG.ALLOWED_EMAILS, email)) {
+        return "owner";
+    }
+
+    if (emailListHas(APP_CONFIG.FAMILY_EMAILS, email)) {
+        return "family";
+    }
+
+    return null;
+}
+
+
+function onFamilyHomePage() {
+
+    return window.location.pathname.toLowerCase().endsWith("/family-summary.html");
+}
+
+
+// one place that leaves the page, so a test can watch it
+function navigateAway(url) {
+
+    window.location.replace(url);
 }
 
 
@@ -150,11 +103,9 @@ async function checkAuthentication() {
         return false;
     }
 
-    if (
-        !APP_CONFIG.ALLOWED_EMAILS.includes(
-            session.user.email
-        )
-    ) {
+    const role = roleForEmail(session.user.email);
+
+    if (!role) {
 
         await supabaseClient.auth.signOut();
 
@@ -178,6 +129,11 @@ async function checkAuthentication() {
         session.user.email
     );
 
+    sessionStorage.setItem(
+        "pwms_role",
+        role
+    );
+
     return true;
 }
 
@@ -191,5 +147,22 @@ async function requireAuthentication() {
 
         window.location.href =
             appUrl("/login.html");
+
+        return;
+    }
+
+    // A family login belongs on the Family summary page and nowhere else.
+    if (
+        sessionStorage.getItem("pwms_role") === "family" &&
+        !onFamilyHomePage()
+    ) {
+
+        navigateAway(
+            appUrl(FAMILY_HOME_PAGE)
+        );
+
+        // Stop here for good. The page that called this must not carry on loading its own
+        // data (or showing errors) while the browser is on its way to the Family summary.
+        await new Promise(() => {});
     }
 }

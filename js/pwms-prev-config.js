@@ -1,4 +1,4 @@
-// AC v1.7 DB BACKUP/EXPORT AND ATTENDANCE
+// AC v2.0 BANKNDEPOSITS
 
 // pwms-prev-config.js
 // Connection details for pwms_prev — the backup/restore target project.
@@ -22,6 +22,13 @@ const PWMS_PREV_CONFIG = {
     // not into chat, not into any shared conversation. Find it in:
     // pwms_prev Supabase dashboard -> Project Settings -> API ->
     // "Project API keys" -> anon / public.
-    SUPABASE_ANON_KEY: "sb_publishable_uMRg6iZrMrKriPP9-BcrGA_7m1IudlI"
+    SUPABASE_ANON_KEY: "sb_publishable_uMRg6iZrMrKriPP9-BcrGA_7m1IudlI",
+
+    // The one dedicated login pwms_prev lets in (see 4003_Lockdown_PwmsPrev.sql).
+    // Only the EMAIL lives here. The password is typed on the Data Safety
+    // page at each push, used once, and never stored anywhere. It must match
+    // the user created in pwms_prev's Authentication and the address in
+    // private.is_backup_user() in the lockdown script.
+    BACKUP_EMAIL: "pwms-backup@example.com"
 
 };
