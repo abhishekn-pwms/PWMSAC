@@ -1,4 +1,4 @@
-/* AC v1.7e UPDATEPREPATTACHTODOATTACHPUSHSAFE */
+/* AC v2.0 FAMILY */
 
 /* ==========================================================================
    PWMS AC - SHARED STYLESHEET (v1 Redesign Pass)
@@ -980,4 +980,792 @@ label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-
     min-height: 120px;
     resize: vertical;
     overflow-y: auto;
+}
+
+/* ==================================
+   DEPOSITS — list (desktop grid, stacked cards on narrow screens),
+   needed-by inline editing, form bits and the bank accounts panel.
+   Lists need explicit spacing here: the global reset above zeroes all
+   margins and padding.
+================================== */
+
+.dep-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.dep-head,
+.dep-row {
+    display: grid;
+    grid-template-columns: 2.2fr 0.6fr 0.9fr 0.9fr 1.4fr 1.2fr 1.8fr 1.1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 10px 12px;
+}
+
+.dep-head {
+    background: var(--surface-alt);
+    border-bottom: 2px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+}
+
+.dep-row {
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-main);
+    transition: background-color 0.15s ease;
+}
+
+.dep-row:last-child { border-bottom: none; }
+.dep-row:hover { background: var(--surface-alt); }
+.dep-row > div { position: relative; min-width: 0; }
+
+.dep-purpose { font-weight: 600; word-break: break-word; }
+
+.dep-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-faint);
+}
+
+.dep-sub-ok { color: var(--success); }
+.dep-sub-warn { color: var(--warning); font-weight: 600; }
+
+.dep-type {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+}
+
+.dep-type-fd { background: #dbeafe; color: var(--primary); }
+
+.dep-badge {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.dep-badge-warn { background: var(--warning-bg); color: var(--warning); }
+.dep-badge-neutral { background: var(--surface-alt); color: var(--text-muted); }
+
+.stat-chip.dep-chip-warn {
+    background: var(--warning-bg);
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+.dep-needed {
+    cursor: pointer;
+    border-bottom: 1px dotted var(--text-faint);
+}
+
+.dep-setdate {
+    display: inline-block;
+    padding: 2px 10px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.dep-setdate:hover { border-color: var(--primary); color: var(--primary); }
+
+.dep-date-input {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dep-c-actions { display: flex; gap: 4px; justify-content: flex-end; align-items: center; }
+
+.dep-clip { font-size: 0.74rem; color: var(--text-muted); white-space: nowrap; }
+.dep-clip-zero { color: var(--text-faint); }
+
+.dep-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+}
+
+.dep-icon-btn:hover { background: var(--surface-alt); }
+
+/* Form */
+.dep-hint {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.7rem;
+    color: var(--text-faint);
+}
+
+.dep-hint.dep-sub-ok { color: var(--success); }
+.dep-hint.dep-sub-warn { color: var(--warning); font-weight: 600; }
+
+.dep-type-row {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dep-type-row > div { display: flex; flex-direction: column; }
+
+.dep-close-block {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin-bottom: 10px;
+    background: var(--surface);
+}
+
+.dep-close-title { font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
+.dep-close-note { font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; }
+
+/* Bank accounts panel */
+.dep-bank-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dep-bank-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.dep-bank-editing { display: block; border-color: var(--primary); }
+.dep-bank-title { font-size: 0.85rem; font-weight: 700; }
+.dep-bank-editing .dep-bank-title { margin-bottom: 10px; }
+
+.dep-bank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dep-bank-grid > div { display: flex; flex-direction: column; }
+.dep-bank-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+@media (max-width: 768px) {
+    .dep-head { display: none; }
+
+    .dep-row { grid-template-columns: 1fr 1fr; row-gap: 10px; position: relative; }
+
+    .dep-row > div[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 2px;
+        font-size: 0.66rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--text-faint);
+    }
+
+    .dep-row > .dep-c-purpose { grid-column: 1 / -1; padding-right: 64px; }
+    .dep-row > .dep-c-actions { position: absolute; top: 8px; right: 10px; }
+
+    .dep-type-row { grid-template-columns: 80px 1fr; }
+    .dep-bank-grid { grid-template-columns: 1fr; }
+}
+
+
+/* ==================================
+   ATTACHMENTS — the reusable files section on every record form
+================================== */
+
+.att-section {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+.att-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.att-title { font-size: 0.82rem; font-weight: 700; }
+.att-count { font-weight: 400; color: var(--text-muted); }
+
+.att-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.att-type { max-width: 170px; }
+
+.att-group { margin-top: 8px; }
+.att-group-title { font-size: 0.72rem; color: var(--text-faint); margin-bottom: 2px; }
+
+.att-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 0.8rem;
+}
+
+.att-icon { font-size: 1rem; }
+.att-name { flex: 1; min-width: 0; word-break: break-word; color: var(--primary); text-decoration: none; }
+.att-name-staged { color: var(--text-main); }
+.att-size { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+.att-pending { font-size: 0.66rem; padding: 1px 7px; border-radius: var(--radius-pill); background: var(--warning-bg); color: var(--warning); font-weight: 700; }
+
+.att-tick { display: flex; align-items: center; gap: 3px; font-size: 0.72rem; color: var(--text-muted); margin: 0; white-space: nowrap; cursor: pointer; }
+.att-tick input { width: auto; min-height: 0; margin: 0; }
+
+.att-x { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; padding: 2px 4px; }
+.att-x:hover { color: var(--danger); }
+
+.att-notice { margin-top: 6px; padding: 6px 8px; border-radius: var(--radius-sm); background: var(--danger-bg); color: var(--danger); font-size: 0.72rem; }
+.att-hint { margin-top: 8px; padding: 6px; border: 1px dashed var(--border); border-radius: var(--radius-sm); font-size: 0.7rem; color: var(--text-faint); text-align: center; }
+
+
+/* ==================================
+   INSURANCE — policy cards, funding lines, People panel
+================================== */
+
+.ins-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.ins-card-closed { opacity: 0.7; }
+
+.ins-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.ins-name { font-size: 0.95rem; font-weight: 700; }
+.ins-card-actions { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+.ins-sub { font-size: 0.72rem; font-weight: 400; color: var(--text-faint); }
+.ins-sub-warn { color: var(--warning); font-weight: 600; }
+.ins-sub-ok { color: var(--success); }
+
+.ins-type {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+}
+
+.ins-type-medical { background: #dbeafe; color: var(--primary); }
+
+.ins-clip { font-size: 0.78rem; color: var(--text-muted); }
+.ins-clip-zero { color: var(--text-faint); }
+
+.ins-icon-btn { background: none; border: none; cursor: pointer; font-size: 1.05rem; line-height: 1; padding: 4px; border-radius: var(--radius-sm); }
+.ins-icon-btn:hover { background: var(--surface-alt); }
+
+.ins-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.ins-fact-label { font-size: 0.7rem; color: var(--text-faint); }
+.ins-fact-value { font-size: 0.85rem; }
+
+.ins-funding {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+}
+
+.ins-funding-ok { color: var(--success); }
+.ins-funding-warn { color: var(--warning); }
+.ins-funding-muted { color: var(--text-muted); }
+.ins-funding-none { color: var(--text-muted); }
+
+.stat-chip.ins-chip-warn {
+    background: var(--warning-bg);
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+.ins-hint { display: block; margin-top: 3px; font-size: 0.7rem; color: var(--text-faint); }
+
+.ins-fundedby {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+.ins-fundedby:empty { display: none; }
+.ins-fundedby-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
+.ins-fundedby-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.8rem; padding: 3px 0; }
+
+.ins-people-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+
+.ins-person-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.ins-person-editing { display: block; border-color: var(--primary); }
+.ins-person-name { font-size: 0.85rem; font-weight: 700; }
+.ins-person-editing .ins-person-name { margin-bottom: 10px; }
+.ins-person-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ins-person-grid > div { display: flex; flex-direction: column; }
+.ins-person-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+@media (max-width: 768px) {
+    .ins-facts { grid-template-columns: 1fr 1fr; }
+    .ins-person-grid { grid-template-columns: 1fr; }
+    .att-controls { width: 100%; }
+}
+
+
+/* ==================================
+   VAULT — tabs, rows, masked numbers, lockers, contacts
+================================== */
+
+.vault-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+    overflow-x: auto;
+}
+
+.vault-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.vault-tab.active {
+    color: var(--text-main);
+    font-weight: 700;
+    border-bottom-color: var(--primary);
+}
+
+.stat-chip.vault-chip-warn {
+    background: var(--warning-bg);
+    border-color: var(--warning);
+    color: var(--warning);
+}
+
+.vault-group-title { font-size: 0.85rem; font-weight: 700; margin: 14px 2px 6px; }
+
+.vault-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 0 12px;
+    margin-bottom: 10px;
+}
+
+.vault-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.vault-row:last-child { border-bottom: none; }
+
+.vault-icon { font-size: 1.3rem; }
+.vault-main { flex: 1; min-width: 0; }
+.vault-title { font-size: 0.9rem; font-weight: 700; word-break: break-word; }
+.vault-sub { font-size: 0.74rem; color: var(--text-faint); font-weight: 400; margin-top: 2px; }
+.vault-faint { color: var(--text-faint); font-weight: 400; font-size: 0.78rem; }
+.vault-status { text-align: right; font-size: 0.78rem; min-width: 110px; }
+.vault-number { font-family: monospace; color: var(--text-muted); }
+.vault-clip { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+.vault-clip-zero { color: var(--text-faint); }
+.vault-warn { color: var(--warning); font-weight: 600; }
+.vault-danger { color: var(--danger); font-weight: 600; }
+
+.vault-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: inherit;
+}
+
+.vault-icon-btn:hover { background: var(--surface-alt); }
+
+.vault-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin-left: 4px;
+}
+
+.vault-status .vault-badge { margin-left: 0; }
+.vault-badge-warn { background: var(--warning-bg); color: var(--warning); }
+.vault-badge-danger { background: var(--danger-bg); color: var(--danger); }
+.vault-badge-share { background: var(--success-bg); color: var(--success); }
+.vault-badge-type { background: var(--surface-alt); color: var(--text-muted); }
+
+.vault-hint { display: block; margin-top: 3px; font-size: 0.7rem; color: var(--text-faint); }
+.vault-warn-note { margin: 4px 0 8px; padding: 6px 8px; border-radius: var(--radius-sm); background: var(--warning-bg); color: var(--warning); }
+
+.vault-number-row { display: flex; gap: 6px; }
+.vault-number-row input { flex: 1; }
+
+.vault-share {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 12px;
+}
+
+.vault-share input { width: auto; min-height: 0; margin-top: 3px; }
+.vault-share-title { font-size: 0.82rem; font-weight: 700; }
+
+.vault-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+
+.vault-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.vault-card-actions { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.vault-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.vault-fact-label { font-size: 0.7rem; color: var(--text-faint); }
+.vault-fact-value { font-size: 0.85rem; }
+.vault-contents { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 0.8rem; }
+
+.vault-manages {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    padding: 10px;
+    margin-bottom: 12px;
+}
+
+.vault-manages:empty { display: none; }
+.vault-manages-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; }
+.vault-manages-row { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; padding: 3px 0; margin: 0; cursor: pointer; }
+.vault-manages-row input { width: auto; min-height: 0; margin: 0; }
+
+@media (max-width: 768px) {
+    .vault-facts { grid-template-columns: 1fr 1fr; }
+    .vault-row { flex-wrap: wrap; }
+    .vault-status { text-align: left; min-width: 0; }
+}
+
+
+/* ==================================
+   MUTUAL FUNDS -- reuses the Vault's list rows, badges and chips; these are
+   only the parts that are specific to values, gains and the update screen.
+================================== */
+
+.mf-value { font-weight: 700; font-size: 0.95rem; color: var(--text-main); }
+.mf-gain { font-size: 0.76rem; font-weight: 600; margin-top: 2px; }
+.mf-gain-up { color: var(--success); }
+.mf-gain-down { color: var(--danger-strong); }
+.mf-asof { font-size: 0.7rem; color: var(--text-faint); font-weight: 400; margin-top: 2px; }
+.mf-scheme { font-size: 0.72rem; color: var(--text-faint); font-weight: 400; margin-top: 1px; }
+.mf-totals-note { margin: -6px 0 12px; font-size: 0.74rem; color: var(--text-faint); }
+
+.mf-upd-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+.mf-upd-row:last-child { border-bottom: none; }
+.mf-upd-name { font-weight: 600; font-size: 0.82rem; }
+.mf-upd-last { font-size: 0.7rem; color: var(--text-faint); font-weight: 400; margin-top: 2px; }
+.mf-upd-row label { font-size: 0.68rem; color: var(--text-faint); margin-bottom: 2px; }
+.mf-upd-list { margin: 10px 0 4px; max-height: 52vh; overflow-y: auto; }
+
+.mf-redeem {
+    margin: 4px 0 12px;
+    padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-alt);
+}
+
+.mf-hist-wrap {
+    max-height: 190px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+}
+.mf-hist { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+.mf-hist th { text-align: left; color: var(--text-faint); font-weight: 600; padding: 5px 8px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); }
+.mf-hist td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
+.mf-hist tr:last-child td { border-bottom: none; }
+.mf-hist .mf-num { text-align: right; white-space: nowrap; }
+.mf-hist-title { font-size: 0.78rem; font-weight: 700; margin: 6px 0 4px; }
+
+@media (max-width: 768px) {
+    .mf-upd-row { grid-template-columns: 1fr 1fr; }
+    .mf-upd-row > div:first-child { grid-column: 1 / -1; }
+}
+
+
+/* ==================================
+   INVEST DASHBOARD -- four tiles that open the investment pages, and one
+   "Upcoming" feed of every date from every module. Separate from the main
+   dashboard on purpose.
+================================== */
+
+.inv-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.inv-tile {
+    display: block;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    text-decoration: none;
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+}
+.inv-tile:hover { border-color: var(--primary); }
+
+.inv-tile-head { display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+.inv-tile-main { font-size: 1.3rem; font-weight: 700; margin-top: 6px; }
+.inv-tile-sub { font-size: 0.76rem; color: var(--text-faint); margin-top: 2px; }
+
+.inv-warn { color: var(--warning); font-weight: 600; }
+.inv-bad { color: var(--danger-strong); font-weight: 600; }
+
+.inv-load-note {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--danger-bg);
+    color: var(--danger-strong);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.inv-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 14px;
+}
+
+.inv-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.inv-card-title { font-weight: 700; font-size: 1rem; }
+.inv-card-head select { width: 150px; }
+
+.inv-month { font-size: 0.74rem; font-weight: 600; color: var(--text-faint); margin: 12px 0 2px; }
+
+.inv-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 9px 0;
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: none;
+    text-align: left;
+    text-decoration: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.inv-row:hover { background: var(--surface-alt); }
+
+.inv-date { width: 48px; text-align: center; flex: none; }
+.inv-date b { display: block; font-size: 1.05rem; line-height: 1.1; }
+.inv-date span { font-size: 0.68rem; color: var(--text-faint); }
+
+.inv-main { flex: 1; min-width: 0; }
+.inv-title { font-size: 0.85rem; font-weight: 600; }
+.inv-sub { font-size: 0.74rem; color: var(--text-faint); margin-top: 1px; }
+
+.inv-tag {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.inv-overdue-arrow { width: 48px; text-align: center; flex: none; color: var(--danger-strong); }
+
+
+/* ==================================
+   DATA SAFETY: VERIFY BACKUP AND RESTORE. The panels themselves reuse the
+   bk-panel classes from dbbckupexpo.css; only what is new is styled here.
+================================== */
+
+.bk-chip-bad {
+    background: var(--danger-bg);
+    color: var(--danger-strong);
+    border-color: var(--danger-strong);
+}
+
+.bk-verify-wrap { margin-top: 12px; overflow-x: auto; }
+
+.bk-verify-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+
+.bk-verify-table th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-faint);
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.bk-verify-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
+
+.bk-verify-num { text-align: right; white-space: nowrap; }
+
+.bk-verify-diff td { color: var(--danger-strong); font-weight: 600; }
+
+
+/* ==================================
+   FAMILY SUMMARY -- the share card, the reminder banner, and the document preview.
+   The print rules at the end hide everything except the document, and only apply
+   on this page (body.fs-page).
+================================== */
+
+.fs-load-note {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--danger-bg);
+    color: var(--danger-strong);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.fs-banner {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+}
+.fs-banner-warn { background: var(--warning-bg); color: var(--warning); }
+.fs-banner-ok { background: var(--surface-alt); color: var(--text-muted); border: 1px solid var(--border); }
+
+.fs-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+}
+
+.fs-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.fs-card-title { font-weight: 700; font-size: 1rem; }
+.fs-hint { font-size: 0.76rem; color: var(--text-faint); margin: 6px 0 0; }
+.fs-bad { color: var(--danger-strong); font-weight: 600; }
+.fs-tag { font-size: 0.68rem; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface-alt); color: var(--text-muted); }
+
+.fs-action-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+.fs-action-row input { max-width: 300px; }
+
+.fs-meter { height: 4px; border-radius: 2px; background: var(--border); margin-top: 8px; max-width: 260px; overflow: hidden; }
+.fs-meter i { display: block; height: 100%; width: 0; transition: width 0.15s; }
+.fs-meter-bad { background: var(--danger-strong); }
+.fs-meter-warn { background: var(--warning); }
+.fs-meter-ok { background: var(--success); }
+
+.fs-status { margin-top: 8px; font-size: 0.8rem; font-style: italic; color: var(--text-muted); min-height: 1em; }
+
+.fs-doc { margin-top: 10px; }
+.fs-doc-title { font-size: 1.1rem; font-weight: 700; }
+.fs-doc-sub { font-size: 0.76rem; color: var(--text-faint); margin-top: 2px; }
+.fs-guide { font-size: 0.78rem; font-style: italic; color: var(--text-muted); background: var(--surface-alt); border-radius: var(--radius-sm); padding: 8px 10px; margin: 10px 0; }
+
+.fs-section { margin-top: 14px; }
+.fs-section-title { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+.fs-empty { font-size: 0.78rem; font-style: italic; color: var(--text-faint); }
+.fs-note { font-size: 0.72rem; font-style: italic; color: var(--text-faint); margin-top: 3px; }
+
+.fs-table-wrap { overflow-x: auto; }
+.fs-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+.fs-table th { text-align: left; font-weight: 600; color: var(--text-faint); padding: 4px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.fs-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: top; white-space: pre-line; }
+
+@media print {
+    body.fs-page #header,
+    body.fs-page #sidebar,
+    body.fs-page #footer,
+    body.fs-page #fab,
+    body.fs-page .fs-noprint { display: none !important; }
+
+    body.fs-page .app-body-container { display: block; }
+    body.fs-page #content { margin: 0; padding: 0; width: 100%; }
+    body.fs-page .fs-card { border: none; box-shadow: none; padding: 0; margin: 0; }
+    body.fs-page .fs-section { break-inside: avoid; }
+    body.fs-page .fs-table { font-size: 8.5pt; }
 }
