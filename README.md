@@ -1,4 +1,23 @@
 === === === === === ===
+Date : Sun, 22-Nov-2026
+=== === === === === ===
+
+Release PWMS AC v2.0 BANKNDEPOSITS & FAMILY & PACK
+
+------------------
+
+What's New
+* Added Vault, Deposits and Family Pack Modules
+
+** FAMILY ACCESS PACK WITH ACCESS TO VAULT, DEPOSISTS & INVESTMENTS
+
+## <Comment Block>
+# "AC v2.0 BANKNDEPOSITS & FAMILY & PACK"
+# "AC v2.0 BANKNDEPOSITS"
+# "AC v2.0 FAMILY"
+
+
+=== === === === === ===
 Date : Fri, 07-Aug-2026
 === === === === === ===
 
