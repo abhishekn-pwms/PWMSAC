@@ -2,7 +2,7 @@
 Date : Wed, 25-Nov-2026
 === === === === === ===
 
-Release PWMS AC v2.1 INVESTPACK
+Release PWMS AC v2.0b INVESTPACK
 
 ------------------
 
@@ -12,7 +12,7 @@ What's New
 ** INVESTMENT PACK (INCLUDES DEPOSISTS, INVESTMENTS, VAULT AND FAMILY SUMMARY HANDOVER PACK
 
 ## <Comment Block>
-# "AC v2.1 INVESTPACK"
+# "AC v2.0b INVESTPACK"
 
 
 === === === === === ===
