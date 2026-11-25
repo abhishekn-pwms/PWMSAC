@@ -1,10 +1,10 @@
-<!-- AC v2.0 BANKNDEPOSITS & FAMILY & PACK -->
+<!-- AC v2.1 INVESTPACK -->
 
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>PWMS AC Login v2.0 BANKNDEPOSITS & FAMILY SUMMARY PACK</title>
+    <title>PWMS AC Login v2.1 INVESTPACK</title>
 
     <link rel="stylesheet" href="css/pwms.css">
 
@@ -74,7 +74,14 @@
 
             <text class="login-workspace-tag">Abhi's Workspace</text>
 
-            <text class="loginHostname" style="text-align: center;">AC v2.0 BANKNDEPOSITS & FAMILY SUMMARY PACK</text>
+            <span id="loginTitle" style="text-align: center;"></span>
+            <script>
+                (function () {
+                    var found = document.title.match(/v\d.*/);
+                    document.getElementById("loginTitle").textContent = found ? "AC " + found[0] : document.title;
+                })();
+            </script>
+            </text>
 
             <text id="loginHostname" style="text-align: center;"></text>
 

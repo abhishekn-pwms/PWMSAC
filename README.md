@@ -1,4 +1,21 @@
 === === === === === ===
+Date : Wed, 25-Nov-2026
+=== === === === === ===
+
+Release PWMS AC v2.1 INVESTPACK
+
+------------------
+
+What's New
+* Complete Investment Pack with Deposits, Investments, Vault, Family Summary Pack for Handover
+
+** INVESTMENT PACK (INCLUDES DEPOSISTS, INVESTMENTS, VAULT AND FAMILY SUMMARY HANDOVER PACK
+
+## <Comment Block>
+# "AC v2.1 INVESTPACK"
+
+
+=== === === === === ===
 Date : Sun, 23-Nov-2026
 === === === === === ===
 
